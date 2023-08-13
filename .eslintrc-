@@ -1,0 +1,35 @@
+{
+  "extends": ["eslint:recommended"],
+  "plugins": [
+    "@typescript-eslint",
+    "react",
+    // important to running prettier
+    "react-hooks",
+    "prettier"
+  ],
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "ignorePatterns": ["./denoRuntime"],
+  "parser": "@typescript-eslint/parser",
+  "rules": {
+
+    "indent": ["error", 2],
+    "no-multi-spaces": "error",
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "semi": true,
+        "useTabs": false,
+
+        "tabWidth": 2,
+        "trailingComma": "all",
+        "printWidth": 120,
+        "bracketSpacing": true,
+        "arrowParens": "avoid"
+      }
+    ]
+  }
+}

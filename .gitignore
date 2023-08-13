@@ -1,0 +1,9 @@
+# RUST
+/target
+
+# JS
+dist/
+node_modules/
+
+# Environment
+.idea/

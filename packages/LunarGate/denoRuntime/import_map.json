@@ -1,0 +1,6 @@
+{
+	"imports": {
+		"yaml": "https://deno.land/x/yaml@v2.1.1",
+		"app-built/": "../../dist/"
+	}
+}

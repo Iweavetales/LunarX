@@ -1,0 +1,25 @@
+js:
+  distDirectory: './dist'
+  esmDirectory: "./dist/esm/"
+  cjsDirectory: "./dist/cjs/"
+  esmMetaFilePath: "./dist/meta.esm.json"
+  cjsMetaFilePath: "./dist/meta.cjs.json"
+#  For server
+  routesRoot: "./app/routes"
+
+publicServe:
+  # 공개 서비스 서버
+  port: 3001
+
+privateServe:
+  # 시스템 관리용 서버
+  # App 빌더가 런타임에게 빌드완료 메시지 전달 등, 시스템 모니터링 기능 구현 예정
+  port: 3002
+
+production: false
+
+build:
+  cjsTranspiler: "swc" # "babel" or "swc" 사용 가능
+  # vendor 로 모듈을 명시 하면 코드가 분리되어 샤드로 생성된다.
+  # 증분 빌드속도에 이점이 있음
+  vendors:
