@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { SwiftRouterContext } from './Router';
+import { SwiftRouterContext } from './router';
 
 export type RouteFetchResult = {
   data?: any;

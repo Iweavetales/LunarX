@@ -1,4 +1,4 @@
-import { SwiftContext } from '../../context.ts';
+import { LunarContext } from '../../LunarContext.ts';
 import { GetUrlPath } from './urlUtils.ts';
 
 export function makeSwiftContext(
@@ -6,7 +6,7 @@ export function makeSwiftContext(
 	urlPath:string,
 	params: Map<string, string>,
 	response: Response,
-): SwiftContext {
+): LunarContext {
 	let searchMarkIndex = urlPath.indexOf("?");
 	let hashMarkIndex = urlPath.indexOf("#");
 

@@ -1,9 +1,9 @@
 import { hydrateRoot } from 'react-dom/client';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { RouteFetchResult, ServerFetchesProvider } from '../serverFetches';
-import { UniversalRouteNode } from '../DocumentTypes';
-import SwiftAppContainer, { SwiftRenderer } from '../SwiftApp';
+import { RouteFetchResult, ServerFetchesProvider } from '../src/serverFetches';
+import { UniversalRouteNode } from './DocumentTypes';
+import SwiftAppContainer, { SwiftRenderer } from '../src/lunarApp';
 
 type ReactRouteNode = {
   element: React.ReactElement;

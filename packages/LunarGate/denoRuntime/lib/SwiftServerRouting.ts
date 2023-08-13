@@ -16,7 +16,7 @@ import {
 	ServerSideRouteFetchResult,
 } from './FetchServerSideRouteData.ts';
 import { makeSwiftContext } from './SSRContext.ts';
-import {UniversalRouteNode} from "../../DocumentTypes.ts";
+import {UniversalRouteNode} from "../../lib/DocumentTypes.ts";
 
 export { Node };
 

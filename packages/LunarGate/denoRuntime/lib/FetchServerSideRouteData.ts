@@ -1,7 +1,7 @@
 import { uuidV4 } from './deps.ts';
 import { RouteNode } from '../../Manifest.ts';
 import { WebAppStructure } from './WebAppStructure.ts';
-import { SwiftContext } from '../../context.ts';
+import { LunarContext } from '../../LunarContext.ts';
 
 export type ServerSideRouteFetchResult = {
 	error?: {
@@ -13,7 +13,7 @@ export type ServerSideRouteFetchResult = {
 export async function FetchingServerSideRouteData(
 	routeNode: RouteNode,
 	webApp: WebAppStructure,
-	context: SwiftContext,
+	context: LunarContext,
 ) {
 	const serverSideEntry = routeNode.serverSideEntryPath;
 	if (serverSideEntry) {

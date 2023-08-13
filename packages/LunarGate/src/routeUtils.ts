@@ -1,4 +1,4 @@
-import {TopUniversalRouteNodes, UniversalRouteNode} from "./DocumentTypes";
+import {TopUniversalRouteNodes, UniversalRouteNode} from "~/lib/DocumentTypes";
 
 
 export function FindRouteNodeByPattern(

@@ -1,10 +1,10 @@
-import { SwiftContext } from '../context';
+import { LunarContext } from '../src/lunarContext';
 import React, { StrictMode } from 'react';
-import { Bootstrap, DocumentLinks, DocumentScripts } from '../Document';
+import { Bootstrap, DocumentLinks, DocumentScripts } from '../src/document';
 import reactDomServer from 'react-dom/server';
 // import { ServerStyleSheet } from 'styled-components';
 
-export default async function (context: SwiftContext, res: Response | null , App: () => React.ReactElement) {
+export default async function (context: LunarContext, res: Response | null , App: () => React.ReactElement) {
   // const sheet = new ServerStyleSheet();
   // const appMarkup = reactDomServer.renderToString(sheet.collectStyles(<App />));
   const appMarkup = reactDomServer.renderToString(<App />);

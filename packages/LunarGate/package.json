@@ -1,9 +1,8 @@
 {
   "name": "lunargate-test-helloworld2",
-  "version": "0.1.4",
+  "version": "0.1.7",
   "description": "The LunarGate that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
-  "main": "Document.js",
-
+  "main": "index.js",
   "scripts": {
     "escape-lightningcss-error": "CSS_TRANSFORMER_WASM=false",
     "build:builder": "npm run escape-lightningcss-error &&  esbuild ApplicationBuilder/src/index.ts --bundle --platform=node --outfile=ApplicationBuilder/dist/builder.js --external:esbuild   --sourcemap=external   --external:@swc --loader:.node=file",
@@ -24,7 +23,20 @@
     "lib": "lib"
   },
   "files": [
-    "ApplicationBuilder/dist"
+    "ApplicationBuilder/dist",
+    "dist",
+    "document.d.ts",
+    "document.js",
+    "head.d.ts",
+    "head.js,",
+    "lunarApp.d.ts",
+    "lunarApp.js",
+    "lunarContext.d.ts",
+    "lunarContext.js,",
+    "router.d.ts",
+    "router.js",
+    "serverFetches.d.ts",
+    "serverFetches.js"
   ],
   "dependencies": {
     "autoprefixer": "^10.4.13",

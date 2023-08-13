@@ -4,7 +4,7 @@ import { GenerateRandomBytes } from './random.ts';
 import {
 	DocumentSheet,
 	UniversalRouteNode,
-} from '../../DocumentTypes.ts';
+} from '../../lib/DocumentTypes.ts';
 import { RouteNode, RouteNodeMap } from '../../Manifest.ts';
 import {
 	FetchingServerSideRouteData,

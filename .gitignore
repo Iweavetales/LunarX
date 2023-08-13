@@ -3,7 +3,6 @@
 
 # JS
 dist/
-packages/LunarGate/dist/
 node_modules/
 
 # Environment

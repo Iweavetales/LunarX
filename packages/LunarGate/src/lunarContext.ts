@@ -1,4 +1,4 @@
-export interface SwiftContext {
+export interface LunarContext {
   req: Request;
   res: Response;
   requestHeaders: Headers; // req 객체에서 복사해온 헤더

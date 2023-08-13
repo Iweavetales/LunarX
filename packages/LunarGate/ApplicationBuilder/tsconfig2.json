@@ -15,6 +15,7 @@
     "jsx": "preserve"
   },
   "include": [
-    "../commonLib/Manifest.ts","**/*.ts", "**/*.tsx" ],
+    "../commonLib/Manifest.ts","**/*.ts", "**/*.tsx"
+  ],
   "exclude": ["node_modules"]
 }

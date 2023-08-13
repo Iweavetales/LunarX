@@ -1,15 +1,15 @@
 import reactDomServer from 'react-dom/server';
 import React, { StrictMode } from 'react';
-import { SwiftContext } from '../context';
+import { LunarContext } from '../src/lunarContext';
 import { StaticRouter } from 'react-router-dom/server';
-import SwiftAppContainer, { SwiftRenderer } from '../SwiftApp';
-import { DocumentSheet } from '../DocumentTypes';
-import { DocumentWrapper } from '../Document';
+import SwiftAppContainer, { SwiftRenderer } from '../src/lunarApp';
+import { DocumentSheet } from './DocumentTypes';
+import { DocumentWrapper } from '../src/document';
 import DefaultDocumentFactory from './defaultDocument.server';
-import { ServerFetchesProvider } from '../serverFetches';
+import { ServerFetchesProvider } from '../src/serverFetches';
 // import App from '../routes/_app';
 
-export default async function handleRequest(context: SwiftContext, documentSheet: DocumentSheet, LunarJSApp: any) {
+export default async function handleRequest(context: LunarContext, documentSheet: DocumentSheet, LunarJSApp: any) {
   /**
    * Server Side 랜더링 중에는 useLayoutEffect 를 호출 하여도 useEffect 로 호출 되도록 수정한다
    * styledComponents 의 createGlobalStyle 를 사용했을 때 경고 발생 방지를 위함

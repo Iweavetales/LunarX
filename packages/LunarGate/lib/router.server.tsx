@@ -1,12 +1,12 @@
-import { RouteNode, RouteNodeMap } from '../Manifest';
+import { RouteNode, RouteNodeMap } from '../lib/Manifest';
 import React from 'react';
 import { Routes, Route } from 'react-router';
-import { ServerFetchesProvider } from '../serverFetches';
-import {SwiftContext} from "../context";
+import { ServerFetchesProvider } from '../src/serverFetches';
+import {LunarContext} from "../src/lunarContext";
 import {GetRouterModule} from "./types";
 
 export default function ServerBuildRouter(
-  context: SwiftContext,
+  context: LunarContext,
   routeNodes: RouteNodeMap,
   getRouterModule: GetRouterModule,
 ) {

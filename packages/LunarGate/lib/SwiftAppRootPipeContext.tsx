@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { ShardLoader } from '../Router';
+import { ShardLoader } from '../src/router';
 
 /**
  * SwiftApp 플랫폼 내부적으로 사용되는 슈퍼 컨텍스트

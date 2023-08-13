@@ -17,7 +17,7 @@
     "baseUrl": "./app",
     "typeRoots": ["./node_modules/@types"," ./app/types"],
     "paths": {
-
+      "Lunar/*": ["./packages/LunarGate/*"]
     }
   },
   "include": [ "commonLib/Manifest.d.ts","**/*.ts", "**/*.tsx"],

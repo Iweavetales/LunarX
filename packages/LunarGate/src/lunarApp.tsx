@@ -1,9 +1,9 @@
 import React, { useContext, useState } from 'react';
 import { Route, Routes } from 'react-router';
-import { RouteServerFetchDataMap, UniversalRouteNode } from './DocumentTypes';
+import { RouteServerFetchDataMap, UniversalRouteNode } from '../lib/DocumentTypes';
 import { ServerFetchesProvider } from './serverFetches';
-import {EmptyRoute, RouteTreeNode, ShardLoader, SwiftRouterContext, SwiftRouterProvider} from './Router';
-import {   SwiftAppRootPipeContext } from './lib/SwiftAppRootPipeContext';
+import {EmptyRoute, RouteTreeNode, ShardLoader, SwiftRouterContext, SwiftRouterProvider} from './router';
+import {   SwiftAppRootPipeContext } from '../lib/SwiftAppRootPipeContext';
 
 /**
  * @Deprecated ModuleContext
