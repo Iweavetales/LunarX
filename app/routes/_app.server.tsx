@@ -1,5 +1,5 @@
-import { SwiftContext } from '../../packages/LunarGate/context';
-export async function serverFetches(ctx: SwiftContext) {
+import { LunarContext } from '../../packages/LunarGate/LunarContext';
+export async function serverFetches(ctx: LunarContext) {
   // /client-session/info
 
   return {

@@ -1,5 +1,5 @@
-import { SwiftContext } from '../../packages/LunarGate/lib/context';
+import { LunarContext } from '../../packages/LunarGate/LunarContext';
 
-export default async function (ctx: SwiftContext): Promise<boolean> {
+export default async function (ctx: LunarContext): Promise<boolean> {
   return true;
 }

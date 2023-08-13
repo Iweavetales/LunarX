@@ -1,10 +1,10 @@
-import { SwiftContext } from '../../packages/LunarGate/context';
+import { LunarContext } from '../../packages/LunarGate/LunarContext';
 import React, { StrictMode } from 'react';
 import { Bootstrap, DocumentLinks, DocumentScripts } from '../../packages/LunarGate/Document';
 import reactDomServer from 'react-dom/server';
 // import { ServerStyleSheet } from 'styled-components';
 
-export default async function (context: SwiftContext, res: Response, App: () => React.ReactElement) {
+export default async function (context: LunarContext, res: Response, App: () => React.ReactElement) {
   // const sheet = new ServerStyleSheet();
   // const appMarkup = reactDomServer.renderToString(sheet.collectStyles(<App />));
   const appMarkup = reactDomServer.renderToString(<App />);
