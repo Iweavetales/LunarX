@@ -1,4 +1,4 @@
-#!node
+#!/usr/bin/env node
 import devCommand from '../utils/commands/dev'
 import buildCommand from '../utils/commands/build'
 import startCommand from '../utils/commands/start'
@@ -24,21 +24,24 @@ function MatchingSpecificCommand(string: string) : LunarCommands | null {
     return null
 }
 
-let foundSomeCommand = lunarArgs.find((arg) => /^[a-z][A-Z]/)
+let foundSomeCommand = lunarArgs.find((arg) => /^[a-z][A-Z]/);
 
-if( foundSomeCommand !== undefined ){
-    let lunarCmd = MatchingSpecificCommand(foundSomeCommand)
-    if ( lunarCmd != null ){
-        switch (lunarCmd) {
-            case LunarCommands.Dev:
-                devCommand(lunarArgs)
-                break
-            case LunarCommands.Build:
-                buildCommand(lunarArgs)
-                break
-            case LunarCommands.Start:
-                startCommand(lunarArgs)
-                break
+(async function (){
+    if( foundSomeCommand !== undefined ){
+        let lunarCmd = MatchingSpecificCommand(foundSomeCommand)
+        if ( lunarCmd != null ){
+            switch (lunarCmd) {
+                case LunarCommands.Dev:
+                    devCommand(lunarArgs)
+                    break
+                case LunarCommands.Build:
+                    await buildCommand(lunarArgs)
+                    break
+                case LunarCommands.Start:
+                    startCommand(lunarArgs)
+                    break
+            }
         }
     }
-}
+})()
+

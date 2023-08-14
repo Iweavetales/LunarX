@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { UniversalRouteNode } from '~/lib/DocumentTypes';
-import { Location, UrlToLocation } from '~/lib/location';
-import { useRouteShardPreparing } from '~/lib/SwiftAppRootPipeContext';
+import { UniversalRouteNode } from '../lib/DocumentTypes';
+import { Location, UrlToLocation } from '../lib/location';
+import { useRouteShardPreparing } from '../lib/SwiftAppRootPipeContext';
 
 export type ComponentModule = any;
 /**

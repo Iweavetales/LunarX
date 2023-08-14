@@ -7,7 +7,7 @@
 type ModuleContent = {
   name: string;
   deps: string[];
-  moduleFactory: (deps: string, require) => any
+  moduleFactory: (deps: string, require: any) => any
 }
 
 
@@ -89,7 +89,7 @@ type ModuleContent = {
   }
 
 
-  function _define(moduleName: string, deps: string[], factory) {
+  function _define(moduleName: string, deps: string[], factory: any) {
     console.log('shard define', moduleName)
     moduleMap[moduleName] = {
       name: moduleName,
@@ -115,7 +115,7 @@ type ModuleContent = {
     return false
   }
 
-  function moduleCall(moduleContent: ModuleContent, _callback) {
+  function moduleCall(moduleContent: ModuleContent, _callback: () => any) {
     console.log('shard called', moduleContent.name, moduleContent)
     let deps = moduleContent.deps;
     let moduleName = moduleContent.name
@@ -157,11 +157,11 @@ type ModuleContent = {
          * @param moduleNames
          * @param callback
          */
-        loadedModules[i] = (moduleNames, callback) => _require(moduleNames, callback, moduleContent.name)
+        loadedModules[i] = (moduleNames: string[], callback: () => any) => _require(moduleNames, callback, moduleContent.name)
       } else {
         hasSubModuleCall = true
 
-        moduleCall(content, (module) => {
+        moduleCall(content, (module: any) => {
           loadedModules[i] = module
 
 

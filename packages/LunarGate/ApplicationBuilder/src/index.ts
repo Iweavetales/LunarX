@@ -1,7 +1,7 @@
 'use strict';
 
 import { ClearDirectory } from './utils/clearDirectory';
-import esbuild, { build } from 'esbuild';
+import esbuild, { BuildContext } from 'esbuild';
 import { join, relative, resolve } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 // import cssModulesPlugin from 'esbuild-css-modules-plugin';
@@ -13,6 +13,7 @@ import { parse } from 'yaml';
 import { getAllFiles } from './utils/files';
 import esbuildBabelPlugin from './utils/esbuild-babel-plugin';
 import { Config } from './utils/config';
+import { collectDistLibSources } from './utils/collectDistLibSources';
 const file = readFileSync('./swift.yaml', 'utf8');
 
 const config: Config = parse(file);
@@ -20,13 +21,16 @@ const config: Config = parse(file);
 ClearDirectory(config.js.distDirectory);
 
 const cwd = process.cwd();
+console.log('Lunar builder cwd', cwd, __dirname);
 const appDirectory = join(cwd, './app');
 const absoluteESMDistDirectory = join(cwd, config.js.esmDirectory);
 const absoluteCJSDistDirectory = join(cwd, config.js.cjsDirectory);
 const absoluteESMMetafilePath = join(cwd, config.js.esmMetaFilePath);
 const absoluteCJSMetafilePath = join(cwd, config.js.cjsMetaFilePath);
 const routeDirectory = join(appDirectory, './routes');
-const libDirectory = join(cwd, './packages/LunarGate', './lib'); // swift-nest-platform 라이브러리 디렉토리
+
+// Lunar Library directory
+const libDirectory = resolve(__dirname, '../../dist/lib'); // swift-nest-platform 라이브러리 디렉토리
 console.log('__dirname', __dirname, resolve(__dirname, '../../', './lib'));
 if (!existsSync(absoluteESMDistDirectory)) {
   mkdirSync(absoluteESMDistDirectory, {
@@ -40,7 +44,7 @@ if (!existsSync(absoluteCJSDistDirectory)) {
   });
 }
 
-async function BuildReusableBuilder() {
+async function BuildReusableBuilder(): Promise<BuildContext> {
   /**
    * Make route file list
    */
@@ -55,12 +59,12 @@ async function BuildReusableBuilder() {
 
   console.log('routeFiles:', filteredRouteFiles);
 
-  let dirtyLibFiles: string[] = [];
-  getAllFiles(libDirectory, dirtyLibFiles);
+  // let dirtyLibFiles: string[] = [];
+  let distLibSources = collectDistLibSources(libDirectory);
 
   // libFiles
-  let libFiles = dirtyLibFiles.filter(filename => /\.tsx/.test(filename)).map(filename => relative(cwd, filename));
-  console.log('lib files:', libFiles);
+  // let libFiles = dirtyLibFiles.filter(filename => /\.tsx/.test(filename)).map(filename => relative(cwd, filename));
+  console.log('lib files:', distLibSources);
 
   /**
    * lightningcss 모듈의
@@ -74,7 +78,7 @@ async function BuildReusableBuilder() {
 
   return await esbuild.context({
     entryPoints: [
-      ...libFiles,
+      ...distLibSources,
       ...filteredRouteFiles,
       // 'react',
       // 'react-dom',
@@ -135,11 +139,12 @@ async function BuildReusableBuilder() {
   });
 }
 
-(async function main() {
-  console.log('ENV =', process.env.NODE_ENV);
-
-  console.log(appDirectory, absoluteESMDistDirectory);
-  let buildContext = await BuildReusableBuilder();
-  console.log('watching');
-  await buildContext.watch();
-})();
+// (async function main() {
+//   console.log('ENV =', process.env.NODE_ENV);
+//
+//   console.log(appDirectory, absoluteESMDistDirectory);
+//   let buildContext = await BuildReusableBuilder();
+//   console.log('watching');
+//   await buildContext.watch();
+// })();
+export default BuildReusableBuilder;

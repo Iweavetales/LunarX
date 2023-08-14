@@ -15,5 +15,15 @@
     }
   },
 
-  "exclude": ["node_modules/**/*", "**/*.js", "denoRuntime/**/*"]
+//  "include": [
+//    "ApplicationBuilder/src/index.ts"
+//  ],
+  "exclude": [
+    "node_modules/**/*",
+    "**/*.js",
+    "denoRuntime/**/*",
+    "ApplicationBuilder/**/*",
+    "utils/**/*",
+    "./*.d.ts"
+  ]
 }

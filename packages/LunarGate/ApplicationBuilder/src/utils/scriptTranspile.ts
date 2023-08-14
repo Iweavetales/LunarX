@@ -1,5 +1,5 @@
 import { BabelFileResult, transformSync } from '@babel/core';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { readFileSync } from 'fs';
 import chalk from 'chalk';
 
@@ -32,7 +32,8 @@ export function TranspileScript(script: string, filename: string): BabelFileResu
 }
 
 export function GetBrowserModuleLoaderScript(): BabelFileResult {
-  let scriptPath = join('packages/scripts/browserAMDModuleLoader.ts');
+  // dist/ApplicationBuilder 디렉토리 기준
+  let scriptPath = resolve(__dirname, '../scripts/browserAMDModuleLoader.js');
 
   try {
     let file = readFileSync(scriptPath);
