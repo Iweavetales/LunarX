@@ -5,7 +5,7 @@ import {
 	DocumentSheet,
 	UniversalRouteNode,
 } from '../../lib/DocumentTypes.ts';
-import { RouteNode, RouteNodeMap } from '../../Manifest.ts';
+import { RouteNode, RouteNodeMap } from '../../lib/Manifest.ts';
 import {
 	FetchingServerSideRouteData,
 	ServerSideRouteFetchResult,
@@ -41,14 +41,26 @@ export function RenderPage(
 	/**
 	 * beginToTerminalRouteStem 을 universalNode 배열 로 변환
 	 */
-	let ascendRouteNodeList: UniversalRouteNode[] = ascendFlatRouteNodeList.map(
+	let ascendRouteNodeList: UniversalRouteNode[] | unknown = ascendFlatRouteNodeList.map(
 		(node) => ({
 			// childNodes:[],
 			matchPattern: node.routePattern,
 			upperRouteMatchPattern: node.upperRoutePattern,
-			shardPath: webApp.Manifest.entries[node.entryPath].shardPath,
+			shardPath: webApp.Manifest.entries[node.entryPath ?? "??"].shardPath,
 		}),
 	);
+
+	let entryKeys = Object.keys(webApp.Manifest.entries)
+
+	let routerServerEntrySource = entryKeys
+		.find((entryKey) => webApp.Manifest.entries[entryKey].entryFileName === "router.server.js")
+	let entryServerEntrySource = entryKeys
+		.find((entryKey) => webApp.Manifest.entries[entryKey].entryFileName === "entry.server.js")
+	if( routerServerEntrySource && entryServerEntrySource ){
+		return Promise.resolve(new Response("Not found core", {
+			status: 200,
+		}))
+	}
 
 	return new Promise((resolve, reject) => {
 		async function process() {
@@ -104,7 +116,7 @@ export function RenderPage(
 							webApp.Manifest
 								.entries[
 									webApp.Manifest.routeNodes[pattern]
-										.entryPath
+										.entryPath ?? "??"
 								].shardPath
 						].default;
 				}
@@ -122,8 +134,8 @@ export function RenderPage(
 				 */
 				const fetchedDataList: {
 					routerPattern: string;
-					result: ServerSideRouteFetchResult | undefined;
-				}[] = await Promise.all(
+					result: ServerSideRouteFetchResult | undefined | any;
+				}[] | unknown = await Promise.all(
 					ascendFlatRouteNodeList.map((routeNode) => {
 						return new Promise(async (resolve, reject) => {
 							resolve(
@@ -146,6 +158,7 @@ export function RenderPage(
 				/**
 				 * 위에서 로드 한 데이터를 결과 맵에 바인딩 한다
 				 */
+				// @ts-ignore
 				fetchedDataList.forEach((fetchedData) => {
 					if (fetchedData) {
 						const pattern = fetchedData.routerPattern;

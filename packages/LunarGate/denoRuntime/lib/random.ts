@@ -1,4 +1,4 @@
-import { crypto } from 'https://deno.land/std@0.105.0/crypto/mod.ts?s=crypto';
+import { crypto } from "./deps.ts"
 
 export function GenerateRandomBytes(length: number): string {
 	let arr = new Uint8Array(length);

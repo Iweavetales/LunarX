@@ -36,7 +36,7 @@
 //   };
 // };
 
-import { LunarJSManifest } from '../../Manifest.ts';
+import { LunarJSManifest } from '../../lib/Manifest.ts';
 
 export function LoadManifest(path: string): LunarJSManifest {
 	const text = Deno.readTextFileSync(path);

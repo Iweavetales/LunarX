@@ -13,12 +13,13 @@ async function main() {
 	// let meta = LoadMeta(config.js.esmMetaFilePath);
 	// let clientSourceMeta = LoadMeta(config.js.cjsMetaFilePath);
 
+	// @ts-ignore
 	window.process = {
 		env: Deno.env.toObject()
 	}
 	const nodeEnv = Deno.env.get('NODE_ENV');
 
-	console.log('NODE_ENV = ', nodeEnv,window.process);
+	// console.log('NODE_ENV = ', nodeEnv,window.process);
 
 	/**
    ChunkFileMap 세팅

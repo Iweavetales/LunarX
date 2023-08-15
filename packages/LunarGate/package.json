@@ -1,6 +1,6 @@
 {
   "name": "lunargate-test-helloworld2",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "description": "The LunarGate that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "deno-runtime-fmt": "deno fmt ./packages/LunarGate/denoRuntime/",
     "deno-runtime-lint": "deno lint ./packages/LunarGate/denoRuntime/",
     "deno-runtime": "NODE_ENV=development deno run --allow-all packages/LunarGate/denoRuntime/index.ts ",
-    "build:deno-runtime": "deno bundle ./packages/LunarGate/denoRuntime/index.ts ./packages/LunarGate/denoRuntime/dist.js"
+    "build:deno-runtime": "mkdir -p ./dist/denoRuntime/ && deno bundle ./denoRuntime/index.ts ./dist/denoRuntime/index.js"
   },
   "author": "TalesWeaver",
   "license": "ISC",

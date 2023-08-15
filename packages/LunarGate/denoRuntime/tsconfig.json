@@ -11,5 +11,6 @@
 		"strict": true,
 		"target": "esnext",
 		"useDefineForClassFields": true
-	}
+	},
+	"include": ["types.d.ts"]
 }

@@ -8,7 +8,7 @@ import {
 	BuiltShardInfo,
 	RouteNode,
 	RouteNodeMap,
-} from '../../Manifest.ts';
+} from '../../lib/Manifest.ts';
 import { GetUrlPath } from './urlUtils.ts';
 import { ArrayClone } from './array.ts';
 import {
@@ -207,7 +207,7 @@ export function BuildRoutes(manifestRouteNodes: RouteNodeMap): Node {
 				);
 
 				const urlPath = GetUrlPath(req.url).replace(/^\/_\/r/,'' ); // url 패스를 실제 page 패스에 맞추기 위해 앞의 "/_/r" 경로는 제거 한다
-				const context = makeSwiftContext(req, urlPath, params);
+				const context = makeSwiftContext(req, urlPath, params, response);
 
 				/**
 				 * _init.server.tsx 파일이 존재 한다면 먼저 처리 한다.
@@ -231,7 +231,7 @@ export function BuildRoutes(manifestRouteNodes: RouteNodeMap): Node {
 				const fetchedDataList: {
 					routerPattern: string;
 					result: ServerSideRouteFetchResult | undefined;
-				}[] = await Promise.all(
+				}[] | unknown = await Promise.all(
 					ascendFlatRouteNodeList.map((routeNode) => {
 						return new Promise(async (resolve, reject) => {
 							resolve(
@@ -264,6 +264,7 @@ export function BuildRoutes(manifestRouteNodes: RouteNodeMap): Node {
 				}
 
 
+				// @ts-ignore
 				fetchedDataList.forEach((fetchedData) => {
 					if (fetchedData) {
 						const pattern = fetchedData.routerPattern;

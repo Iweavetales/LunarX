@@ -1,10 +1,10 @@
 import { Config } from './Config.ts';
 import { WebAppStructure } from './WebAppStructure.ts';
 import { BuildRoutes, Node } from './SwiftServerRouting.ts';
-import { serve } from 'https://deno.land/std@0.154.0/http/server.ts';
+
 import { GetUrlPath } from './urlUtils.ts';
 import FsFile = Deno.FsFile;
-import { join } from 'https://deno.land/std@0.150.0/path/mod.ts';
+import {httpServe, join} from "./deps";
 
 /**
  * A Server class provides pages for LunarJS
@@ -12,7 +12,7 @@ import { join } from 'https://deno.land/std@0.150.0/path/mod.ts';
 export class SwiftServer {
 	config: Config;
 	cwd: string;
-	running: boolean;
+	running: boolean = false
 	router: Node;
 	webApp: WebAppStructure;
 
@@ -33,15 +33,16 @@ export class SwiftServer {
 		this.webApp = webApp;
 	}
 
-	getDistFilePath(distPath): string {
+	getDistFilePath(distPath: string): string {
 		return join(this.cwd, distPath);
 	}
 
 	async getShardFile(shardPath: string): Promise<FsFile | null> {
+		const nodeEnv = Deno.env.get('NODE_ENV');
 		/**
 		 * production 모드 일떄만 map 파일 제공
 		 */
-		if(process.env.NODE_ENV !== "production" && /\.map$/.test(shardPath)){
+		if(nodeEnv !== "production" && /\.map$/.test(shardPath)){
 			 shardPath = shardPath.replace(/\.map$/,'');
 			const shard = this.webApp.BrowserShards[shardPath];
 			return await Deno.open(
@@ -80,10 +81,20 @@ export class SwiftServer {
 			return;
 		}
 
+		let envPortString = Deno.env.get('PORT');
+		let envPort: number | null = null
+		if( envPortString ) {
+			try {
+				envPort = parseInt(envPortString)
+			} catch (e) {
+				console.error(e)
+			}
+		}
+
 		/**
 		 * 웹서버 시작
 		 */
-		await serve(
+		await httpServe(
 			async (req) => {
 				if (!this.webApp) {
 					return new Response('not ready', {
@@ -126,7 +137,7 @@ export class SwiftServer {
 				});
 			},
 			{
-				port: parseInt(process.env.PORT || this.config.publicServe.port || 3000),
+				port:  envPort ?? 3000,
 			},
 		);
 	}

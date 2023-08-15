@@ -1,6 +1,6 @@
 import { OutputChunkInfo } from './Meta.ts';
 
-import { BuiltShardInfo, LunarJSManifest } from '../../Manifest.ts';
+import { BuiltShardInfo, LunarJSManifest } from '../../lib/Manifest.ts';
 import { LoadBuiltShardEntryModule } from './moduleLoader.ts';
 
 export type RoutableEntryPointName = string;
@@ -203,7 +203,7 @@ export async function ResolveWebappStructure(
 
 			webapp.BrowserShards[chunk.shardPath] = {
 				ShardPath: chunk.shardPath,
-				RealPath: chunk.clientSideOutputPath,
+				RealPath: chunk.clientSideOutputPath ?? "??",
 				IsChunk: false,
 			};
 
@@ -222,7 +222,7 @@ export async function ResolveWebappStructure(
 
 			webapp.BrowserShards[entry.shardPath] = {
 				ShardPath: entry.shardPath,
-				RealPath: entry.clientSideOutputPath,
+				RealPath: entry.clientSideOutputPath ?? "??",
 				IsChunk: false,
 			};
 

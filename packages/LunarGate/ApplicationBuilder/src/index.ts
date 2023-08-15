@@ -60,11 +60,11 @@ async function BuildReusableBuilder(): Promise<BuildContext> {
   console.log('routeFiles:', filteredRouteFiles);
 
   // let dirtyLibFiles: string[] = [];
-  let distLibSources = collectDistLibSources(libDirectory);
+  let libSources = collectDistLibSources(libDirectory);
 
   // libFiles
   // let libFiles = dirtyLibFiles.filter(filename => /\.tsx/.test(filename)).map(filename => relative(cwd, filename));
-  console.log('lib files:', distLibSources);
+  console.log('lib files:', libSources);
 
   /**
    * lightningcss 모듈의
@@ -78,7 +78,7 @@ async function BuildReusableBuilder(): Promise<BuildContext> {
 
   return await esbuild.context({
     entryPoints: [
-      ...distLibSources,
+      ...libSources,
       ...filteredRouteFiles,
       // 'react',
       // 'react-dom',

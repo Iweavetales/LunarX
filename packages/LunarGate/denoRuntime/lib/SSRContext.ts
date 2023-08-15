@@ -1,4 +1,4 @@
-import { LunarContext } from '../../LunarContext.ts';
+import { LunarContext } from '../../src/lunarContext.ts';
 import { GetUrlPath } from './urlUtils.ts';
 
 export function makeSwiftContext(

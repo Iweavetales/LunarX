@@ -1,7 +1,10 @@
-import { uuidV4 } from './deps.ts';
-import { RouteNode } from '../../Manifest.ts';
+import { uuidV5Generate } from './deps.ts';
+import { RouteNode } from '../../lib/Manifest.ts';
 import { WebAppStructure } from './WebAppStructure.ts';
-import { LunarContext } from '../../LunarContext.ts';
+import { LunarContext } from '../../src/lunarContext.ts';
+
+const NAMESPACE_URL = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
+
 
 export type ServerSideRouteFetchResult = {
 	error?: {
@@ -42,7 +45,7 @@ export async function FetchingServerSideRouteData(
 					 *
 					 * @ToDo 추후에 클라이언트 ID 도 포함해서 로그를 남기자
 					 */
-					const errorId = uuidV4();
+					const errorId = uuidV5Generate("",new TextEncoder().encode("lunargate"));
 					console.error(
 						`Unexpected error: PageRenderError/ssrFetchError/${errorId}: error occurs when fetching server side data about route[${routeNode.routePattern}].`,
 						e,
