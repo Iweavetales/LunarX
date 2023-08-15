@@ -1,6 +1,6 @@
 //입력된 청크 위치로 모듈을 로드
 
-import {join} from "./deps";
+import {join} from "./deps.ts";
 
 export async function LoadBuiltShardEntryModule(shardPath: string) {
 

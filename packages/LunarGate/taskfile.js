@@ -69,6 +69,7 @@ module.exports = {
         }
     },
 
+
     *bin(task) {
         yield esbuild.build({
             entryPoints: ["bin/lunar.ts"],

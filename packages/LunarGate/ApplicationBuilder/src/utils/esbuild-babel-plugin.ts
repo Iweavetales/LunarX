@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, readFile } from 'fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join, relative } from 'path';
 import { obfuscate, ObfuscatorOptions } from 'javascript-obfuscator';
 import queue from 'queue';
@@ -10,14 +10,16 @@ import { Metafile, Plugin, PluginBuild } from 'esbuild';
 
 import { DetermineServerSideShard } from './serverSideScript';
 import { BuildRouteNodeMap } from './routing';
-import { BuiltShardInfo, ShardType, LunarJSManifest } from '../../../Manifest';
+import { BuiltShardInfo, ShardType, LunarJSManifest } from '../../../lib/Manifest';
 import { GetBrowserModuleLoaderScript } from './scriptTranspile';
 import { TranspileForBrowser } from './transpileESMForBrowser';
 import { DiffMetaOutput, DiffStatus } from './metaFile';
 
 // import babel from '@babel/core';
 // import styled from 'babel-plugin-styled-components';
-import { Config } from './config';
+
+import { CheckBrowserEntrySource } from './browserEntry';
+import { LunarConfig } from '../../../lib/lunarConfig';
 
 type PluginOptions = {
   esmDirectory: string;
@@ -29,7 +31,7 @@ type PluginOptions = {
 };
 
 // eslint-disable-next-line no-unused-vars
-type TranspilePlugin = (config: Config, options: PluginOptions) => Plugin;
+type TranspilePlugin = (config: LunarConfig, options: PluginOptions) => Plugin;
 
 const plugin: TranspilePlugin = (config, options) => {
   let q = queue({ results: [] });
@@ -360,7 +362,7 @@ const plugin: TranspilePlugin = (config, options) => {
             let entryPoint = entry.entryPoint;
 
             if (entryPoint) {
-              if (/lib\/entry\.browser\.tsx$/.test(entryPoint)) {
+              if (CheckBrowserEntrySource(entry)) {
                 serviceServerManifest.browserEntryShardPath = entry.shardPath;
               } else if (/routes\/_app\.tsx$/.test(entryPoint)) {
                 serviceServerManifest.customizeAppShardPath = entry.shardPath;

@@ -1,50 +1,55 @@
 'use strict';
 
 import { ClearDirectory } from './utils/clearDirectory';
-import esbuild, { BuildContext } from 'esbuild';
+import { BuildContext, context as esbuildContext } from 'esbuild';
 import { join, relative, resolve } from 'path';
 import { existsSync, mkdirSync } from 'fs';
-// import cssModulesPlugin from 'esbuild-css-modules-plugin';
-// import chalk from 'chalk';
-// const { vanillaExtractPlugin } = require('@vanilla-extract/esbuild-plugin');
-const postcss = require('postcss');
-import { readFileSync } from 'fs';
-import { parse } from 'yaml';
+
 import { getAllFiles } from './utils/files';
+import { defaultConfig, LunarConfig } from '../../lib/lunarConfig';
 import esbuildBabelPlugin from './utils/esbuild-babel-plugin';
-import { Config } from './utils/config';
+import merge from 'lodash/merge';
 import { collectDistLibSources } from './utils/collectDistLibSources';
-const file = readFileSync('./swift.yaml', 'utf8');
-
-const config: Config = parse(file);
-
-ClearDirectory(config.js.distDirectory);
-
-const cwd = process.cwd();
-console.log('Lunar builder cwd', cwd, __dirname);
-const appDirectory = join(cwd, './app');
-const absoluteESMDistDirectory = join(cwd, config.js.esmDirectory);
-const absoluteCJSDistDirectory = join(cwd, config.js.cjsDirectory);
-const absoluteESMMetafilePath = join(cwd, config.js.esmMetaFilePath);
-const absoluteCJSMetafilePath = join(cwd, config.js.cjsMetaFilePath);
-const routeDirectory = join(appDirectory, './routes');
-
-// Lunar Library directory
-const libDirectory = resolve(__dirname, '../../dist/lib'); // swift-nest-platform 라이브러리 디렉토리
-console.log('__dirname', __dirname, resolve(__dirname, '../../', './lib'));
-if (!existsSync(absoluteESMDistDirectory)) {
-  mkdirSync(absoluteESMDistDirectory, {
-    recursive: true,
-  });
-}
-
-if (!existsSync(absoluteCJSDistDirectory)) {
-  mkdirSync(absoluteCJSDistDirectory, {
-    recursive: true,
-  });
-}
 
 async function BuildReusableBuilder(): Promise<BuildContext> {
+  const cwd = process.cwd();
+
+  let config: LunarConfig = defaultConfig;
+  let userConfigPath = join(cwd, 'lunar.conf.js');
+  try {
+    let userConfig = await import(userConfigPath);
+    config = merge(config, userConfig.default);
+    console.log('found user config', userConfig.default);
+  } catch (e) {
+    // Nothing to do
+    console.log('Not found user config', userConfigPath, e);
+  }
+
+  ClearDirectory(config.js.distDirectory);
+
+  console.log('Lunar builder cwd', cwd, __dirname);
+  const appDirectory = join(cwd, './app');
+  const absoluteESMDistDirectory = join(cwd, config.js.esmDirectory);
+  const absoluteCJSDistDirectory = join(cwd, config.js.cjsDirectory);
+  const absoluteESMMetafilePath = join(cwd, config.js.esmMetaFilePath);
+  const absoluteCJSMetafilePath = join(cwd, config.js.cjsMetaFilePath);
+  const routeDirectory = join(appDirectory, './routes');
+
+  // Lunar Library directory
+  const libDirectory = resolve(__dirname, '../../dist/lib'); // swift-nest-platform 라이브러리 디렉토리
+  console.log('__dirname', __dirname, resolve(__dirname, '../../', './lib'));
+  if (!existsSync(absoluteESMDistDirectory)) {
+    mkdirSync(absoluteESMDistDirectory, {
+      recursive: true,
+    });
+  }
+
+  if (!existsSync(absoluteCJSDistDirectory)) {
+    mkdirSync(absoluteCJSDistDirectory, {
+      recursive: true,
+    });
+  }
+
   /**
    * Make route file list
    */
@@ -76,7 +81,7 @@ async function BuildReusableBuilder(): Promise<BuildContext> {
   // process.env.CSS_TRANSFORMER_WASM = '';
   console.log('process.env', process.env);
 
-  return await esbuild.context({
+  return await esbuildContext({
     entryPoints: [
       ...libSources,
       ...filteredRouteFiles,

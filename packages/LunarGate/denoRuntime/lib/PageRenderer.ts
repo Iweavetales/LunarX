@@ -50,13 +50,14 @@ export function RenderPage(
 		}),
 	);
 
-	let entryKeys = Object.keys(webApp.Manifest.entries)
+	let entriesArray = Object.keys(webApp.Manifest.entries).map((key) => webApp.Manifest.entries[key])
 
-	let routerServerEntrySource = entryKeys
-		.find((entryKey) => webApp.Manifest.entries[entryKey].entryFileName === "router.server.js")
-	let entryServerEntrySource = entryKeys
-		.find((entryKey) => webApp.Manifest.entries[entryKey].entryFileName === "entry.server.js")
-	if( routerServerEntrySource && entryServerEntrySource ){
+
+	let routerServerEntrySource = entriesArray
+		.find((entry) => entry.entryFileName === "router.server.js")
+	let entryServerEntrySource = entriesArray
+		.find((entry) => entry.entryFileName === "entry.server.js")
+	if( !( routerServerEntrySource && entryServerEntrySource ) ){
 		return Promise.resolve(new Response("Not found core", {
 			status: 200,
 		}))
@@ -75,18 +76,13 @@ export function RenderPage(
 				const context = makeSwiftContext(req, urlPath, params, response);
 
 
-				console.log(webApp.Manifest.entries, webApp.Manifest.entries)
-
-
 				const entryServerHandler: any = webApp
 					.LoadedEntryModuleMap[
-						webApp.Manifest.entries['packages/LunarGate/lib/entry.server.tsx']
-							.shardPath
+						entryServerEntrySource!.shardPath
 					].default;
 				const routerServerHandler: any = webApp
 					.LoadedEntryModuleMap[
-						webApp.Manifest.entries['packages/LunarGate/lib/router.server.tsx']
-							.shardPath
+						routerServerEntrySource!.shardPath
 					].default;
 
 
@@ -111,6 +107,8 @@ export function RenderPage(
 				}
 
 				function getRouteModule(pattern: string): any {
+					console.log("getRouteModule", pattern, webApp.LoadedEntryModuleMap )
+
 					return webApp
 						.LoadedEntryModuleMap[
 							webApp.Manifest
@@ -249,8 +247,7 @@ export function RenderPage(
 						),
 						nonce: nonce,
 						loaderScriptUrl: '/_/s/loader.js'+'?v='+ webApp.Manifest.builtVersion,
-						browserEntryModulePath:
-							webApp.Manifest.browserEntryShardPath,
+						browserEntryModulePath: webApp.Manifest.browserEntryShardPath,
 						customAppModuleShardPath: webApp.Manifest.customizeAppShardPath,
 						customDocumentModuleShardPath: webApp.Manifest.customizeServerDocumentShardPath,
 

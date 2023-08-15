@@ -4,7 +4,7 @@ import { BuildRoutes, Node } from './SwiftServerRouting.ts';
 
 import { GetUrlPath } from './urlUtils.ts';
 import FsFile = Deno.FsFile;
-import {httpServe, join} from "./deps";
+import {httpServe, join} from "./deps.ts";
 
 /**
  * A Server class provides pages for LunarJS
