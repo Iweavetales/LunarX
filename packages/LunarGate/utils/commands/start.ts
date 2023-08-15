@@ -1,3 +1,3 @@
-export default function Start(args: string[]) {
+export default async function Start(args: string[]) {
     console.log(args)
 }

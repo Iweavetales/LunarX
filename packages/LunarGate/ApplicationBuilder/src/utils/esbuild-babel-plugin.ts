@@ -26,8 +26,8 @@ type PluginOptions = {
   cjsDirectory: string;
   absoluteCJSMetafilePath: string;
   absoluteESMMetafilePath: string;
-  runtimeServerPort: string;
   distDirectoryPath: string;
+  builtNoticeCallback: () => void;
 };
 
 // eslint-disable-next-line no-unused-vars
@@ -439,17 +439,17 @@ const plugin: TranspilePlugin = (config, options) => {
             oldMetaFile = result.metafile;
           }
 
-          // runtime server 에 update 통지
-          if (options.runtimeServerPort) {
-            try {
-              await fetch(`http://127.0.0.1:${options.runtimeServerPort}/app-builder/meta/updated`, {
-                method: 'GET',
-              });
-              console.log('Send a notice to the Runtime server that the app has been updated');
-            } catch (e) {
-              console.error('Failed to send built notice to Runtime server : ', e);
-            }
-          }
+          // // runtime server 에 update 통지
+          // if (options.runtimeServerPort) {
+          //   try {
+          //     await fetch(`http://127.0.0.1:${options.runtimeServerPort}/app-builder/meta/updated`, {
+          //       method: 'GET',
+          //     });
+          //     console.log('Send a notice to the Runtime server that the app has been updated');
+          //   } catch (e) {
+          //     console.error('Failed to send built notice to Runtime server : ', e);
+          //   }
+          // }
 
           if (cb) {
             cb(undefined, `Built sources`);
@@ -461,6 +461,9 @@ const plugin: TranspilePlugin = (config, options) => {
            * Meta 쓰기
            */
           writeFileSync(options.absoluteESMMetafilePath, JSON.stringify(result.metafile));
+
+          // 빌드 완료 통지
+          options.builtNoticeCallback();
         });
         q.start(err => {
           if (err) {

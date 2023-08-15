@@ -11,7 +11,7 @@ import esbuildBabelPlugin from './utils/esbuild-babel-plugin';
 import merge from 'lodash/merge';
 import { collectDistLibSources } from './utils/collectDistLibSources';
 
-async function BuildReusableBuilder(): Promise<BuildContext> {
+async function BuildReusableBuilder(builtCallback: () => void): Promise<BuildContext> {
   const cwd = process.cwd();
 
   let config: LunarConfig = defaultConfig;
@@ -89,7 +89,7 @@ async function BuildReusableBuilder(): Promise<BuildContext> {
       // 'react-dom',
       // 'react-dom/server',
       // 'react-router-dom/server',
-      ...(config.build.vendors || []),
+      ...config.build.vendors,
     ],
 
     /**
@@ -130,15 +130,19 @@ async function BuildReusableBuilder(): Promise<BuildContext> {
       '.woff': 'file',
       '.otf': 'file',
       '.eot': 'file',
+      ...config.build.loaders,
     },
     plugins: [
+      ...config.build.plugins,
       esbuildBabelPlugin(config, {
         distDirectoryPath: config.js.distDirectory,
         cjsDirectory: config.js.cjsDirectory,
         esmDirectory: config.js.esmDirectory,
         absoluteCJSMetafilePath: absoluteCJSMetafilePath,
         absoluteESMMetafilePath: absoluteESMMetafilePath,
-        runtimeServerPort: config.privateServe.port,
+        builtNoticeCallback: () => {
+          builtCallback && builtCallback();
+        },
       }),
     ],
   });

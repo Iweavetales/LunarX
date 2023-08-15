@@ -23,7 +23,7 @@ export default async function (context: LunarContext, res: Response, App: () => 
         {/*{sheet.getStyleElement()}*/}
       </head>
       <body>
-        <div id="app" dangerouslySetInnerHTML={{ __html: appMarkup }}></div>
+        <div id="lunar" dangerouslySetInnerHTML={{ __html: appMarkup }}></div>
 
         <Bootstrap />
       </body>

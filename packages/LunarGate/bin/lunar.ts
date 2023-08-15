@@ -24,7 +24,7 @@ function MatchingSpecificCommand(string: string) : LunarCommands | null {
     return null
 }
 
-let foundSomeCommand = lunarArgs.find((arg) => /^[a-z][A-Z]/);
+let foundSomeCommand = lunarArgs.find((arg) => /^[a-zA-Z]+$/.test(arg));
 
 (async function (){
     if( foundSomeCommand !== undefined ){
@@ -32,13 +32,13 @@ let foundSomeCommand = lunarArgs.find((arg) => /^[a-z][A-Z]/);
         if ( lunarCmd != null ){
             switch (lunarCmd) {
                 case LunarCommands.Dev:
-                    devCommand(lunarArgs)
+                    await devCommand(lunarArgs)
                     break
                 case LunarCommands.Build:
                     await buildCommand(lunarArgs)
                     break
                 case LunarCommands.Start:
-                    startCommand(lunarArgs)
+                    await startCommand(lunarArgs)
                     break
             }
         }

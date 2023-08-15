@@ -7,17 +7,12 @@ export type LunarConfig = {
         cjsMetaFilePath: string;
         routesRoot: string;
     };
-    publicServe: {
-        port: string | number;
-    };
-    privateServe: {
-        port: string | number;
-    };
-    production: boolean;
 
     build: {
         cjsTranspiler: 'swc' | 'babel';
         vendors?: string[];
+        plugins?: any[];
+        loaders?: Record<any, any>;
     };
 }
 
@@ -31,18 +26,10 @@ export const defaultConfig: LunarConfig = {
         routesRoot: "./app/routes",
     },
 
-    publicServe: {
-        port: 3001
-    },
-
-    privateServe: {
-        port: 3002
-    },
-
-    production: false,
-
     build: {
         cjsTranspiler: "swc",
-        vendors: []
+        vendors: [],
+        plugins: [],
+        loaders: {}
     }
 }
