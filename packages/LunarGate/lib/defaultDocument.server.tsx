@@ -1,13 +1,13 @@
 import { LunarContext } from '../src/lunarContext';
 import React, { StrictMode } from 'react';
-import { Bootstrap, DocumentLinks, DocumentScripts } from '../src/document';
+import { DocumentLinks, DocumentScripts } from '../src/document';
 import reactDomServer from 'react-dom/server';
 // import { ServerStyleSheet } from 'styled-components';
 
-export default async function (context: LunarContext, res: Response | null , App: () => React.ReactElement) {
+export default async function (context: LunarContext, res: Response | null , Main: () => React.ReactElement) {
   // const sheet = new ServerStyleSheet();
   // const appMarkup = reactDomServer.renderToString(sheet.collectStyles(<App />));
-  const appMarkup = reactDomServer.renderToString(<App />);
+  // const appMarkup = reactDomServer.renderToString(<App />);
 
   return (
     <html>
@@ -17,9 +17,7 @@ export default async function (context: LunarContext, res: Response | null , App
         <DocumentLinks />
       </head>
       <body>
-        <div id="app" dangerouslySetInnerHTML={{ __html: appMarkup }}></div>
-
-        <Bootstrap />
+        <Main />
       </body>
     </html>
   );

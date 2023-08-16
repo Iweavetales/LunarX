@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { RouteFetchResult, ServerFetchesProvider } from '../src/serverFetches';
 import { UniversalRouteNode } from './DocumentTypes';
 import SwiftAppContainer, { SwiftRenderer } from '../src/lunarApp';
+import {RootElementID} from "./constants";
 
 type ReactRouteNode = {
   element: React.ReactElement;
@@ -35,7 +36,9 @@ export default function (
 ) {
   async function Startup() {
     let App: () => React.ReactElement;
+    console.log("customAppEntryModulePath",customAppEntryModulePath)
     if (customAppEntryModulePath) {
+      console.log("Used customized App module")
       const customAppModule: any = await PromiseRequire(require, customAppEntryModulePath);
       App = customAppModule.default;
     } else {
@@ -87,12 +90,11 @@ export default function (
     // const nativeScrollTo = window.scrollTo;
     // window.scrollTo = (...args) => console.trace('scrollTo', args);
 
-    const reactContainerEl = document.getElementById('app');
+    const reactContainerEl = document.getElementById(RootElementID);
     if (reactContainerEl) {
       hydrateRoot(
         reactContainerEl,
         <React.StrictMode>
-          {/*<RouterProvider router={browserRouter} />*/}
           <BrowserRouter>
             <SwiftAppContainer
               enterLocation={{

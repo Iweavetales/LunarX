@@ -5,6 +5,7 @@ import { ServerFetchesProvider } from './serverFetches';
 import {EmptyRoute, RouteTreeNode, ShardLoader, SwiftRouterContext, SwiftRouterProvider} from './router';
 import {   SwiftAppRootPipeContext } from '../lib/SwiftAppRootPipeContext';
 
+
 /**
  * @Deprecated ModuleContext
  */
@@ -91,7 +92,7 @@ export const SwiftRenderer = () => {
   }
 
   return (
-    <div>
+    <>
       <Routes location={loc ?? undefined}>
         {routeCtx.routeTree.map(node => {
           // return (
@@ -115,22 +116,22 @@ export const SwiftRenderer = () => {
       </Routes>
 
       {routeCtx.browsing && (
-        <div
-          style={{
-            backgroundColor: '#fff',
-            boxShadow: '0 0 10px 0 rgba(0,0,0,.3)',
-            padding: 10,
-            position: 'fixed',
-            bottom: 10,
-            right: 10,
-            borderRadius: 10,
-            pointerEvents: 'none',
-          }}
-        >
-          loading
-        </div>
+          <div
+              style={{
+                backgroundColor: '#fff',
+                boxShadow: '0 0 10px 0 rgba(0,0,0,.3)',
+                padding: 10,
+                position: 'fixed',
+                bottom: 10,
+                right: 10,
+                borderRadius: 10,
+                pointerEvents: 'none',
+              }}
+          >
+            loading
+          </div>
       )}
-    </div>
+    </>
   );
 };
 

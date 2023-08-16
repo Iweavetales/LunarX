@@ -256,7 +256,7 @@ type ModuleContent = {
         return moduleMap[moduleName]
       }
 
-      throw new Error(`Module[${moduleName}] not found.`)
+      throw new Error(`${_from}: Module[${moduleName}] not found.`)
     })
 
 

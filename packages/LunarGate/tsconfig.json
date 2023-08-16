@@ -9,9 +9,9 @@
     "stripInternal": true,
     "declaration": true,
     "outDir": "./dist",
+
     "paths": {
-      "~/lib/*": ["./lib/*"],
-      "~/src/*": ["./src/*"]
+
     }
   },
 
