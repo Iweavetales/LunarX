@@ -41,7 +41,7 @@ export function RenderPage(
 	/**
 	 * beginToTerminalRouteStem 을 universalNode 배열 로 변환
 	 */
-	let ascendRouteNodeList: UniversalRouteNode[] | unknown = ascendFlatRouteNodeList.map(
+	const ascendRouteNodeList: UniversalRouteNode[] | unknown = ascendFlatRouteNodeList.map(
 		(node) => ({
 			// childNodes:[],
 			matchPattern: node.routePattern,
@@ -50,12 +50,12 @@ export function RenderPage(
 		}),
 	);
 
-	let entriesArray = Object.keys(webApp.Manifest.entries).map((key) => webApp.Manifest.entries[key])
+	const entriesArray = Object.keys(webApp.Manifest.entries).map((key) => webApp.Manifest.entries[key])
 
 
-	let routerServerEntrySource = entriesArray
+	const routerServerEntrySource = entriesArray
 		.find((entry) => entry.entryFileName === "router.server.js")
-	let entryServerEntrySource = entriesArray
+	const entryServerEntrySource = entriesArray
 		.find((entry) => entry.entryFileName === "entry.server.js")
 	if( !( routerServerEntrySource && entryServerEntrySource ) ){
 		return Promise.resolve(new Response("Not found core", {
@@ -67,7 +67,7 @@ export function RenderPage(
 		async function process() {
 			try {
 
-				let response = new Response();
+				const response = new Response();
 				response.headers.append('content-type','text/html; charset=utf-8')
 
 
@@ -95,7 +95,7 @@ export function RenderPage(
 							webApp.Manifest.initServerShardPath
 						].default;
 
-					let ret : boolean = await initServerScript(context)
+					const ret : boolean = await initServerScript(context)
 					if( !ret ){
 						resolve(
 							new Response("error", {

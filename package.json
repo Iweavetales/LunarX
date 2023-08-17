@@ -5,16 +5,7 @@
   "scripts": {
     "build-all": "npm run build:builder",
     "build": "turbo run build",
-    "escape-lightningcss-error": "CSS_TRANSFORMER_WASM=false",
-    "build-builder": "npm run escape-lightningcss-error && esbuild packages/LunarGate/ApplicationBuilder/src/index.ts --bundle --platform=node --outfile=packages/LunarGate/ApplicationBuilder/builder.js --external:esbuild   --sourcemap=external   --external:@swc --loader:.node=file",
-    "build:app:dev:watch": "run-p build:app:dev:watch:*",
-    "build:app:dev:watch:app": "NODE_ENV=development npm run build:builder && env NODE_ENV=development node packages/LunarGate/ApplicationBuilder/dist/builder.js --enable-source-maps",
-    "build:app:dev:watch:comment": "# Application Builder 를 빌드하고 앱을 증분 빌드 시작",
-    "build:app:prd": "npm run build:builder && env NODE_ENV=production node packages/LunarGate/ApplicationBuilder/dist/builder.js --enable-source-maps",
-    "deno-runtime-fmt": "deno fmt ./packages/LunarGate/denoRuntime/",
-    "deno-runtime-lint": "deno lint ./packages/LunarGate/denoRuntime/",
-    "deno-runtime": "NODE_ENV=development deno run --allow-all packages/LunarGate/denoRuntime/index.ts ",
-    "build:deno-runtime": "deno bundle ./packages/LunarGate/denoRuntime/index.ts ./packages/LunarGate/denoRuntime/dist.js"
+    "lint": "eslint --fix --ext .ts,.tsx ."
   },
   "devDependencies": {
     "prettier": "^2.7.1",

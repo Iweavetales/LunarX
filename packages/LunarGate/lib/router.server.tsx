@@ -11,13 +11,13 @@ export default function ServerBuildRouter(
   getRouterModule: GetRouterModule,
 ) {
   return (props: { routeFetchesResults: { [routePattern: string]: any } }) => {
-    let routePatterns = Object.keys(routeNodes);
+    const routePatterns = Object.keys(routeNodes);
 
     /**
      * 상위라우터가 없는 최상위 라우터들만 추출
      */
-    let topLevelRoutes = routePatterns.filter(pattern => {
-      let routeNode = routeNodes[pattern];
+    const topLevelRoutes = routePatterns.filter(pattern => {
+      const routeNode = routeNodes[pattern];
       if (routeNode.upperRoutePattern) {
         return false;
       }
@@ -25,7 +25,7 @@ export default function ServerBuildRouter(
     });
 
     function RenderRouteNode(routeNode: RouteNode, upperRoutePattern: string) {
-      let pattern = routeNode.routePattern;
+      const pattern = routeNode.routePattern;
 
       let Component = getRouterModule(pattern);
       if (Component === undefined) {
@@ -52,7 +52,7 @@ export default function ServerBuildRouter(
                */
               .filter(childPattern => routeNodes[childPattern])
               .map(childPattern => {
-                let childRouteNode = routeNodes[childPattern];
+                const childRouteNode = routeNodes[childPattern];
 
                 if (childRouteNode) {
                   return RenderRouteNode(childRouteNode, pattern);

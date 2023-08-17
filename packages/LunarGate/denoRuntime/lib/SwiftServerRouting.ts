@@ -42,7 +42,7 @@ export function BuildRoutes(manifestRouteNodes: RouteNodeMap): Node {
 
 			let fileSize;
 			try {
-				let stat = (await Deno.stat(filePath));
+				const stat = (await Deno.stat(filePath));
 
 				fileSize = stat.size;
 			} catch (e) {
@@ -185,7 +185,7 @@ export function BuildRoutes(manifestRouteNodes: RouteNodeMap): Node {
 		root.add(
 			'/_/r' + routePattern,
 			async (req: Request, params: Params, swift: SwiftServer) => {
-				let response = new Response();
+				const response = new Response();
 				response.headers.append('content-type','application/json')
 				// req.
 				/**
@@ -197,7 +197,7 @@ export function BuildRoutes(manifestRouteNodes: RouteNodeMap): Node {
 				/**
 				 * beginToTerminalRouteStem 을 universalNode 배열 로 변환
 				 */
-				let ascendRouteNodeList: UniversalRouteNode[] = ascendFlatRouteNodeList.map(
+				const ascendRouteNodeList: UniversalRouteNode[] = ascendFlatRouteNodeList.map(
 					(node) => ({
 						// childNodes:[],
 						matchPattern: node.routePattern,
@@ -218,7 +218,7 @@ export function BuildRoutes(manifestRouteNodes: RouteNodeMap): Node {
 						swift.webApp.Manifest.initServerShardPath
 						].default;
 
-					let ret : boolean = await initServerScript(context)
+					const ret : boolean = await initServerScript(context)
 					if( !ret ){
 						return new Response("error", {
 								status: 404,

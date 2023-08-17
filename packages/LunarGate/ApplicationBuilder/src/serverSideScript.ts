@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 
 function getFileName(filepath: string): string {
-  let pathTokens = filepath.replace(/\\/g, '/').split('/'); // 디렉토리를 제외한 파일명
-  let filename = pathTokens[pathTokens.length - 1];
+  const pathTokens = filepath.replace(/\\/g, '/').split('/'); // 디렉토리를 제외한 파일명
+  const filename = pathTokens[pathTokens.length - 1];
 
   return filename;
 }
@@ -19,9 +19,9 @@ export function ExtensionList(filename: string): string[] {
 }
 
 function ThisIsServerSideShard(filePath: string): boolean {
-  let filename = getFileName(filePath);
-  let extensions = ExtensionList(filename);
-  let extensionCount = extensions.length;
+  const filename = getFileName(filePath);
+  const extensions = ExtensionList(filename);
+  const extensionCount = extensions.length;
 
   /**
    * filename 이 server.js 면 서버사이드 스크립트로 간주 한다.
@@ -39,7 +39,7 @@ function ThisIsServerSideShard(filePath: string): boolean {
    * 확장자가 2개 이상인 경우
    */
   if (extensionCount >= 2) {
-    let secondExtensionFromLast = extensions[extensionCount - 2]; // 끝에서 두번째 확장자
+    const secondExtensionFromLast = extensions[extensionCount - 2]; // 끝에서 두번째 확장자
 
     if (secondExtensionFromLast === 'server') {
       // 파일명이 *.server.* 로 끝나면 서버사이드 모듈 이므로 클라이언트 소스 트랜스폼에서 제외 시킨다
@@ -90,10 +90,10 @@ export function DetermineServerSideShard(
    * entryFilepath 가 server side shard 는 아니지만
    * shard 를 구성하는 input 중 server side shard 가 있는지 체크
    */
-  let inputSourceFileNames = Object.keys(inputSources);
-  let includedServerSideScripts: string[] = [];
+  const inputSourceFileNames = Object.keys(inputSources);
+  const includedServerSideScripts: string[] = [];
   for (let idx = 0; idx < inputSourceFileNames.length; idx++) {
-    let sourceFileName = inputSourceFileNames[idx];
+    const sourceFileName = inputSourceFileNames[idx];
     if (ThisIsServerSideShard(sourceFileName)) {
       // console.warn(
       //   // chalk.redBright('Skipped server side script. But may mixed client/server side script  '),

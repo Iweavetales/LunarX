@@ -8,7 +8,7 @@ import * as path from 'path';
  * @returns {*[]}
  */
 export const getAllFiles = function (dirPath: string, arrayOfFiles: string[]) {
-  let files = fs.readdirSync(dirPath);
+  const files = fs.readdirSync(dirPath);
 
   arrayOfFiles = arrayOfFiles || [];
 

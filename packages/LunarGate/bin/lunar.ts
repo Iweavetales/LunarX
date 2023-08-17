@@ -4,7 +4,7 @@ import buildCommand from './commands/build'
 import startCommand from './commands/start'
 import {Command} from "commander";
 
-let lunarArgs = process.argv.slice(2)
+const lunarArgs = process.argv.slice(2)
 
 enum LunarCommands {
     Build = "build",
@@ -25,7 +25,7 @@ function MatchingSpecificCommand(string: string) : LunarCommands | null {
     return null
 }
 
-let foundSomeCommand = lunarArgs.find((arg) => /^[a-zA-Z]+$/.test(arg));
+const foundSomeCommand = lunarArgs.find((arg) => /^[a-zA-Z]+$/.test(arg));
 
 (async function (){
     return new Promise((resolve, reject) => {

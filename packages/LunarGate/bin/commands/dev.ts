@@ -2,8 +2,8 @@
 export default async function Dev(options: Record<any, any>) {
     console.log(options)
 
-    let createBuildContext = require("../../dist/ApplicationBuilder/index.js").createBuildContext;
-    let buildContext = await createBuildContext(() => {
+    const createBuildContext = require("../../dist/ApplicationBuilder/index.js").createBuildContext;
+    const buildContext = await createBuildContext(() => {
         // built
         console.log("built")
     })

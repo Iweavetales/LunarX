@@ -10,15 +10,15 @@ type DiffResult = {
   };
 };
 export const DiffMetaOutput = (oldMeta: Metafile, newMeta: Metafile): DiffResult => {
-  let oldOutputKeys = Object.keys(oldMeta.outputs);
-  let newOutputKeys = Object.keys(newMeta.outputs);
+  const oldOutputKeys = Object.keys(oldMeta.outputs);
+  const newOutputKeys = Object.keys(newMeta.outputs);
 
-  let oldOutputKeysLength = oldOutputKeys.length;
-  let newOutputKeysLength = newOutputKeys.length;
+  const oldOutputKeysLength = oldOutputKeys.length;
+  const newOutputKeysLength = newOutputKeys.length;
 
-  let diffRet: DiffResult = {};
+  const diffRet: DiffResult = {};
 
-  let key: string = '';
+  let key = '';
   for (let i = 0; i < oldOutputKeysLength; i++) {
     key = oldOutputKeys[i];
 

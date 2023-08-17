@@ -34,9 +34,9 @@ type PluginOptions = {
 type TranspilePlugin = (config: LunarConfig, options: PluginOptions) => Plugin;
 
 const plugin: TranspilePlugin = (config, options) => {
-  let q = queue({ results: [] });
+  const q = queue({ results: [] });
 
-  let obfuscateOptions: ObfuscatorOptions = {
+  const obfuscateOptions: ObfuscatorOptions = {
     compact: true,
     controlFlowFlattening: false,
     controlFlowFlatteningThreshold: 0.75,
@@ -150,7 +150,7 @@ const plugin: TranspilePlugin = (config, options) => {
            *
            * chunks, clientEntryPoints 의 key 는 프로젝트 root 기준 파일 상대 경로이다
            */
-          let serviceServerManifest: LunarJSManifest = {
+          const serviceServerManifest: LunarJSManifest = {
             entries: {},
             chunks: {},
             browserEntryShardPath: '',
@@ -163,21 +163,21 @@ const plugin: TranspilePlugin = (config, options) => {
             return;
           }
 
-          let diffResult = DiffMetaOutput(oldMetaFile || { outputs: {}, inputs: {} }, result.metafile);
+          const diffResult = DiffMetaOutput(oldMetaFile || { outputs: {}, inputs: {} }, result.metafile);
 
           // dist 디렉토리 생성
           if (!existsSync(options.distDirectoryPath)) {
             mkdirSync(options.distDirectoryPath, { recursive: true });
           }
 
-          let esmMeta = result.metafile;
-          let outputShardPaths = Object.keys(esmMeta.outputs);
+          const esmMeta = result.metafile;
+          const outputShardPaths = Object.keys(esmMeta.outputs);
           for (let i = 0; i < outputShardPaths.length; i++) {
-            let outputKey = outputShardPaths[i];
-            let outputDiffStatus = diffResult[outputKey];
+            const outputKey = outputShardPaths[i];
+            const outputDiffStatus = diffResult[outputKey];
 
-            let outputShardPath = outputShardPaths[i];
-            let outputInfo = esmMeta.outputs[outputShardPath];
+            const outputShardPath = outputShardPaths[i];
+            const outputInfo = esmMeta.outputs[outputShardPath];
 
             // esm meta 기준으로 메니페스트 생성
             // console.log(outputShardPath, options.esmDirectory, relative(options.esmDirectory, outputShardPath));
@@ -189,22 +189,22 @@ const plugin: TranspilePlugin = (config, options) => {
              *
              *  esm 형식이나 cjs 형식이나 상대경로는 동일 하다
              */
-            let outputRelativePath = relative(options.esmDirectory, outputShardPath); //
+            const outputRelativePath = relative(options.esmDirectory, outputShardPath); //
 
             /**
              * 윈도우 파일시스템 경로 구분자 "\" 를 url 과 리눅스 파일시스템 경로 구분자인 "/" 로 치환 한다
              */
-            let normalizedRelativePath = outputRelativePath.replace(/\\/g, '/');
+            const normalizedRelativePath = outputRelativePath.replace(/\\/g, '/');
 
             // map 파일 여부
-            let isMapFile = /\.map$/.test(normalizedRelativePath);
+            const isMapFile = /\.map$/.test(normalizedRelativePath);
 
             /**
              * map file 이 아니면 분류를 시작합니다
              */
             if (!isMapFile) {
-              let entryPoint = outputInfo.entryPoint;
-              let inputs = outputInfo.inputs;
+              const entryPoint = outputInfo.entryPoint;
+              const inputs = outputInfo.inputs;
 
               /**
                * 모듈 타입 분류
@@ -221,7 +221,7 @@ const plugin: TranspilePlugin = (config, options) => {
               /**
                * 서버사이드 Shard 분류
                */
-              let serverSideShardInfo = DetermineServerSideShard(entryPoint || null, inputs);
+              const serverSideShardInfo = DetermineServerSideShard(entryPoint || null, inputs);
 
               /**
                * esbuild 로 출력된 파일 샤드에 서버사이드 모듈이 일부 포함 된 경우에 해당 할 떄
@@ -248,12 +248,12 @@ const plugin: TranspilePlugin = (config, options) => {
                    * 클라이언트 스크립트 트랜스파일
                    */
                   if (!serverSideShardInfo.isServerSideShard /* 서버사이드 샤드가 아니면 */) {
-                    let esmSourceMapFile =
+                    const esmSourceMapFile =
                       process.env.NODE_ENV === 'production' ? null : readFileSync(outputShardPath + '.map');
 
                     // console.log(chalk.blue(`Transpile ESM shard ${outputShardPath}`));
 
-                    let transpiledESMSource = TranspileForBrowser(
+                    const transpiledESMSource = TranspileForBrowser(
                       config.build.cjsTranspiler,
                       outputShardPath,
                       normalizedRelativePath,
@@ -262,10 +262,10 @@ const plugin: TranspilePlugin = (config, options) => {
 
                     // console.log('transpiledESMSource', transpiledESMSource);
 
-                    let cjsFileName = outputShardPath.replace(/^dist\/esm/, 'dist/cjs');
-                    let cjsMapFileName = cjsFileName + '.map';
+                    const cjsFileName = outputShardPath.replace(/^dist\/esm/, 'dist/cjs');
+                    const cjsMapFileName = cjsFileName + '.map';
 
-                    let targetDirectory = dirname(cjsFileName);
+                    const targetDirectory = dirname(cjsFileName);
                     if (!existsSync(targetDirectory)) {
                       mkdirSync(targetDirectory, { recursive: true });
                     }
@@ -294,9 +294,9 @@ const plugin: TranspilePlugin = (config, options) => {
                 } else if (moduleType === 'stylesheet') {
                   // stylesheet 는 esm to cjs 디렉토리로 복사만 수행
                   // console.log(chalk.blue(`Copy stylesheet shard ${outputShardPath}`));
-                  let from = outputShardPath;
-                  let to = from.replace(/^dist\/esm/, 'dist/cjs/');
-                  let targetDirectory = dirname(to);
+                  const from = outputShardPath;
+                  const to = from.replace(/^dist\/esm/, 'dist/cjs/');
+                  const targetDirectory = dirname(to);
                   if (!existsSync(targetDirectory)) {
                     mkdirSync(targetDirectory, { recursive: true });
                   }
@@ -304,14 +304,14 @@ const plugin: TranspilePlugin = (config, options) => {
 
                   // map 파일도 복사
                   if (process.env.NODE_ENV === 'development') {
-                    let from = outputShardPath + '.map';
-                    let to = from.replace(/^dist\/esm/, 'dist/cjs/');
+                    const from = outputShardPath + '.map';
+                    const to = from.replace(/^dist\/esm/, 'dist/cjs/');
 
                     copyFileSync(from, to);
                   }
                 } else if (moduleType === 'unknown') {
-                  let from = outputShardPath;
-                  let to = from.replace(/^dist\/esm/, 'dist/cjs/');
+                  const from = outputShardPath;
+                  const to = from.replace(/^dist\/esm/, 'dist/cjs/');
                   copyFileSync(from, to);
                 }
               }
@@ -320,8 +320,8 @@ const plugin: TranspilePlugin = (config, options) => {
                * manifest 에 항목 추가
                */
               if (entryPoint) {
-                let entryFilepathTokens = entryPoint.split('/');
-                let entryFilename = entryFilepathTokens.pop();
+                const entryFilepathTokens = entryPoint.split('/');
+                const entryFilename = entryFilepathTokens.pop();
 
                 serviceServerManifest.entries[entryPoint] = {
                   entryPoint: entryPoint,
@@ -356,10 +356,10 @@ const plugin: TranspilePlugin = (config, options) => {
           /**
            * 엔트리 분석
            */
-          let entryKeys = Object.keys(serviceServerManifest.entries);
+          const entryKeys = Object.keys(serviceServerManifest.entries);
           entryKeys.forEach(key => {
-            let entry = serviceServerManifest.entries[key];
-            let entryPoint = entry.entryPoint;
+            const entry = serviceServerManifest.entries[key];
+            const entryPoint = entry.entryPoint;
 
             if (entryPoint) {
               if (CheckBrowserEntrySource(entry)) {
@@ -377,20 +377,20 @@ const plugin: TranspilePlugin = (config, options) => {
           /**
            * 라우트 노드맵 생성
            */
-          let routeNodes = BuildRouteNodeMap(serviceServerManifest.entries);
+          const routeNodes = BuildRouteNodeMap(serviceServerManifest.entries);
           serviceServerManifest.routeNodes = routeNodes;
 
           // 브라우저 전용 파일 디렉토리 생성
-          let browserDirectory = join(options.distDirectoryPath, 'browser');
+          const browserDirectory = join(options.distDirectoryPath, 'browser');
           if (!existsSync(browserDirectory)) {
             mkdirSync(browserDirectory, { recursive: true });
           }
 
           // 추가 스크립트 설치
-          let browserModuleLoaderScript = GetBrowserModuleLoaderScript();
+          const browserModuleLoaderScript = GetBrowserModuleLoaderScript();
 
-          let browserModuleLoaderFilepath = join(browserDirectory, 'loader.js');
-          let browserModuleLoaderMapFilepath = join(browserDirectory, 'loader.js.map');
+          const browserModuleLoaderFilepath = join(browserDirectory, 'loader.js');
+          const browserModuleLoaderMapFilepath = join(browserDirectory, 'loader.js.map');
 
           if (!browserModuleLoaderScript.code) {
             return;

@@ -16,7 +16,7 @@ export function TranspileForBrowser(
 
   if (cjsTranspiler === 'swc') {
     console.log(chalk.bgBlue('BUILD with SWC'));
-    let result = swc.transformFileSync(outputShardPath, {
+    const result = swc.transformFileSync(outputShardPath, {
       // Some options cannot be specified in .swcrc
       filename: normalizedRelativePath,
       sourceMaps: process.env.NODE_ENV === 'production' ? false : true,
@@ -50,7 +50,7 @@ export function TranspileForBrowser(
     // cjsTranspiler === "babel"
     console.log(chalk.bgBlue('BUILD with Babel'));
 
-    let compiled = transformFileSync(outputShardPath, {
+    const compiled = transformFileSync(outputShardPath, {
       plugins: [
         pluginTransformModulesAmd,
         [

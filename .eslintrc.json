@@ -11,6 +11,7 @@
    "parserOptions": {
      "sourceType": "module"
    },
+
    "overrides": [
      {
        "files": ["**/*.tsx"],

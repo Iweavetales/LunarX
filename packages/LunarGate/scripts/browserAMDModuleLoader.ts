@@ -12,8 +12,8 @@ type ModuleContent = {
 
 
 (function () {
-  var moduleMap: { [absoluteModulePath: string]: ModuleContent } = {};
-  var loadedModule: { [absoluteModulePath: string]: any} ={}
+  const moduleMap: { [absoluteModulePath: string]: ModuleContent } = {};
+  const loadedModule: { [absoluteModulePath: string]: any} ={}
 
 
 
@@ -22,9 +22,9 @@ type ModuleContent = {
 
     let trackingFilename = '';
     let dots = ''
-    let targetPathLength = target.length;
+    const targetPathLength = target.length;
     for (let i = 0; i < targetPathLength; i++) {
-      let c = target.charAt(i);
+      const c = target.charAt(i);
 
       trackingFilename += c;
 
@@ -50,7 +50,7 @@ type ModuleContent = {
             editing = editing.slice(0, editingPathLength - 1)
           }
         } else if (dots.length === 2) {
-          let slashBackCount: number = 0;
+          let slashBackCount = 0;
           let editingPathLength: number;
           let lastChar: string;
           while (1) {
@@ -105,7 +105,7 @@ type ModuleContent = {
    * @param arr
    */
   function HasArrayUndefinedElement(arr: any[]): boolean {
-    let len = arr.length
+    const len = arr.length
     for (let i = 0; i < len; i++) {
       if (arr[i] === undefined) {
         return true
@@ -117,8 +117,8 @@ type ModuleContent = {
 
   function moduleCall(moduleContent: ModuleContent, _callback: () => any) {
     console.log('shard called', moduleContent.name, moduleContent)
-    let deps = moduleContent.deps;
-    let moduleName = moduleContent.name
+    const deps = moduleContent.deps;
+    const moduleName = moduleContent.name
 
     if( loadedModule[moduleContent.name] ){
 
@@ -126,14 +126,14 @@ type ModuleContent = {
       return _callback(loadedModule[moduleContent.name])
     }
 
-    let targetModuleContents = deps.map((depModuleName) => {
+    const targetModuleContents = deps.map((depModuleName) => {
       if (depModuleName === "exports") {
         return depModuleName
       } else if (depModuleName === "require") {
         return depModuleName
       } else {
-        let absoluteModulePath = resolvePath(moduleName, depModuleName)
-        let referencingModuleContent = moduleMap[absoluteModulePath]
+        const absoluteModulePath = resolvePath(moduleName, depModuleName)
+        const referencingModuleContent = moduleMap[absoluteModulePath]
 
         if( referencingModuleContent ){
           return referencingModuleContent
@@ -142,10 +142,10 @@ type ModuleContent = {
         throw new Error(`Module[${moduleName}] not found.`)
       }
     })
-    let loadedModules = new Array(deps.length);
+    const loadedModules = new Array(deps.length);
 
 
-    let exportObject = {}
+    const exportObject = {}
     let hasSubModuleCall = false
     targetModuleContents.forEach((content, i) => {
       if (content === "exports") {
@@ -234,17 +234,17 @@ type ModuleContent = {
    */
   function _require(deps: string[], _callback, _from:string | null = null) {
 
-    let loadedModules = new Array(deps.length);
+    const loadedModules = new Array(deps.length);
 
-    let targetModuleContents = deps.map((moduleName) => {
+    const targetModuleContents = deps.map((moduleName) => {
 
       /**
        * _from 이 입력되면 모듈 내에서 모듈을 호출 했으므로
        * _from 기준으로 모듈의 절대경로를 보정 한다.
        */
       if( _from !== null ){
-        let absoluteModulePath = resolvePath(_from, moduleName)
-        let referencingModuleContent = moduleMap[absoluteModulePath]
+        const absoluteModulePath = resolvePath(_from, moduleName)
+        const referencingModuleContent = moduleMap[absoluteModulePath]
 
         if( referencingModuleContent ){
           return referencingModuleContent

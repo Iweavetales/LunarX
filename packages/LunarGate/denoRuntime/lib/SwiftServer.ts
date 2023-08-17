@@ -12,7 +12,7 @@ import {httpServe, join} from "./deps.ts";
 export class SwiftServer {
 	config: RuntimeConfig;
 	cwd: string;
-	running: boolean = false
+	running = false
 	router: Node;
 	webApp: WebAppStructure;
 
@@ -81,7 +81,7 @@ export class SwiftServer {
 			return;
 		}
 
-		let envPortString = Deno.env.get('PORT');
+		const envPortString = Deno.env.get('PORT');
 		let envPort: number | null = null
 		if( envPortString ) {
 			try {

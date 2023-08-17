@@ -1,4 +1,4 @@
-'use strict';
+
 
 import { ClearDirectory } from './clearDirectory';
 import { BuildOptions, context as esbuildContext, build as esbuildBuild } from 'esbuild';
@@ -19,9 +19,9 @@ async function CreateBuildOptions(builtCallback: BuiltCallback): Promise<BuildOp
   const cwd = process.cwd();
 
   let config: LunarConfig = defaultConfig;
-  let userConfigPath = join(cwd, 'lunar.conf.js');
+  const userConfigPath = join(cwd, 'lunar.conf.js');
   try {
-    let userConfig = await import(userConfigPath);
+    const userConfig = await import(userConfigPath);
     config = merge(config, userConfig.default);
     console.log('found user config', userConfig.default);
   } catch (e) {
@@ -56,17 +56,17 @@ async function CreateBuildOptions(builtCallback: BuiltCallback): Promise<BuildOp
   /**
    * Make route file list
    */
-  let dirtyRouteFiles: any = []; // 필터링 되지않은(dirty) 모든 라우트 디렉토리 내의 파일들
+  const dirtyRouteFiles: any = []; // 필터링 되지않은(dirty) 모든 라우트 디렉토리 내의 파일들
   getAllFiles(routeDirectory, dirtyRouteFiles);
   /**
    * 라우트 디렉토리의 .tsx 확장자를 가진 파일만 필터링 한다
    */
-  let filteredRouteFiles = dirtyRouteFiles
+  const filteredRouteFiles = dirtyRouteFiles
     .filter((filename: string) => /\.tsx/.test(filename))
     .map((filename: string) => relative(cwd, filename));
 
 
-  let libSources = collectDistLibSources(libDirectory);
+  const libSources = collectDistLibSources(libDirectory);
 
   /**
    * lightningcss 모듈의
@@ -77,7 +77,7 @@ async function CreateBuildOptions(builtCallback: BuiltCallback): Promise<BuildOp
    */
   // process.env.CSS_TRANSFORMER_WASM = '';
   console.log('process.env', process.env);
-  let esbuildOptions: BuildOptions = {
+  const esbuildOptions: BuildOptions = {
     entryPoints: [
       ...libSources,
       ...filteredRouteFiles,
@@ -137,7 +137,7 @@ async function CreateBuildOptions(builtCallback: BuiltCallback): Promise<BuildOp
         absoluteCJSMetafilePath: absoluteCJSMetafilePath,
         absoluteESMMetafilePath: absoluteESMMetafilePath,
         builtNoticeCallback: () => {
-          let runtimeOptions = extractRuntimeOptionsFromConfig(config)
+          const runtimeOptions = extractRuntimeOptionsFromConfig(config)
           // write runtime options json file to outDir
           writeFileSync(join(config.build.outDir, "runtime.json"), JSON.stringify(runtimeOptions))
 
