@@ -1,4 +1,4 @@
-import { Config } from './Config.ts';
+import { RuntimeConfig } from './Config.ts';
 import { WebAppStructure } from './WebAppStructure.ts';
 import { BuildRoutes, Node } from './SwiftServerRouting.ts';
 
@@ -10,13 +10,13 @@ import {httpServe, join} from "./deps.ts";
  * A Server class provides pages for LunarJS
  */
 export class SwiftServer {
-	config: Config;
+	config: RuntimeConfig;
 	cwd: string;
 	running: boolean = false
 	router: Node;
 	webApp: WebAppStructure;
 
-	constructor(config: Config, cwd: string, webapp: WebAppStructure) {
+	constructor(config: RuntimeConfig, cwd: string, webapp: WebAppStructure) {
 		this.config = config;
 		this.cwd = cwd;
 		this.webApp = webapp;

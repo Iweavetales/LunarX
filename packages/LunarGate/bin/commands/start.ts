@@ -11,6 +11,7 @@ export default async function Start(options: Record<any, any>) {
         if( options.runtime == "deno" ){
             let server = spawn('deno', [
                 'run',
+
                 'node_modules/lunargate-test-helloworld3/dist/denoRuntime/index.js'
             ]);
 

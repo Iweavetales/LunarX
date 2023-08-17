@@ -1,4 +1,4 @@
-import { Config } from './Config.ts';
+import { RuntimeConfig} from './Config.ts';
 import { Node } from 'https://deno.land/x/router@v2.0.0/mod.js';
 import { serve } from 'https://deno.land/std@0.154.0/http/server.ts';
 import { GetUrlPath } from './urlUtils.ts';
@@ -7,7 +7,7 @@ import { SwiftServer } from './SwiftServer.ts';
 import { LoadManifest } from './Manifest.ts';
 import { join } from 'https://deno.land/std@0.150.0/path/mod.ts';
 
-export function RunSystemServer(config: Config, swiftServer: SwiftServer) {
+export function RunSystemServer(config: RuntimeConfig, swiftServer: SwiftServer) {
 	const root = new Node();
 
 	/**
@@ -31,28 +31,28 @@ export function RunSystemServer(config: Config, swiftServer: SwiftServer) {
 		console.log('[System] App-builder meta updated.');
 		return new Response('ok');
 	});
-	/**
-	 * Private Server 시작
-	 * 시스템관리용 API 제공
-	 */
-	serve(
-		async (req) => {
-			// 전체 URL 에서 패스만 추출
-			const urlPath = GetUrlPath(req.url);
-			console.log("[DEV SYSTEM SERVER] Received some request ", req.url)
-
-			// 추출된 패스로 라우터 매칭
-			const [matchedHandler, params] = root.find(urlPath);
-			if (matchedHandler) {
-				return await matchedHandler(req, params);
-			}
-
-			return new Response('', {
-				status: 404,
-			});
-		},
-		{
-			port: parseInt(config.privateServe.port),
-		},
-	);
+	// /**
+	//  * Private Server 시작
+	//  * 시스템관리용 API 제공
+	//  */
+	// serve(
+	// 	async (req) => {
+	// 		// 전체 URL 에서 패스만 추출
+	// 		const urlPath = GetUrlPath(req.url);
+	// 		console.log("[DEV SYSTEM SERVER] Received some request ", req.url)
+	//
+	// 		// 추출된 패스로 라우터 매칭
+	// 		const [matchedHandler, params] = root.find(urlPath);
+	// 		if (matchedHandler) {
+	// 			return await matchedHandler(req, params);
+	// 		}
+	//
+	// 		return new Response('', {
+	// 			status: 404,
+	// 		});
+	// 	},
+	// 	{
+	// 		port: parseInt(config.privateServe.port),
+	// 	},
+	// );
 }

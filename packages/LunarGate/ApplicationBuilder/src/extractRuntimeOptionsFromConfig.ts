@@ -5,6 +5,7 @@ export function extractRuntimeOptionsFromConfig(config: LunarConfig): RuntimeOpt
   //
 
     return {
+        js: config.js,
         type: config.runtime.type
     }
 }

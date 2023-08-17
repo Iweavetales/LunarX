@@ -1,7 +1,7 @@
 import { BuiltShardInfo } from '../../lib/Manifest';
-
+ 
 export function CheckBrowserEntrySource(shardInfo: BuiltShardInfo): boolean {
-  let entryPoint = shardInfo.entryPoint;
+  const entryPoint = shardInfo.entryPoint;
   /**
    * entry.browser.tsx will be used in reserved file name for Lunar framework
    */
