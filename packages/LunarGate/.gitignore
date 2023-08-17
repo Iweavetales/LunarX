@@ -1,5 +1,7 @@
 dist/
 **/*.js
 
+
+!*.js
 # for taskr
 !taskfile.js

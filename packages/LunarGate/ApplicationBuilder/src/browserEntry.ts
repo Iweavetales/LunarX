@@ -1,5 +1,5 @@
 import { BuiltShardInfo } from '../../lib/Manifest';
- 
+
 export function CheckBrowserEntrySource(shardInfo: BuiltShardInfo): boolean {
   const entryPoint = shardInfo.entryPoint;
   /**
