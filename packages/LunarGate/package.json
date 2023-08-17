@@ -1,11 +1,11 @@
 {
   "name": "lunargate-test-helloworld3",
-  "version": "0.1.56",
+  "version": "0.1.70",
   "description": "The LunarGate that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
   "main": "index.js",
   "scripts": {
     "clean-lunar-dist": "npm run clean",
-    "clean":  "rm -rf ./dist/",
+    "clean": "rm -rf ./dist/",
     "compile": "tsc -p tsconfig.json",
     "build": "npm run release",
     "prepublishOnly": "npm run clean && cd ../../ && turbo run build",
@@ -24,7 +24,7 @@
     "build:deno-runtime": "mkdir -p ./dist/denoRuntime/ && deno bundle ./denoRuntime/index.ts ./dist/denoRuntime/index.js"
   },
   "author": "Iweavetales",
-  "license": "ISC",
+  "license": "MIT",
   "bin": {
     "lunar": "./dist/bin/lunar"
   },
@@ -62,6 +62,8 @@
     "@swc/plugin-styled-components": "^1.5.47",
     "@taskr/typescript": "^1.1.0",
     "@types/babel__core": "^7.1.19",
+    "@types/commander": "^2.12.2",
+    "@types/lodash": "^4.14.197",
     "@types/node": "^18.7.16",
     "@types/node-fetch": "^2.6.2",
     "@types/react": "^18.0.15",
@@ -74,6 +76,7 @@
     "autoprefixer": "^10.4.13",
     "babel-plugin-styled-components": "^2.0.7",
     "chalk": "^5.0.1",
+    "commander": "^11.0.0",
     "css-tree": "^2.2.1",
     "esbuild": "^0.19.1",
     "eslint": "^8.22.0",

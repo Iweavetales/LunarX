@@ -1,4 +1,4 @@
-import { BuiltShardInfo, RouteNode, RouteNodeMap } from '~/lib/Manifest';
+import { BuiltShardInfo, RouteNode, RouteNodeMap } from '../../lib/Manifest';
 
 export function BuildRouteNodeMap(entries: { [entryPath: string]: BuiltShardInfo }): RouteNodeMap {
   let routeNodeMap: RouteNodeMap = {};

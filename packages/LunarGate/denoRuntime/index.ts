@@ -4,8 +4,16 @@ import { RunSystemServer } from './lib/SystemServer.ts';
 import { SwiftServer } from './lib/SwiftServer.ts';
 import { LoadManifest } from './lib/Manifest.ts';
 import { join } from 'https://deno.land/std@0.150.0/path/mod.ts';
+import { commandParser } from "./lib/deps";
 
 async function main() {
+	var flags = commandParser(Deno.args, {
+		distDir: "./dist"
+	})
+	var distDir  = flags.distDir
+
+
+
 	const config = LoadConfig('./swift.yaml');
 	const manifest = LoadManifest(
 		join(config.js.distDirectory, 'manifest.json'),

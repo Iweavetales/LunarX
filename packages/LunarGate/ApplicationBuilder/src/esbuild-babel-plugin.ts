@@ -10,7 +10,7 @@ import { Metafile, Plugin, PluginBuild } from 'esbuild';
 
 import { DetermineServerSideShard } from './serverSideScript';
 import { BuildRouteNodeMap } from './routing';
-import { BuiltShardInfo, ShardType, LunarJSManifest } from '../../../lib/Manifest';
+import { BuiltShardInfo, ShardType, LunarJSManifest } from '../../lib/Manifest';
 import { GetBrowserModuleLoaderScript } from './scriptTranspile';
 import { TranspileForBrowser } from './transpileESMForBrowser';
 import { DiffMetaOutput, DiffStatus } from './metaFile';
@@ -19,7 +19,7 @@ import { DiffMetaOutput, DiffStatus } from './metaFile';
 // import styled from 'babel-plugin-styled-components';
 
 import { CheckBrowserEntrySource } from './browserEntry';
-import { LunarConfig } from '../../../lib/lunarConfig';
+import { LunarConfig } from '../../lib/lunarConfig';
 
 type PluginOptions = {
   esmDirectory: string;

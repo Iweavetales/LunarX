@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import devCommand from '../utils/commands/dev'
-import buildCommand from '../utils/commands/build'
-import startCommand from '../utils/commands/start'
+import devCommand from './commands/dev'
+import buildCommand from './commands/build'
+import startCommand from './commands/start'
+import {Command} from "commander";
 
 let lunarArgs = process.argv.slice(2)
 
@@ -27,21 +28,33 @@ function MatchingSpecificCommand(string: string) : LunarCommands | null {
 let foundSomeCommand = lunarArgs.find((arg) => /^[a-zA-Z]+$/.test(arg));
 
 (async function (){
-    if( foundSomeCommand !== undefined ){
-        let lunarCmd = MatchingSpecificCommand(foundSomeCommand)
-        if ( lunarCmd != null ){
-            switch (lunarCmd) {
-                case LunarCommands.Dev:
-                    await devCommand(lunarArgs)
-                    break
-                case LunarCommands.Build:
-                    await buildCommand(lunarArgs)
-                    break
-                case LunarCommands.Start:
-                    await startCommand(lunarArgs)
-                    break
-            }
-        }
-    }
+    return new Promise((resolve, reject) => {
+        const lunar = new Command()
+        lunar.command("start")
+            .description("Start built application")
+            .option("-r, --runtime <string>", "Select runtime for run application")
+            .option("-b, --builtDir <string>", "locate built directory")
+            .option("-h, --help", "Show this")
+            .action(async (options) => {
+                await startCommand(options)
+                resolve(true)
+            })
+
+        lunar.command("dev")
+            .description("Development lunar")
+            .action(async (options) => {
+                await devCommand(options)
+                resolve(true)
+            })
+
+        lunar.command("build")
+            .description("build lunar application")
+            .action(async (options) => {
+                await buildCommand(options)
+                resolve(true)
+            })
+
+        lunar.parse(process.argv)
+    })
 })()
 

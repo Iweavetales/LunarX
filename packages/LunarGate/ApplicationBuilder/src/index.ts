@@ -1,17 +1,21 @@
 'use strict';
 
-import { ClearDirectory } from './utils/clearDirectory';
-import { BuildContext, context as esbuildContext } from 'esbuild';
+import { ClearDirectory } from './clearDirectory';
+import { BuildOptions, context as esbuildContext, build as esbuildBuild } from 'esbuild';
 import { join, relative, resolve } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import {existsSync, mkdirSync, writeFileSync} from 'fs';
 
-import { getAllFiles } from './utils/files';
+import { getAllFiles } from './files';
 import { defaultConfig, LunarConfig } from '../../lib/lunarConfig';
-import esbuildBabelPlugin from './utils/esbuild-babel-plugin';
+import esbuildBabelPlugin from './esbuild-babel-plugin';
 import merge from 'lodash/merge';
-import { collectDistLibSources } from './utils/collectDistLibSources';
+import { collectDistLibSources } from './collectDistLibSources';
+import {extractRuntimeOptionsFromConfig} from "./extractRuntimeOptionsFromConfig";
+import {RuntimeOptions} from "../../lib/runtime";
 
-async function BuildReusableBuilder(builtCallback: () => void): Promise<BuildContext> {
+type BuiltCallback = (runtimeOptions: RuntimeOptions) => void
+
+async function CreateBuildOptions(builtCallback: BuiltCallback): Promise<BuildOptions> {
   const cwd = process.cwd();
 
   let config: LunarConfig = defaultConfig;
@@ -22,12 +26,11 @@ async function BuildReusableBuilder(builtCallback: () => void): Promise<BuildCon
     console.log('found user config', userConfig.default);
   } catch (e) {
     // Nothing to do
-    console.log('Not found user config', userConfigPath, e);
+    console.log('Not exists user config');
   }
 
   ClearDirectory(config.js.distDirectory);
 
-  console.log('Lunar builder cwd', cwd, __dirname);
   const appDirectory = join(cwd, './app');
   const absoluteESMDistDirectory = join(cwd, config.js.esmDirectory);
   const absoluteCJSDistDirectory = join(cwd, config.js.cjsDirectory);
@@ -37,7 +40,7 @@ async function BuildReusableBuilder(builtCallback: () => void): Promise<BuildCon
 
   // Lunar Library directory
   const libDirectory = resolve(__dirname, '../../dist/lib'); // swift-nest-platform 라이브러리 디렉토리
-  console.log('__dirname', __dirname, resolve(__dirname, '../../', './lib'));
+
   if (!existsSync(absoluteESMDistDirectory)) {
     mkdirSync(absoluteESMDistDirectory, {
       recursive: true,
@@ -62,14 +65,8 @@ async function BuildReusableBuilder(builtCallback: () => void): Promise<BuildCon
     .filter((filename: string) => /\.tsx/.test(filename))
     .map((filename: string) => relative(cwd, filename));
 
-  console.log('routeFiles:', filteredRouteFiles);
 
-  // let dirtyLibFiles: string[] = [];
   let libSources = collectDistLibSources(libDirectory);
-
-  // libFiles
-  // let libFiles = dirtyLibFiles.filter(filename => /\.tsx/.test(filename)).map(filename => relative(cwd, filename));
-  console.log('lib files:', libSources);
 
   /**
    * lightningcss 모듈의
@@ -80,8 +77,7 @@ async function BuildReusableBuilder(builtCallback: () => void): Promise<BuildCon
    */
   // process.env.CSS_TRANSFORMER_WASM = '';
   console.log('process.env', process.env);
-
-  return await esbuildContext({
+  let esbuildOptions: BuildOptions = {
     entryPoints: [
       ...libSources,
       ...filteredRouteFiles,
@@ -89,7 +85,7 @@ async function BuildReusableBuilder(builtCallback: () => void): Promise<BuildCon
       // 'react-dom',
       // 'react-dom/server',
       // 'react-router-dom/server',
-      ...config.build.vendors,
+      ...(config.build.vendors ?? []),
     ],
 
     /**
@@ -133,7 +129,7 @@ async function BuildReusableBuilder(builtCallback: () => void): Promise<BuildCon
       ...config.build.loaders,
     },
     plugins: [
-      ...config.build.plugins,
+      ...(config.build.plugins ?? []),
       esbuildBabelPlugin(config, {
         distDirectoryPath: config.js.distDirectory,
         cjsDirectory: config.js.cjsDirectory,
@@ -141,13 +137,25 @@ async function BuildReusableBuilder(builtCallback: () => void): Promise<BuildCon
         absoluteCJSMetafilePath: absoluteCJSMetafilePath,
         absoluteESMMetafilePath: absoluteESMMetafilePath,
         builtNoticeCallback: () => {
-          builtCallback && builtCallback();
+          let runtimeOptions = extractRuntimeOptionsFromConfig(config)
+          // write runtime options json file to outDir
+          writeFileSync(join(config.build.outDir, "runtime.json"), JSON.stringify(runtimeOptions))
+
+          builtCallback && builtCallback(runtimeOptions);
         },
       }),
     ],
-  });
+  };
+  return esbuildOptions;
 }
 
+export async function createBuildContext(builtCallback: BuiltCallback) {
+  return await esbuildContext(await CreateBuildOptions(builtCallback));
+}
+
+export async function build(builtCallback: BuiltCallback) {
+  return await esbuildBuild(await CreateBuildOptions(builtCallback));
+}
 // (async function main() {
 //   console.log('ENV =', process.env.NODE_ENV);
 //
@@ -156,4 +164,3 @@ async function BuildReusableBuilder(builtCallback: () => void): Promise<BuildCon
 //   console.log('watching');
 //   await buildContext.watch();
 // })();
-export default BuildReusableBuilder;

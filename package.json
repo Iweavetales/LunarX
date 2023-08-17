@@ -1,6 +1,7 @@
 {
   "name": "LunarGateProject",
   "workspaces": ["packages/*"],
+  "license": "MIT",
   "scripts": {
     "build-all": "npm run build:builder",
     "build": "turbo run build",

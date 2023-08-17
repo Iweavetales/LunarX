@@ -1,3 +1,5 @@
+import {join} from "path";
+import {SupportingRuntime} from "./runtime";
 export type LunarConfig = {
     js: {
         distDirectory: string;
@@ -9,11 +11,16 @@ export type LunarConfig = {
     };
 
     build: {
+        outDir: 'dist' | string;
         cjsTranspiler: 'swc' | 'babel';
         vendors?: string[];
         plugins?: any[];
         loaders?: Record<any, any>;
     };
+
+    runtime: {
+        type: SupportingRuntime
+    }
 }
 
 export const defaultConfig: LunarConfig = {
@@ -27,9 +34,14 @@ export const defaultConfig: LunarConfig = {
     },
 
     build: {
+        outDir: 'dist',
         cjsTranspiler: "swc",
         vendors: [],
         plugins: [],
         loaders: {}
+    },
+
+    runtime: {
+        type: "node"
     }
 }
