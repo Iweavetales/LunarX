@@ -1,24 +1,29 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext } from "react"
 
-type ScriptDefine = { src?: string; async?: boolean; defer?: boolean; element?: React.ReactNode };
-type LinkDefine = { href?: string; rel?: string; element?: React.ReactNode };
+type ScriptDefine = {
+  src?: string
+  async?: boolean
+  defer?: boolean
+  element?: React.ReactNode
+}
+type LinkDefine = { href?: string; rel?: string; element?: React.ReactNode }
 
 const DocumentInjectionContext = createContext<{
-  nonce: string;
-  scripts: ScriptDefine[];
-  links: LinkDefine[];
+  nonce: string
+  scripts: ScriptDefine[]
+  links: LinkDefine[]
   // app: React.ReactElement;
-  bootstrapScript: string;
-  bootstrapScriptId: string;
-} | null>(null);
+  bootstrapScript: string
+  bootstrapScriptId: string
+} | null>(null)
 
 export function DocumentWrapper(props: {
-  children?: React.ReactNode;
-  nonce: string;
-  scripts: ScriptDefine[];
-  links: LinkDefine[];
-  bootstrapScript: string;
-  bootstrapScriptId: string;
+  children?: React.ReactNode
+  nonce: string
+  scripts: ScriptDefine[]
+  links: LinkDefine[]
+  bootstrapScript: string
+  bootstrapScriptId: string
 }) {
   return (
     <DocumentInjectionContext.Provider
@@ -33,17 +38,17 @@ export function DocumentWrapper(props: {
     >
       {props.children}
     </DocumentInjectionContext.Provider>
-  );
+  )
 }
 
 export function DocumentScripts() {
-  const ctx = useContext(DocumentInjectionContext);
+  const ctx = useContext(DocumentInjectionContext)
   if (ctx) {
     return (
       <>
         {ctx.scripts.map((script, index) => {
           if (script.element) {
-            return script.element;
+            return script.element
           } else {
             return (
               <script
@@ -53,33 +58,40 @@ export function DocumentScripts() {
                 nonce={ctx.nonce}
                 key={script.src}
               ></script>
-            );
+            )
           }
         })}
       </>
-    );
+    )
   }
 
-  return null;
+  return null
 }
 
 export function DocumentLinks() {
-  const ctx = useContext(DocumentInjectionContext);
+  const ctx = useContext(DocumentInjectionContext)
   if (ctx) {
     return (
       <>
         {ctx.links.map((link, index) => {
           if (link.element) {
-            return link.element;
+            return link.element
           } else {
-            return <link href={link.href} rel={link.rel} nonce={ctx.nonce} key={link.href}></link>;
+            return (
+              <link
+                href={link.href}
+                rel={link.rel}
+                nonce={ctx.nonce}
+                key={link.href}
+              ></link>
+            )
           }
         })}
       </>
-    );
+    )
   }
 
-  return null;
+  return null
 }
 //
 // export function App() {
@@ -91,7 +103,7 @@ export function DocumentLinks() {
 // }
 
 export function Bootstrap() {
-  const ctx = useContext(DocumentInjectionContext);
+  const ctx = useContext(DocumentInjectionContext)
   if (ctx) {
     return (
       <script
@@ -104,7 +116,7 @@ export function Bootstrap() {
         nonce={ctx.nonce}
         id={ctx.bootstrapScriptId}
       />
-    );
+    )
   }
-  return null;
+  return null
 }

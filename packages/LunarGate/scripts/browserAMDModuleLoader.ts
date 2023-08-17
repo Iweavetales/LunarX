@@ -5,28 +5,24 @@
  */
 
 type ModuleContent = {
-  name: string;
-  deps: string[];
+  name: string
+  deps: string[]
   moduleFactory: (deps: string, require: any) => any
 }
-
-
-(function () {
-  const moduleMap: { [absoluteModulePath: string]: ModuleContent } = {};
-  const loadedModule: { [absoluteModulePath: string]: any} ={}
-
-
+;(function () {
+  const moduleMap: { [absoluteModulePath: string]: ModuleContent } = {}
+  const loadedModule: { [absoluteModulePath: string]: any } = {}
 
   function resolvePath(base: string, target: string) {
-    let editing = base;
+    let editing = base
 
-    let trackingFilename = '';
-    let dots = ''
-    const targetPathLength = target.length;
+    let trackingFilename = ""
+    let dots = ""
+    const targetPathLength = target.length
     for (let i = 0; i < targetPathLength; i++) {
-      const c = target.charAt(i);
+      const c = target.charAt(i)
 
-      trackingFilename += c;
+      trackingFilename += c
 
       if (c === ".") {
         if (dots.length > 0) {
@@ -36,34 +32,34 @@ type ModuleContent = {
         }
       } else if (c === "/") {
         if (dots.length === 1) {
-          let editingPathLength: number;
-          let lastChar: string;
+          let editingPathLength: number
+          let lastChar: string
 
           while (1) {
-            editingPathLength = editing.length;
+            editingPathLength = editing.length
             lastChar = editing.charAt(editingPathLength - 1)
             // 편집중인 경로 문자열이 비었거나 제일 마지막 문자가 디렉토리("/") 라면 현재 위치("./")로 수정하는 작업을 끝낸다.
             if (lastChar === "" || lastChar === "/") {
-              break;
+              break
             }
 
             editing = editing.slice(0, editingPathLength - 1)
           }
         } else if (dots.length === 2) {
-          let slashBackCount = 0;
-          let editingPathLength: number;
-          let lastChar: string;
+          let slashBackCount = 0
+          let editingPathLength: number
+          let lastChar: string
           while (1) {
-            editingPathLength = editing.length;
+            editingPathLength = editing.length
             lastChar = editing.charAt(editingPathLength - 1)
             // 편집중인 경로 문자열이 비었거나 제일 마지막 문자가 디렉토리("/") 라면 현재 위치("./")로 수정하는 작업을 끝낸다.
             if (lastChar === "" || lastChar === "/") {
-              slashBackCount++;
+              slashBackCount++
 
               // 슬래시("/") 뒤로 간 횟수가 1번이면 현재 디렉토리고
               // 뒤로 간 횟수가 2번 이면 상위 디렉토리로 이동이 완료되었으므로 수정작업 완료
               if (slashBackCount > 1) {
-                break;
+                break
               }
             }
 
@@ -73,31 +69,28 @@ type ModuleContent = {
           editing += trackingFilename
         }
 
-
         /**
          * "/" 가 등장 한다면 지금까지 트래킹된 파일문자열을 모두 리셋한다
          */
         dots = ""
-        trackingFilename = "";
+        trackingFilename = ""
       }
     }
 
-
-    editing += trackingFilename;
+    editing += trackingFilename
 
     return editing
   }
 
-
   function _define(moduleName: string, deps: string[], factory: any) {
-    console.log('shard define', moduleName)
+    console.log("shard define", moduleName)
     moduleMap[moduleName] = {
       name: moduleName,
       deps: deps,
       moduleFactory: factory,
-    };
+    }
 
-    console.log('module map', moduleMap)
+    console.log("module map", moduleMap)
   }
 
   /**
@@ -116,13 +109,12 @@ type ModuleContent = {
   }
 
   function moduleCall(moduleContent: ModuleContent, _callback: () => any) {
-    console.log('shard called', moduleContent.name, moduleContent)
-    const deps = moduleContent.deps;
+    console.log("shard called", moduleContent.name, moduleContent)
+    const deps = moduleContent.deps
     const moduleName = moduleContent.name
 
-    if( loadedModule[moduleContent.name] ){
-
-      console.log('cached module', moduleContent.name, moduleContent)
+    if (loadedModule[moduleContent.name]) {
+      console.log("cached module", moduleContent.name, moduleContent)
       return _callback(loadedModule[moduleContent.name])
     }
 
@@ -135,21 +127,20 @@ type ModuleContent = {
         const absoluteModulePath = resolvePath(moduleName, depModuleName)
         const referencingModuleContent = moduleMap[absoluteModulePath]
 
-        if( referencingModuleContent ){
+        if (referencingModuleContent) {
           return referencingModuleContent
         }
 
         throw new Error(`Module[${moduleName}] not found.`)
       }
     })
-    const loadedModules = new Array(deps.length);
-
+    const loadedModules = new Array(deps.length)
 
     const exportObject = {}
     let hasSubModuleCall = false
     targetModuleContents.forEach((content, i) => {
       if (content === "exports") {
-        loadedModules[i] = exportObject;
+        loadedModules[i] = exportObject
       } else if (content === "require") {
         /**
          * 모듈 내에서 사용된 require 는 모듈의 위치 기준으로 상대 경로로 호출 되기 때문에
@@ -157,13 +148,13 @@ type ModuleContent = {
          * @param moduleNames
          * @param callback
          */
-        loadedModules[i] = (moduleNames: string[], callback: () => any) => _require(moduleNames, callback, moduleContent.name)
+        loadedModules[i] = (moduleNames: string[], callback: () => any) =>
+          _require(moduleNames, callback, moduleContent.name)
       } else {
         hasSubModuleCall = true
 
         moduleCall(content, (module: any) => {
           loadedModules[i] = module
-
 
           /**
            * 모든 모듈이 로드 완료 되었는지 체크
@@ -183,7 +174,7 @@ type ModuleContent = {
     })
 
     // 서브 모듈 호출이 없다면 즉시 모듈 반환 콜백 호출
-    if( hasSubModuleCall === false ){
+    if (hasSubModuleCall === false) {
       moduleContent.moduleFactory(...loadedModules)
       // 모듈 캐시 저장
       loadedModule[moduleContent.name] = exportObject
@@ -232,25 +223,22 @@ type ModuleContent = {
    * @param _callback
    * @param _from 모듈 호출 위치
    */
-  function _require(deps: string[], _callback, _from:string | null = null) {
-
-    const loadedModules = new Array(deps.length);
+  function _require(deps: string[], _callback, _from: string | null = null) {
+    const loadedModules = new Array(deps.length)
 
     const targetModuleContents = deps.map((moduleName) => {
-
       /**
        * _from 이 입력되면 모듈 내에서 모듈을 호출 했으므로
        * _from 기준으로 모듈의 절대경로를 보정 한다.
        */
-      if( _from !== null ){
+      if (_from !== null) {
         const absoluteModulePath = resolvePath(_from, moduleName)
         const referencingModuleContent = moduleMap[absoluteModulePath]
 
-        if( referencingModuleContent ){
+        if (referencingModuleContent) {
           return referencingModuleContent
         }
       }
-
 
       if (moduleMap[moduleName]) {
         return moduleMap[moduleName]
@@ -258,7 +246,6 @@ type ModuleContent = {
 
       throw new Error(`${_from}: Module[${moduleName}] not found.`)
     })
-
 
     targetModuleContents.forEach((content, copyIndex) => {
       moduleCall(content, (module) => {
@@ -284,6 +271,6 @@ type ModuleContent = {
     // }
   }
 
-  window.define = _define;
-  window.require = _require;
-})();
+  window.define = _define
+  window.require = _require
+})()

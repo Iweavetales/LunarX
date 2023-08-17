@@ -1,11 +1,15 @@
 {
   "name": "LunarGateProject",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "license": "MIT",
   "scripts": {
     "build-all": "npm run build:builder",
     "build": "turbo run build",
-    "lint": "eslint --fix --ext .ts,.tsx ."
+    "lint": "eslint --fix --ext .ts,.tsx .",
+    "prettier-check": "prettier --check \"**/*.(js|ts|tsx|json)\"",
+    "prettier-fix": "prettier -w \"**/*.(js|ts|tsx|json)\""
   },
   "devDependencies": {
     "prettier": "^2.7.1",

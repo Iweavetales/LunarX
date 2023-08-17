@@ -1,10 +1,18 @@
-import React, { useContext, useState } from 'react';
-import { Route, Routes } from 'react-router';
-import { RouteServerFetchDataMap, UniversalRouteNode } from '../lib/DocumentTypes';
-import { ServerFetchesProvider } from './serverFetches';
-import {EmptyRoute, RouteTreeNode, ShardLoader, SwiftRouterContext, SwiftRouterProvider} from './router';
-import {   SwiftAppRootPipeContext } from '../lib/SwiftAppRootPipeContext';
-
+import React, { useContext, useState } from "react"
+import { Route, Routes } from "react-router"
+import {
+  RouteServerFetchDataMap,
+  UniversalRouteNode,
+} from "../lib/DocumentTypes"
+import { ServerFetchesProvider } from "./serverFetches"
+import {
+  EmptyRoute,
+  RouteTreeNode,
+  ShardLoader,
+  SwiftRouterContext,
+  SwiftRouterProvider,
+} from "./router"
+import { SwiftAppRootPipeContext } from "../lib/SwiftAppRootPipeContext"
 
 /**
  * @Deprecated ModuleContext
@@ -41,16 +49,16 @@ import {   SwiftAppRootPipeContext } from '../lib/SwiftAppRootPipeContext';
  * @param props
  */
 export default function SwiftAppContainer(props: {
-  ascendRouteNodeList: UniversalRouteNode[];
-  loader: ShardLoader;
-  routeShardPrepareTrigger?: (shardPaths: string[]) => Promise<void>;
-  dataMatchMap: RouteServerFetchDataMap;
-  children?: React.ReactNode;
+  ascendRouteNodeList: UniversalRouteNode[]
+  loader: ShardLoader
+  routeShardPrepareTrigger?: (shardPaths: string[]) => Promise<void>
+  dataMatchMap: RouteServerFetchDataMap
+  children?: React.ReactNode
   enterLocation: {
-    pathname: string;
-    search: string;
-    hash: string;
-  };
+    pathname: string
+    search: string
+    hash: string
+  }
   // store: any;
 }) {
   return (
@@ -70,7 +78,7 @@ export default function SwiftAppContainer(props: {
         {props.children}
       </SwiftRouterProvider>
     </SwiftAppRootPipeContext.Provider>
-  );
+  )
 }
 
 /**
@@ -79,22 +87,22 @@ export default function SwiftAppContainer(props: {
  * @constructor
  */
 export const SwiftRenderer = () => {
-  const pipeCtx = useContext(SwiftAppRootPipeContext);
-  const routeCtx = useContext(SwiftRouterContext);
+  const pipeCtx = useContext(SwiftAppRootPipeContext)
+  const routeCtx = useContext(SwiftRouterContext)
 
-  let loc = null;
+  let loc = null
   if (!routeCtx.currentLocation.auto) {
     /**
      * 💡 swift/Router 에 의해 컨트롤 되는 값 💡
      * 이 값이 변경 되면 화면이 해당 라우트 계층으로 랜더링 된다
      */
-    loc = routeCtx.currentLocation;
+    loc = routeCtx.currentLocation
   }
 
   return (
     <>
       <Routes location={loc ?? undefined}>
-        {routeCtx.routeTree.map(node => {
+        {routeCtx.routeTree.map((node) => {
           // return (
           //   <RouteWrapper
           //     key={node.matchPattern}
@@ -108,54 +116,54 @@ export const SwiftRenderer = () => {
             routeNode: node,
             loader: pipeCtx.loader,
             routeDataMap: routeCtx.routeDataMap,
-          });
+          })
 
-          return routeNode;
+          return routeNode
         })}
         <Route path="*" element={<EmptyRoute />} />
       </Routes>
 
       {routeCtx.browsing && (
-          <div
-              style={{
-                backgroundColor: '#fff',
-                boxShadow: '0 0 10px 0 rgba(0,0,0,.3)',
-                padding: 10,
-                position: 'fixed',
-                bottom: 10,
-                right: 10,
-                borderRadius: 10,
-                pointerEvents: 'none',
-              }}
-          >
-            loading
-          </div>
+        <div
+          style={{
+            backgroundColor: "#fff",
+            boxShadow: "0 0 10px 0 rgba(0,0,0,.3)",
+            padding: 10,
+            position: "fixed",
+            bottom: 10,
+            right: 10,
+            borderRadius: 10,
+            pointerEvents: "none",
+          }}
+        >
+          loading
+        </div>
       )}
     </>
-  );
-};
+  )
+}
 
 const ComponentShardWrapper = (props: { component: any | Promise<any> }) => {
-  const Component = props.component;
-  const [AsyncComponent, setAsyncComponent] = useState(null);
+  const Component = props.component
+  const [AsyncComponent, setAsyncComponent] = useState(null)
   /**
    * Promise 여부 분기
    */
 
   if (Component) {
-    return <Component />;
+    return <Component />
   }
 
-  return <div>Not loaded yet</div>;
-};
+  return <div>Not loaded yet</div>
+}
 
 const GenerateSwiftRouteNode = (options: {
-  routeNode: RouteTreeNode;
-  loader?: ShardLoader;
-  routeDataMap: RouteServerFetchDataMap;
+  routeNode: RouteTreeNode
+  loader?: ShardLoader
+  routeDataMap: RouteServerFetchDataMap
 }) => {
   // 이 함수(GenerateSwiftRouteNode) 자체는 React 컴포넌트가 아니고 React Component 를 생성하는 함수이다
-  const component = options.loader!(options.routeNode.shardPath);
+  const component = options.loader!(options.routeNode.shardPath)
   // const serverFetchesResult = options.routeDataMap[options.routeNode.matchPattern];
   // const serverFetchError = serverFetchesResult?.error;
 
@@ -172,16 +180,16 @@ const GenerateSwiftRouteNode = (options: {
       path={options.routeNode.matchPattern}
       // path={props.routeNode.matchPattern.replace(props.routeNode.upperRouteMatchPattern, '').replace(/^\/?/, '/')}
     >
-      {options.routeNode.children.map(routeNode =>
+      {options.routeNode.children.map((routeNode) =>
         GenerateSwiftRouteNode({
           routeNode: routeNode,
           loader: options.loader,
           routeDataMap: options.routeDataMap,
-        }),
+        })
       )}
     </Route>
-  );
-};
+  )
+}
 //
 // const RouteWrapper = (props: { routeNode: RouteTreeNode; pattern: string; loader: ShardLoader }) => {
 //   const routeCtx = useContext(SwiftRouterContext);

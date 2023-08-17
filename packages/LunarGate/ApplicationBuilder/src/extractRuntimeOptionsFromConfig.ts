@@ -1,11 +1,13 @@
-import { LunarConfig } from '../../lib/lunarConfig';
-import {RuntimeOptions} from "../../lib/runtime";
+import { LunarConfig } from "../../lib/lunarConfig"
+import { RuntimeOptions } from "../../lib/runtime"
 
-export function extractRuntimeOptionsFromConfig(config: LunarConfig): RuntimeOptions {
+export function extractRuntimeOptionsFromConfig(
+  config: LunarConfig
+): RuntimeOptions {
   //
 
-    return {
-        js: config.js,
-        type: config.runtime.type
-    }
+  return {
+    js: config.js,
+    type: config.runtime.type,
+  }
 }

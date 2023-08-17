@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs"
+import * as path from "path"
 
 /**
  * 재귀함수로 해당 디렉토리의 모든 파일경로를 추출한다
@@ -8,17 +8,17 @@ import * as path from 'path';
  * @returns {*[]}
  */
 export const getAllFiles = function (dirPath: string, arrayOfFiles: string[]) {
-  const files = fs.readdirSync(dirPath);
+  const files = fs.readdirSync(dirPath)
 
-  arrayOfFiles = arrayOfFiles || [];
+  arrayOfFiles = arrayOfFiles || []
 
   files.forEach(function (file) {
-    if (fs.statSync(dirPath + '/' + file).isDirectory()) {
-      arrayOfFiles = getAllFiles(dirPath + '/' + file, arrayOfFiles);
+    if (fs.statSync(dirPath + "/" + file).isDirectory()) {
+      arrayOfFiles = getAllFiles(dirPath + "/" + file, arrayOfFiles)
     } else {
-      arrayOfFiles.push(path.join(dirPath, '/', file));
+      arrayOfFiles.push(path.join(dirPath, "/", file))
     }
-  });
+  })
 
-  return arrayOfFiles;
-};
+  return arrayOfFiles
+}

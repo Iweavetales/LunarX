@@ -15,12 +15,9 @@
     "jsx": "preserve",
     "incremental": true,
     "baseUrl": "./app",
-    "typeRoots": ["./node_modules/@types"," ./app/types"],
-    "paths": {
-
-    }
+    "typeRoots": ["./node_modules/@types", " ./app/types"],
+    "paths": {}
   },
-  "include": [ "commonLib/Manifest.d.ts","**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules/"],
-
+  "include": ["commonLib/Manifest.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules/"]
 }

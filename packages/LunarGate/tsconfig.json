@@ -10,20 +10,19 @@
     "declaration": true,
     "outDir": "./dist",
 
-    "paths": {
-
-    }
+    "paths": {}
   },
 
-//  "include": [
-//    "ApplicationBuilder/src/index.ts"
-//  ],
+  //  "include": [
+  //    "ApplicationBuilder/src/index.ts"
+  //  ],
   "exclude": [
     "node_modules/**/*",
     "**/*.js",
     "denoRuntime/**/*",
     "ApplicationBuilder/**/*",
     "utils/**/*",
-    "./*.d.ts"
+    "./*.d.ts",
+    "react-router-dom"
   ]
 }

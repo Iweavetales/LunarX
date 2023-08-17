@@ -1,32 +1,35 @@
-import { transformFileSync } from '@babel/core';
+import { transformFileSync } from "@babel/core"
 // @ts-ignore
-import pluginTransformModulesAmd from '@babel/plugin-transform-modules-amd';
+import pluginTransformModulesAmd from "@babel/plugin-transform-modules-amd"
 
-import chalk from 'chalk';
+import chalk from "chalk"
 // import swc from '@swc/core';
-const swc = require('@swc/core');
+const swc = require("@swc/core")
 
 export function TranspileForBrowser(
-  cjsTranspiler: 'babel' | 'swc',
+  cjsTranspiler: "babel" | "swc",
   outputShardPath: string,
   normalizedRelativePath: string,
-  esmSourceMapFile: Buffer | null,
+  esmSourceMapFile: Buffer | null
 ) {
   // console.log('swc', swc.transformFileSync, esmSourceMapFile);
 
-  if (cjsTranspiler === 'swc') {
-    console.log(chalk.bgBlue('BUILD with SWC'));
+  if (cjsTranspiler === "swc") {
+    console.log(chalk.bgBlue("BUILD with SWC"))
     const result = swc.transformFileSync(outputShardPath, {
       // Some options cannot be specified in .swcrc
       filename: normalizedRelativePath,
-      sourceMaps: process.env.NODE_ENV === 'production' ? false : true,
-      inputSourceMap: process.env.NODE_ENV === 'production' ? false : (esmSourceMapFile || '{}').toString(),
+      sourceMaps: process.env.NODE_ENV === "production" ? false : true,
+      inputSourceMap:
+        process.env.NODE_ENV === "production"
+          ? false
+          : (esmSourceMapFile || "{}").toString(),
       // Input files are treated as module by default.
       isModule: true,
-      minify: process.env.NODE_ENV === 'production',
+      minify: process.env.NODE_ENV === "production",
 
       module: {
-        type: 'amd',
+        type: "amd",
         moduleId: normalizedRelativePath,
       },
 
@@ -43,18 +46,18 @@ export function TranspileForBrowser(
       //     ],
       //   },
       // },
-    });
+    })
 
-    return result;
+    return result
   } else {
     // cjsTranspiler === "babel"
-    console.log(chalk.bgBlue('BUILD with Babel'));
+    console.log(chalk.bgBlue("BUILD with Babel"))
 
     const compiled = transformFileSync(outputShardPath, {
       plugins: [
         pluginTransformModulesAmd,
         [
-          'babel-plugin-styled-components',
+          "babel-plugin-styled-components",
           {
             ssr: true,
           },
@@ -66,21 +69,21 @@ export function TranspileForBrowser(
 
       presets: [
         [
-          '@babel/preset-env',
+          "@babel/preset-env",
           {
             targets: {
-              browsers: ['last 2 versions'],
+              browsers: ["last 2 versions"],
               // "node":"node 12.0"
             },
           },
         ],
       ],
 
-      minified: process.env.NODE_ENV === 'production',
-      sourceMaps: process.env.NODE_ENV === 'production' ? false : true,
-      inputSourceMap: JSON.parse((esmSourceMapFile || '{}').toString()),
-    });
+      minified: process.env.NODE_ENV === "production",
+      sourceMaps: process.env.NODE_ENV === "production" ? false : true,
+      inputSourceMap: JSON.parse((esmSourceMapFile || "{}").toString()),
+    })
 
-    return { code: compiled?.code, map: JSON.stringify(compiled?.map) };
+    return { code: compiled?.code, map: JSON.stringify(compiled?.map) }
   }
 }

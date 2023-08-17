@@ -1,15 +1,20 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext } from "react"
 
-export const HeadContext = createContext({});
+export const HeadContext = createContext({})
 export const Head = () => {
-  const headContext = useContext(HeadContext);
+  const headContext = useContext(HeadContext)
 
-  return <>{}</>;
-};
+  return <>{}</>
+}
 
-export const HeadSyncProvider = (props: { syncer: HeadSyncer, children: React.ReactNode }) => {
-  return <HeadContext.Provider value={{}}>{props.children}</HeadContext.Provider>;
-};
+export const HeadSyncProvider = (props: {
+  syncer: HeadSyncer
+  children: React.ReactNode
+}) => {
+  return (
+    <HeadContext.Provider value={{}}>{props.children}</HeadContext.Provider>
+  )
+}
 
 export class HeadSyncer {}
 

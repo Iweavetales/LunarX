@@ -1,35 +1,35 @@
-import { RouteNode, RouteNodeMap } from '../lib/Manifest';
-import React from 'react';
-import { Routes, Route } from 'react-router';
-import { ServerFetchesProvider } from '../src/serverFetches';
-import {LunarContext} from "../src/lunarContext";
-import {GetRouterModule} from "./types";
+import { RouteNode, RouteNodeMap } from "../lib/Manifest"
+import React from "react"
+import { Routes, Route } from "react-router"
+import { ServerFetchesProvider } from "../src/serverFetches"
+import { LunarContext } from "../src/lunarContext"
+import { GetRouterModule } from "./types"
 
 export default function ServerBuildRouter(
   context: LunarContext,
   routeNodes: RouteNodeMap,
-  getRouterModule: GetRouterModule,
+  getRouterModule: GetRouterModule
 ) {
   return (props: { routeFetchesResults: { [routePattern: string]: any } }) => {
-    const routePatterns = Object.keys(routeNodes);
+    const routePatterns = Object.keys(routeNodes)
 
     /**
      * 상위라우터가 없는 최상위 라우터들만 추출
      */
-    const topLevelRoutes = routePatterns.filter(pattern => {
-      const routeNode = routeNodes[pattern];
+    const topLevelRoutes = routePatterns.filter((pattern) => {
+      const routeNode = routeNodes[pattern]
       if (routeNode.upperRoutePattern) {
-        return false;
+        return false
       }
-      return true;
-    });
+      return true
+    })
 
     function RenderRouteNode(routeNode: RouteNode, upperRoutePattern: string) {
-      const pattern = routeNode.routePattern;
+      const pattern = routeNode.routePattern
 
-      let Component = getRouterModule(pattern);
+      let Component = getRouterModule(pattern)
       if (Component === undefined) {
-        Component = () => <div>Not found Page</div>;
+        Component = () => <div>Not found Page</div>
       }
       return (
         <Route
@@ -50,27 +50,27 @@ export default function ServerBuildRouter(
               /**
                * 현재 라우트노드가 보유중인 하위 라우터중 현재 입력된(routeNodes) 노드 목록에 존재 하는 라우터만 포함시킨다
                */
-              .filter(childPattern => routeNodes[childPattern])
-              .map(childPattern => {
-                const childRouteNode = routeNodes[childPattern];
+              .filter((childPattern) => routeNodes[childPattern])
+              .map((childPattern) => {
+                const childRouteNode = routeNodes[childPattern]
 
                 if (childRouteNode) {
-                  return RenderRouteNode(childRouteNode, pattern);
+                  return RenderRouteNode(childRouteNode, pattern)
                 } else {
-                  console.error(`Called unlisted route[${childPattern}]`);
-                  return null;
+                  console.error(`Called unlisted route[${childPattern}]`)
+                  return null
                 }
               })}
         </Route>
-      );
+      )
     }
 
     return (
       <Routes>
-        {topLevelRoutes.map(pattern => {
-          return RenderRouteNode(routeNodes[pattern], '');
+        {topLevelRoutes.map((pattern) => {
+          return RenderRouteNode(routeNodes[pattern], "")
         })}
       </Routes>
-    );
-  };
+    )
+  }
 }
