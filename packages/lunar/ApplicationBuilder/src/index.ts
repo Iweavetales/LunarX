@@ -22,6 +22,7 @@ async function CreateBuildOptions(
 ): Promise<BuildOptions> {
   const cwd = process.cwd()
 
+  console.log("build start")
   let config: LunarConfig = defaultConfig
   const userConfigPath = join(cwd, "lunar.conf.js")
   try {

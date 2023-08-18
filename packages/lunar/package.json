@@ -1,13 +1,13 @@
 {
-  "name": "lunargate-test-helloworld3",
-  "version": "0.1.74",
+  "name": "@lunargate/lunar",
+  "version": "0.0.1",
   "description": "The LunarGate that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
   "main": "index.js",
   "scripts": {
-    "clean-lunar-dist": "npm run clean",
+    "clean-lunar-dist": "pnpm run clean",
     "clean": "rm -rf ./dist/",
-    "build": "npm run release",
-    "prepublishOnly": "npm run clean && cd ../../ && turbo run build",
+    "build": "pnpm run release",
+    "prepublishOnly": "pnpm run clean && cd ../../ && turbo run build",
     "release": "taskr release",
     "test": "echo \"Error: no test specified\" && exit 1",
     "deno-runtime-fmt": "deno fmt ./packages/LunarGate/denoRuntime/",

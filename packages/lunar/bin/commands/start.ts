@@ -1,7 +1,16 @@
 import { spawn } from "child_process"
 import { Command } from "commander"
+import { join } from "path"
+import { SupportingRuntime } from "../../lib/runtime"
 
-export default async function Start(options: Record<any, any>) {
+export default async function Start(options: {
+  runtime: SupportingRuntime
+  buildDir: string
+}) {
+  // set defaults
+  options.runtime = options.runtime ?? "node"
+  options.buildDir = options.buildDir ?? "./dist"
+
   console.log("options", process.argv, options, options)
 
   return new Promise((resolve, reject) => {
@@ -9,7 +18,8 @@ export default async function Start(options: Record<any, any>) {
       const server = spawn("deno", [
         "run",
 
-        "node_modules/lunargate-test-helloworld3/dist/denoRuntime/index.js",
+        "--allow-all",
+        join(process.cwd(), options.buildDir, "deno-server.js"),
       ])
 
       server.stdout.on("data", (data) => {

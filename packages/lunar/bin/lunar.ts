@@ -33,11 +33,18 @@ const foundSomeCommand = lunarArgs.find((arg) => /^[a-zA-Z]+$/.test(arg))
     lunar
       .command("start")
       .description("Start built application")
-      .option("-r, --runtime <string>", "Select runtime for run application")
-      .option("-b, --builtDir <string>", "locate built directory")
+      .option(
+        "-r, --runtime <string>",
+        "Select runtime for run application",
+        "deno"
+      )
+      .option("-b, --builtDir <string>", "locate built directory", "./dist")
       .option("-h, --help", "Show this")
       .action(async (options) => {
-        await startCommand(options)
+        await startCommand({
+          runtime: options.runtime,
+          buildDir: options.buildDir,
+        })
         resolve(true)
       })
 
