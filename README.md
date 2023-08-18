@@ -1,4 +1,7 @@
- 
+<p align="center" style="text-align: center">
+    <img src="./assets/emblem.svg" width="200" title="Lunar Emblem">
+</p>
+
 <a aria-label="NPM version" href="https://www.npmjs.com/package/lunargate/lunar">
     <img alt="" src="https://img.shields.io/npm/v/lunargate/lunar.svg?style=for-the-badge&labelColor=000000">
 </a>
@@ -9,13 +12,9 @@
 [//]: # ([![NPM Downloads][downloads-image]][downloads-url])
 [//]: # (![Lunar Emblem]&#40;./assets/emblem.svg&#41;)
  
-<p style="text-align: center">
-    <img src="./assets/emblem.svg" width="200" title="Lunar Emblem">
-</p>
 
-# Lunar
 
-React, Solid SSR Framework
+React SSR Framework
 
 An enhanced SSR framework, offering greater flexibility than Next.js and Remix.Run, designed to build powerful front-end applications.
 
@@ -28,9 +27,9 @@ An enhanced SSR framework, offering greater flexibility than Next.js and Remix.R
 * Minimal core framework dependencies
 * Loosely coupled with the framework
 
-## Features
-* React SSR (Server-Side Rendering) Framework
+## Features 
 * Supports Deno runtime
+* File based routing
 * Nested routing
 * Scroll position memory
 * Server-side rendering (note: this seems repetitive given the React SSR mention)
@@ -40,8 +39,7 @@ An enhanced SSR framework, offering greater flexibility than Next.js and Remix.R
 ## Future Enhancements
 * Highly customizable with both shallow and deep modifications
 * Support for BUN runtime
-* Support for Go and Rust runtimes
-* Compatibility with Solid.JS, and other UI frameworks
+* Support for Go and Rust runtimes 
 * Multi-core optimized server-side processing
 * Enhanced features for front-end applications
 
