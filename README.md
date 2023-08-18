@@ -7,12 +7,11 @@
 </a> 
 
 [//]: # ([![NPM Downloads][downloads-image]][downloads-url])
-
 [//]: # (![Lunar Emblem]&#40;./assets/emblem.svg&#41;)
-
-<div style="text-align: center">
+ 
+<p style="text-align: center">
     <img src="./assets/emblem.svg" width="200" title="Lunar Emblem">
-</div>
+</p>
 
 # Lunar
 
