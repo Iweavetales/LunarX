@@ -33,6 +33,7 @@ async function CreateBuildOptions(
     console.log("Not exists user config")
   }
 
+  console.log("Final config", config)
   ClearDirectory(config.js.distDirectory)
 
   const appDirectory = join(cwd, "./app")

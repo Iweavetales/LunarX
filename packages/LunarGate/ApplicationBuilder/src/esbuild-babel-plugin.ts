@@ -9,9 +9,9 @@ import {
 import { dirname, join, relative } from "path"
 import { obfuscate, ObfuscatorOptions } from "javascript-obfuscator"
 import queue from "queue"
-// @ts-ignore
+
 import fetch from "node-fetch"
-// @ts-ignore
+
 import { Metafile, Plugin, PluginBuild } from "esbuild"
 
 import { DetermineServerSideShard } from "./serverSideScript"
@@ -286,7 +286,8 @@ const plugin: TranspilePlugin = (config, options) => {
                       config.build.cjsTranspiler,
                       outputShardPath,
                       normalizedRelativePath,
-                      esmSourceMapFile
+                      esmSourceMapFile,
+                      config
                     )
 
                     // console.log('transpiledESMSource', transpiledESMSource);
@@ -304,23 +305,20 @@ const plugin: TranspilePlugin = (config, options) => {
 
                     if (transpiledESMSource?.code) {
                       // 트랜스파일된 파일내용을 디스크에 쓴다
-                      if (process.env.NODE_ENV === "production") {
-                        /**
-                         * 프로덕션에서는 obfuscate
-                         */
-                        writeFileSync(
-                          cjsFileName,
-                          obfuscate(
-                            transpiledESMSource.code,
-                            obfuscateOptions
-                          ).getObfuscatedCode()
-                        )
-                      } else {
-                        writeFileSync(cjsFileName, transpiledESMSource.code)
-                        if (transpiledESMSource.map) {
-                          // 트랜스파일된 소스맵을 디스크에 쓴다
-                          writeFileSync(cjsMapFileName, transpiledESMSource.map)
-                        }
+
+                      writeFileSync(
+                        cjsFileName,
+                        config.build.obfuscate
+                          ? obfuscate(
+                              transpiledESMSource.code,
+                              obfuscateOptions
+                            ).getObfuscatedCode()
+                          : transpiledESMSource.code
+                      )
+
+                      if (transpiledESMSource.map) {
+                        // 트랜스파일된 소스맵을 디스크에 쓴다
+                        writeFileSync(cjsMapFileName, transpiledESMSource.map)
                       }
                     }
                   } else {

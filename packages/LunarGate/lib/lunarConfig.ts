@@ -1,5 +1,6 @@
 import { join } from "path"
 import { SupportingRuntime } from "./runtime"
+import { obfuscate } from "javascript-obfuscator"
 export type LunarConfig = {
   js: {
     distDirectory: string
@@ -16,6 +17,8 @@ export type LunarConfig = {
     vendors?: string[]
     plugins?: any[]
     loaders?: Record<any, any>
+    obfuscate?: boolean // Note: Obfuscation will impact decrease slight to performance.
+    minify?: boolean
   }
 
   runtime: {
@@ -39,6 +42,8 @@ export const defaultConfig: LunarConfig = {
     vendors: [],
     plugins: [],
     loaders: {},
+    obfuscate: false,
+    minify: false,
   },
 
   runtime: {

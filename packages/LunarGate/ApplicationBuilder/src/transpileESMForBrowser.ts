@@ -1,8 +1,9 @@
 import { transformFileSync } from "@babel/core"
-// @ts-ignore
+
 import pluginTransformModulesAmd from "@babel/plugin-transform-modules-amd"
 
 import chalk from "chalk"
+import { LunarConfig } from "../../lib/lunarConfig"
 // import swc from '@swc/core';
 const swc = require("@swc/core")
 
@@ -10,7 +11,8 @@ export function TranspileForBrowser(
   cjsTranspiler: "babel" | "swc",
   outputShardPath: string,
   normalizedRelativePath: string,
-  esmSourceMapFile: Buffer | null
+  esmSourceMapFile: Buffer | null,
+  config: LunarConfig
 ) {
   // console.log('swc', swc.transformFileSync, esmSourceMapFile);
 
@@ -26,7 +28,7 @@ export function TranspileForBrowser(
           : (esmSourceMapFile || "{}").toString(),
       // Input files are treated as module by default.
       isModule: true,
-      minify: process.env.NODE_ENV === "production",
+      minify: config.build.minify,
 
       module: {
         type: "amd",
@@ -79,7 +81,7 @@ export function TranspileForBrowser(
         ],
       ],
 
-      minified: process.env.NODE_ENV === "production",
+      minified: config.build.minify,
       sourceMaps: process.env.NODE_ENV === "production" ? false : true,
       inputSourceMap: JSON.parse((esmSourceMapFile || "{}").toString()),
     })
