@@ -18,7 +18,7 @@
 
 React SSR Framework
 
-An simplified SSR framework, offering greater flexibility than Next.js and Remix.Run, designed to build powerful front-end applications.
+A simplified SSR framework, offering greater flexibility than Next.js and Remix.Run, designed to build powerful front-end applications.
 
 
 # Why Lunar?
