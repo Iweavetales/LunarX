@@ -26,6 +26,15 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-react": "^7.30.1",
-    "eslint-plugin-react-hooks": "^4.6.0"
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "lunargate-test-helloworld3": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router": "^6.3.0",
+    "react-router-dom": "^6.4.1",
+    "typescript": "^5.1.6",
+    "@babel/preset-env": "^7.22.10",
+    "@babel/preset-react": "^7.22.5",
+    "@babel/preset-typescript": "^7.22.5"
   }
 }
