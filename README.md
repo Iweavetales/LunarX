@@ -2,12 +2,14 @@
     <img src="./assets/emblem.svg" width="200" title="Lunar Emblem">
 </p>
 
-<a aria-label="NPM version" href="https://www.npmjs.com/package/lunargate/lunar">
-    <img alt="" src="https://img.shields.io/npm/v/lunargate/lunar.svg?style=for-the-badge&labelColor=000000">
+<p align="center">
+<a aria-label="NPM version" href="https://www.npmjs.com/package/@lunargate/lunar">
+    <img alt="" src="https://img.shields.io/npm/v/@lunargate/lunar.svg?style=for-the-badge&labelColor=000000">
 </a>
 <a aria-label="License" href="https://github.com/lunargate/lunar/license.md">
-    <img alt="" src="https://img.shields.io/npm/l/lunar.svg?style=for-the-badge&labelColor=000000">
+    <img alt="" src="https://img.shields.io/npm/l/@lunargate/lunar.svg?style=for-the-badge&labelColor=000000">
 </a> 
+</p>
 
 [//]: # ([![NPM Downloads][downloads-image]][downloads-url])
 [//]: # (![Lunar Emblem]&#40;./assets/emblem.svg&#41;)
