@@ -1,8 +1,22 @@
+ 
+<a aria-label="NPM version" href="https://www.npmjs.com/package/lunargate/lunar">
+    <img alt="" src="https://img.shields.io/npm/v/lunargate/lunar.svg?style=for-the-badge&labelColor=000000">
+</a>
+<a aria-label="License" href="https://github.com/lunargate/lunar/license.md">
+    <img alt="" src="https://img.shields.io/npm/l/lunar.svg?style=for-the-badge&labelColor=000000">
+</a> 
 
-# LunarGate
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
+[//]: # ([![NPM Downloads][downloads-image]][downloads-url])
 
+[//]: # (![Lunar Emblem]&#40;./assets/emblem.svg&#41;)
+
+<div style="text-align: center">
+    <img src="./assets/emblem.svg" width="200" title="Lunar Emblem">
+</div>
+
+# Lunar
+
+React, Solid SSR Framework
 
 An enhanced SSR framework, offering greater flexibility than Next.js and Remix.Run, designed to build powerful front-end applications.
 
@@ -28,7 +42,7 @@ An enhanced SSR framework, offering greater flexibility than Next.js and Remix.R
 * Highly customizable with both shallow and deep modifications
 * Support for BUN runtime
 * Support for Go and Rust runtimes
-* Compatibility with Solid.JS, Vue.JS, and other UI frameworks
+* Compatibility with Solid.JS, and other UI frameworks
 * Multi-core optimized server-side processing
 * Enhanced features for front-end applications
 
