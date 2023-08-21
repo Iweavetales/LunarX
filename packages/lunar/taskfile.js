@@ -19,6 +19,19 @@ module.exports = {
     })
   },
 
+  *nodeRuntime(task, opts) {
+    yield esbuild.build({
+      entryPoints: ["nodeRuntime/index.ts"],
+      outfile: "dist/nodeRuntime/node-server.js",
+      bundle: true,
+      platform: "node",
+      sourcemap: "external",
+      loader: {
+        ".node": "file",
+      },
+    })
+  },
+
   *app(task) {
     // Compile with tsconfig.json
 
@@ -99,7 +112,7 @@ module.exports = {
   },
 
   *prebuild(task) {
-    yield task.parallel(["builder", "app"])
+    yield task.parallel(["builder", "app", "nodeRuntime"])
   },
 
   *release(task) {

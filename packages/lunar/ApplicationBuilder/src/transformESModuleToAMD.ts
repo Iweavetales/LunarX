@@ -1,14 +1,13 @@
-import { transformFileSync } from "@babel/core"
+import { transformFileSync as babelTransformFileSync } from "@babel/core"
 
 import pluginTransformModulesAmd from "@babel/plugin-transform-modules-amd"
 
 import chalk from "chalk"
 import { LunarConfig } from "../../lib/lunarConfig"
-// import swc from '@swc/core';
-const swc = require("@swc/core")
+import { transformFileSync as swcTransformFileSync } from "@swc/core"
 
-export function TranspileForBrowser(
-  cjsTranspiler: "babel" | "swc",
+export function TransformESModuleToAMD(
+  transpiler: "babel" | "swc",
   outputShardPath: string,
   normalizedRelativePath: string,
   esmSourceMapFile: Buffer | null,
@@ -16,9 +15,9 @@ export function TranspileForBrowser(
 ) {
   // console.log('swc', swc.transformFileSync, esmSourceMapFile);
 
-  if (cjsTranspiler === "swc") {
+  if (transpiler === "swc") {
     console.log(chalk.bgBlue("BUILD with SWC"))
-    const result = swc.transformFileSync(outputShardPath, {
+    const result = swcTransformFileSync(outputShardPath, {
       // Some options cannot be specified in .swcrc
       filename: normalizedRelativePath,
       sourceMaps: process.env.NODE_ENV === "production" ? false : true,
@@ -55,7 +54,7 @@ export function TranspileForBrowser(
     // cjsTranspiler === "babel"
     console.log(chalk.bgBlue("BUILD with Babel"))
 
-    const compiled = transformFileSync(outputShardPath, {
+    const compiled = babelTransformFileSync(outputShardPath, {
       plugins: [
         pluginTransformModulesAmd,
         [

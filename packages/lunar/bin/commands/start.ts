@@ -1,5 +1,4 @@
 import { spawn } from "child_process"
-import { Command } from "commander"
 import { join } from "path"
 import { SupportingRuntime } from "../../lib/runtime"
 
@@ -34,6 +33,17 @@ export default async function Start(options: {
         console.log(`child process exited with code ${code}`)
         resolve(true)
       })
+    } else {
+      ;(async function () {
+        const module = await import(
+          join(process.cwd(), options.buildDir, "node-server.js")
+        )
+        const server = module.server
+        console.log("ss", server)
+        await server()
+
+        resolve(true)
+      })()
     }
   })
 }

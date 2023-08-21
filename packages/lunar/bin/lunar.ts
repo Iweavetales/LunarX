@@ -12,19 +12,6 @@ enum LunarCommands {
   Start = "start",
 }
 
-function MatchingSpecificCommand(string: string): LunarCommands | null {
-  switch (string) {
-    case LunarCommands.Dev:
-      return LunarCommands.Dev
-    case LunarCommands.Start:
-      return LunarCommands.Start
-    case LunarCommands.Build:
-      return LunarCommands.Build
-  }
-
-  return null
-}
-
 const foundSomeCommand = lunarArgs.find((arg) => /^[a-zA-Z]+$/.test(arg))
 
 ;(async function () {
@@ -36,7 +23,7 @@ const foundSomeCommand = lunarArgs.find((arg) => /^[a-zA-Z]+$/.test(arg))
       .option(
         "-r, --runtime <string>",
         "Select runtime for run application",
-        "deno"
+        "node"
       )
       .option("-b, --builtDir <string>", "locate built directory", "./dist")
       .option("-h, --help", "Show this")

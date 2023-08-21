@@ -10,22 +10,18 @@ import { dirname, join, relative } from "path"
 import { obfuscate, ObfuscatorOptions } from "javascript-obfuscator"
 import queue from "queue"
 
-import fetch from "node-fetch"
-
 import { Metafile, Plugin, PluginBuild } from "esbuild"
 
 import { DetermineServerSideShard } from "./serverSideScript"
 import { BuildRouteNodeMap } from "./routing"
 import { BuiltShardInfo, ShardType, LunarJSManifest } from "../../lib/Manifest"
 import { GetBrowserModuleLoaderScript } from "./scriptTranspile"
-import { TranspileForBrowser } from "./transpileESMForBrowser"
+import { TransformESModuleToAMD } from "./transformESModuleToAMD"
 import { DiffMetaOutput, DiffStatus } from "./metaFile"
-
-// import babel from '@babel/core';
-// import styled from 'babel-plugin-styled-components';
 
 import { CheckBrowserEntrySource } from "./browserEntry"
 import { LunarConfig } from "../../lib/lunarConfig"
+import { TransformESModuleToCJS } from "./transformESModuleToCJS"
 
 type PluginOptions = {
   esmDirectory: string
@@ -265,6 +261,18 @@ const plugin: TranspilePlugin = (config, options) => {
                   chalk.greenBright(`ADDED ESM shard ${outputShardPath}`)
                 )
 
+                const esmSourceMapFile =
+                  process.env.NODE_ENV === "production"
+                    ? null
+                    : readFileSync(outputShardPath + ".map")
+
+                // Transform for nodeRuntime CJS
+                await TransformESModuleToCJS(
+                  outputShardPath,
+                  normalizedRelativePath,
+                  esmSourceMapFile
+                )
+
                 /**
                  * Javascript 파일인지 체크
                  */
@@ -275,14 +283,9 @@ const plugin: TranspilePlugin = (config, options) => {
                   if (
                     !serverSideShardInfo.isServerSideShard /* 서버사이드 샤드가 아니면 */
                   ) {
-                    const esmSourceMapFile =
-                      process.env.NODE_ENV === "production"
-                        ? null
-                        : readFileSync(outputShardPath + ".map")
-
                     // console.log(chalk.blue(`Transpile ESM shard ${outputShardPath}`));
 
-                    const transpiledESMSource = TranspileForBrowser(
+                    const transpiledESMSource = TransformESModuleToAMD(
                       config.build.cjsTranspiler,
                       outputShardPath,
                       normalizedRelativePath,
@@ -294,7 +297,7 @@ const plugin: TranspilePlugin = (config, options) => {
 
                     const cjsFileName = outputShardPath.replace(
                       /^dist\/esm/,
-                      "dist/cjs"
+                      "dist/client"
                     )
                     const cjsMapFileName = cjsFileName + ".map"
 
@@ -328,7 +331,7 @@ const plugin: TranspilePlugin = (config, options) => {
                   // stylesheet 는 esm to cjs 디렉토리로 복사만 수행
                   // console.log(chalk.blue(`Copy stylesheet shard ${outputShardPath}`));
                   const from = outputShardPath
-                  const to = from.replace(/^dist\/esm/, "dist/cjs/")
+                  const to = from.replace(/^dist\/esm/, "dist/client/")
                   const targetDirectory = dirname(to)
                   if (!existsSync(targetDirectory)) {
                     mkdirSync(targetDirectory, { recursive: true })
@@ -338,13 +341,13 @@ const plugin: TranspilePlugin = (config, options) => {
                   // map 파일도 복사
                   if (process.env.NODE_ENV === "development") {
                     const from = outputShardPath + ".map"
-                    const to = from.replace(/^dist\/esm/, "dist/cjs/")
+                    const to = from.replace(/^dist\/esm/, "dist/client/")
 
                     copyFileSync(from, to)
                   }
                 } else if (moduleType === "unknown") {
                   const from = outputShardPath
-                  const to = from.replace(/^dist\/esm/, "dist/cjs/")
+                  const to = from.replace(/^dist\/esm/, "dist/client/")
                   copyFileSync(from, to)
                 }
               }
@@ -353,6 +356,8 @@ const plugin: TranspilePlugin = (config, options) => {
                * manifest 에 항목 추가
                */
               if (entryPoint) {
+                // entry point modules
+
                 const entryFilepathTokens = entryPoint.split("/")
                 const entryFilename = entryFilepathTokens.pop()
 
@@ -368,9 +373,11 @@ const plugin: TranspilePlugin = (config, options) => {
                   serverSideOutputPath: outputShardPath,
                   clientSideOutputPath: serverSideShardInfo.isServerSideShard
                     ? undefined
-                    : outputShardPath.replace("esm", "cjs"),
+                    : outputShardPath.replace("esm", "client"),
                 } as BuiltShardInfo
               } else {
+                // chunks
+
                 serviceServerManifest.chunks[outputShardPath] = {
                   shardPath: normalizedRelativePath,
                   isServerSideShard: serverSideShardInfo.isServerSideShard,
@@ -380,7 +387,7 @@ const plugin: TranspilePlugin = (config, options) => {
                   serverSideOutputPath: outputShardPath,
                   clientSideOutputPath: serverSideShardInfo.isServerSideShard
                     ? undefined
-                    : outputShardPath.replace("esm", "cjs"),
+                    : outputShardPath.replace("esm", "client"),
                 }
               }
             }
@@ -415,7 +422,7 @@ const plugin: TranspilePlugin = (config, options) => {
           serviceServerManifest.routeNodes = routeNodes
 
           // 브라우저 전용 파일 디렉토리 생성
-          const browserDirectory = join(options.distDirectoryPath, "browser")
+          const browserDirectory = join(options.distDirectoryPath, "client")
           if (!existsSync(browserDirectory)) {
             mkdirSync(browserDirectory, { recursive: true })
           }

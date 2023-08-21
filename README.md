@@ -16,7 +16,7 @@
  
 
 
-React SSR Framework
+React SSR Framework with NodeJS and Deno
 
 A simplified SSR framework, offering greater flexibility than Next.js and Remix.Run, designed to build powerful front-end applications.
 
@@ -36,21 +36,33 @@ A simplified SSR framework, offering greater flexibility than Next.js and Remix.
 * Scroll position memory
 * Server-side rendering (note: this seems repetitive given the React SSR mention)
 * TypeScript support
+* Supports NodeJS runtime
 * SEO (in progress)
+* HMR (in progress)
 
 ## Future Enhancements
 * Highly customizable with both shallow and deep modifications
 * Support for BUN runtime
 * Support for Go and Rust runtimes 
-* Multi-core optimized server-side processing
+* Multi-thread optimized server-side processing(for Deno,Bun runtime)
 * Enhanced features for front-end applications
+
+
+# Getting Started
 
 
 
 # Architecture
-## Response Pipeline
+## Response-Render Pipeline
 1. 
 2. 
+
+## Build 
+### Bundler  
+Lunar uses `esbuild` to quickly create a split-bundle source structure.
+
+### Transpiler  
+Lunar uses `SWC` for transpile to ensure compatibility with both client-side and Node.js runtimes.
 
 
 ## Server Side Script

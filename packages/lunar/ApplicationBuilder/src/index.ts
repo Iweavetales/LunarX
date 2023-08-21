@@ -116,6 +116,7 @@ async function CreateBuildOptions(
     sourcemap: process.env.NODE_ENV === "production" ? false : true,
     bundle: true,
     outdir: absoluteESMDistDirectory,
+    //❗ platform: "node", // ❗️Do not comment out this option. There's an issue with this option in the Deno runtime.
     format: "esm",
     target: [],
     // outExtension: { '.js': '.mjs' }, // esm 모듈은 mjs 로

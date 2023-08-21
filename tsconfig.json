@@ -16,7 +16,9 @@
     "incremental": true,
     "baseUrl": "./app",
     "typeRoots": ["./node_modules/@types", " ./app/types"],
-    "paths": {}
+    "paths": {},
+    "plugins": [],
+    "sourceMap": true
   },
   "include": ["commonLib/Manifest.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules/"]

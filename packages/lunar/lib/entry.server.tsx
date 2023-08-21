@@ -14,7 +14,7 @@ export default async function handleRequest(
   context: LunarContext,
   documentSheet: DocumentSheet,
   LunarJSApp: any
-) {
+): Promise<string> {
   /**
    * Server Side 랜더링 중에는 useLayoutEffect 를 호출 하여도 useEffect 로 호출 되도록 수정한다
    * styledComponents 의 createGlobalStyle 를 사용했을 때 경고 발생 방지를 위함

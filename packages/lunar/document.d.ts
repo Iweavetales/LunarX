@@ -1,3 +1,3 @@
-import Document from "./dist/src/Document"
-export * from "./dist/src/Document"
-export default Document
+import document from "./dist/src/document"
+export * from "./dist/src/document"
+export default document
