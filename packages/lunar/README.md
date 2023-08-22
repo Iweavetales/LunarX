@@ -1,6 +1,4 @@
-# LunarGate
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
+# Lunar 
 
-
-LunarGate 
+Working hard to release Alpha
+ 

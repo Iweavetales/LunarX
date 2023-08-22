@@ -1,6 +1,4 @@
-import { join } from "path"
 import { SupportingRuntime } from "./runtime"
-import { obfuscate } from "javascript-obfuscator"
 export type LunarConfig = {
   js: {
     distDirectory: string

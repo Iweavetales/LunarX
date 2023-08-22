@@ -1,4 +1,4 @@
-import { LunarContext } from "../src/lunarContext"
+import { LunarContext } from "./lunarContext"
 import { DocumentSheet } from "./DocumentTypes"
 
 export type EntryServerHandler = (

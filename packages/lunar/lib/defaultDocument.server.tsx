@@ -1,4 +1,4 @@
-import { LunarContext } from "../src/lunarContext"
+import { LunarContext } from "./lunarContext"
 import React, { StrictMode } from "react"
 import { DocumentLinks, DocumentScripts } from "../src/document"
 import reactDomServer from "react-dom/server"

@@ -1,4 +1,4 @@
-import { LunarContext } from "../../src/lunarContext"
+import { LunarContext } from "../../lib/lunarContext"
 import { GetUrlPath } from "./urlUtils"
 import { IncomingMessage } from "http"
 import { HTTPHeaders } from "../../lib/HTTPHeaders.server"

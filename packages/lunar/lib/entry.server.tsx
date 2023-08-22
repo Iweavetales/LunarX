@@ -1,6 +1,6 @@
 import reactDomServer from "react-dom/server"
 import React, { StrictMode } from "react"
-import { LunarContext } from "../src/lunarContext"
+import { LunarContext } from "./lunarContext"
 import { StaticRouter } from "react-router-dom/server"
 import SwiftAppContainer, { SwiftRenderer } from "../src/lunarApp"
 import { DocumentSheet } from "./DocumentTypes"

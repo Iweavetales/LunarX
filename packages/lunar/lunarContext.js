@@ -1,1 +1,1 @@
-module.exports = require("./dist/src/LunarContext")
+module.exports = require("./dist/lib/lunarContext")

@@ -1,3 +1,3 @@
-import lunarContext from "./dist/src/lunarContext"
-export * from "./dist/src/lunarContext"
+import lunarContext from "./dist/lib/lunarContext"
+export * from "./dist/lib/lunarContext"
 export default lunarContext

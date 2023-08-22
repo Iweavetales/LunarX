@@ -18,7 +18,7 @@
 
 React SSR Framework with NodeJS and Deno
 
-A simplified SSR framework, offering greater flexibility than Next.js and Remix.Run, designed to build powerful front-end applications.
+A simplified SSR framework, offering greater flexibility than Next.js and Remix.Run, empower to build powerful front-end applications.
 
 
 # Why Lunar?
@@ -50,7 +50,9 @@ A simplified SSR framework, offering greater flexibility than Next.js and Remix.
 
 # Getting Started
 
-
+```shell
+pnpx create-lunar-app example
+```
 
 # Architecture
 ## Response-Render Pipeline

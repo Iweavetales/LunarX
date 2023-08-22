@@ -1,6 +1,6 @@
 import { RouteNode } from "../../lib/Manifest"
 import { WebAppStructure } from "./WebAppStructure"
-import { LunarContext } from "../../src/lunarContext"
+import { LunarContext } from "../../lib/lunarContext"
 import { v4 as uuidV4 } from "uuid"
 
 export type ServerSideRouteFetchResult = {

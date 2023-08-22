@@ -13,7 +13,6 @@ import {
 import { makeSwiftContext } from "./SSRContext"
 import { UniversalRouteNode } from "../../lib/DocumentTypes"
 import { readFileSync, statSync } from "fs"
-// import * as Router from "find-my-way"
 import { IncomingMessage, ServerResponse } from "http"
 import { join, resolve } from "path"
 import { HTTPVersion, Instance as RouterInstance } from "find-my-way"
@@ -124,9 +123,9 @@ export function BuildRoutes(
       const shardPath = CutOffQuery(urlPath.replace(/^\/_\/s\//, ""))
 
       /**
-       * Provides .map files in production
+       * Provides .map files in development mode
        */
-      if (ProductionMode) {
+      if (!ProductionMode) {
         const isMap = /\.map$/.test(shardPath)
         if (isMap) {
           const realShardPath = shardPath.replace(/\.map$/, "")

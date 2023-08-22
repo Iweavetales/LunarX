@@ -1,5 +1,5 @@
 import { IncomingMessage } from "http"
-import { HTTPHeaders } from "../lib/HTTPHeaders.server"
+import { HTTPHeaders } from "./HTTPHeaders.server"
 
 export interface LunarContext {
   req: IncomingMessage
@@ -22,3 +22,5 @@ export interface LunarContext {
   //   pageModule: any;
   // };
 }
+
+export default LunarContext

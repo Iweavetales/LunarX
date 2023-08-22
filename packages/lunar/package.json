@@ -1,6 +1,6 @@
 {
   "name": "@lunargate/lunar",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The LunarGate that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
   "main": "index.js",
   "scripts": {
