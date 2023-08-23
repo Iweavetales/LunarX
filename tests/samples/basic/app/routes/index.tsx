@@ -13,7 +13,7 @@ export default function IndexPage() {
     <div>
       <div style={{ textAlign: "center" }}>
         <div>
-          <img src={"/static/svg/LunarLogo.svg"} width={100} />
+          <img src={"/static/svg/emblem.svg"} width={100} />
         </div>
         <Link href={"/about"}>To About</Link>
         <Outlet />

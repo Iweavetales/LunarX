@@ -1,24 +1,24 @@
 <p align="center" style="text-align: center">
-    <img src="./assets/emblem.svg" width="200" title="Lunar Emblem">
+    <img src="./assets/emblem.svg" width="200" title="Lunarx Emblem">
 </p>
 
 <p align="center">
-<a aria-label="NPM version" href="https://www.npmjs.com/package/@lunargate/lunar">
-    <img alt="" src="https://img.shields.io/npm/v/@lunargate/lunar.svg?style=for-the-badge&labelColor=000000">
+<a aria-label="NPM version" href="https://www.npmjs.com/package/lunarx">
+    <img alt="" src="https://img.shields.io/npm/v/lunarx.svg?style=for-the-badge&labelColor=000000">
 </a>
-<a aria-label="License" href="https://github.com/lunargate/lunar/license.md">
-    <img alt="" src="https://img.shields.io/npm/l/@lunargate/lunar.svg?style=for-the-badge&labelColor=000000">
+<a aria-label="License" href="https://github.com/lunarx/license.md">
+    <img alt="" src="https://img.shields.io/npm/l/lunarx.svg?style=for-the-badge&labelColor=000000">
 </a> 
 </p>
 
 [//]: # ([![NPM Downloads][downloads-image]][downloads-url])
 [//]: # (![Lunar Emblem]&#40;./assets/emblem.svg&#41;)
- 
+
 
 
 React SSR Framework with NodeJS and Deno
 
-A simplified SSR framework, offering greater flexibility than Next.js and Remix.Run, empower to build powerful front-end applications.
+The simplified & light SSR front framework, offering greater flexibility than Next.js and Remix.Run, empower to build powerful front-end applications.
 
 
 # Why Lunar?
@@ -51,7 +51,7 @@ A simplified SSR framework, offering greater flexibility than Next.js and Remix.
 # Getting Started
 
 ```shell
-pnpx create-lunar-app example
+pnpx create-lunarx-app example
 ```
 
 # Architecture
