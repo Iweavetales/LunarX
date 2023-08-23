@@ -266,17 +266,17 @@ const plugin: TranspilePlugin = (config, options) => {
                     ? null
                     : readFileSync(outputShardPath + ".map")
 
-                // Transform for node-runtime CJS
-                await TransformEsModuleToCjs(
-                  outputShardPath,
-                  normalizedRelativePath,
-                  esmSourceMapFile
-                )
-
                 /**
                  * Javascript 파일인지 체크
                  */
                 if (moduleType === "javascript") {
+                  // Transform for node-runtime CJS
+                  await TransformEsModuleToCjs(
+                    outputShardPath,
+                    normalizedRelativePath,
+                    esmSourceMapFile
+                  )
+
                   /**
                    * 클라이언트 스크립트 트랜스파일
                    */
