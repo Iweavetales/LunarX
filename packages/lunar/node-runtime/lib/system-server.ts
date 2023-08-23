@@ -1,14 +1,14 @@
-import { RuntimeConfig } from "./Config"
-import { ResolveWebappStructure } from "./WebAppStructure"
-import { SwiftServer } from "./SwiftServer"
+import { RuntimeConfig } from "./config"
+import { MakeClientAppStructureFromManifest } from "./client-app-structure"
+import { LunarServer } from "./lunar-server"
 import { join } from "path"
 import express from "express"
-import { ReadJson } from "./jsonReader"
+import { ReadJson } from "./json-reader"
 import { LunarJSManifest } from "../../lib/manifest"
 
 export function RunSystemServer(
   config: RuntimeConfig,
-  swiftServer: SwiftServer
+  swiftServer: LunarServer
 ) {
   const app = express()
 
@@ -23,7 +23,7 @@ export function RunSystemServer(
       join(config.js.distDirectory, "manifest.json")
     )
 
-    const webAppStructure = await ResolveWebappStructure(manifest)
+    const webAppStructure = await MakeClientAppStructureFromManifest(manifest)
 
     swiftServer.updateWebApp(webAppStructure)
     console.log("[System] App-builder meta updated.")

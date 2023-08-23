@@ -1,6 +1,10 @@
 import { IncomingMessage } from "http"
 import { HTTPHeaders } from "./http-headers.server"
 
+export type PageParams = {
+  [name: string]: undefined | string | string[]
+}
+
 export interface LunarContext {
   req: IncomingMessage
   requestHeaders: HTTPHeaders // req 객체에서 복사해온 헤더
@@ -12,9 +16,7 @@ export interface LunarContext {
     search: string
     hash: string
   }
-  params: {
-    [k: string]: string | undefined
-  }
+  params: PageParams
 
   // 페이지 빌드용
   // pageBuild: {

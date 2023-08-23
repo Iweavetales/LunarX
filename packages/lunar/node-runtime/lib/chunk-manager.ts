@@ -1,5 +1,5 @@
-import { OutputChunkInfo } from "./Meta"
-import { ChunkFileName } from "./Chunk"
+import { OutputChunkInfo } from "./meta"
+import { ChunkFileName } from "./chunk"
 
 export type ChunkWrapper = {
   Info: OutputChunkInfo

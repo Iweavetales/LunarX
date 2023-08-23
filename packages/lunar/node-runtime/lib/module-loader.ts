@@ -1,9 +1,10 @@
 //입력된 청크 위치로 모듈을 로드
 
 import { join } from "path"
+import { PathHelper } from "./helper/path"
 
 export async function LoadBuiltShardEntryModule(shardPath: string) {
-  const modulePath = join(process.cwd(), "/dist/cjs/", shardPath)
+  const modulePath = join(PathHelper.cwd, "/dist/cjs/", shardPath)
 
   /**
    * Loader use timestamp, randomized numbers to reload renewed module.

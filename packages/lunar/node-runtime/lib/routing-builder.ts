@@ -1,5 +1,5 @@
-import { RenderPage } from "./PageRenderer"
-import { SwiftServer } from "./SwiftServer"
+import { RenderPage } from "./page-renderer"
+import { LunarServer } from "./lunar-server"
 import { BuiltShardInfo, RouteNode, RouteNodeMap } from "../../lib/manifest"
 import { CutOffQuery, GetUrlPath } from "./urlUtils"
 import { ArrayClone } from "./array"
@@ -7,15 +7,18 @@ import {
   FetchingServerSideRouteData,
   ServerSideFetchResult,
   ServerSideRouteFetchResult,
-} from "./FetchServerSideRouteData"
-import { makeSwiftContext } from "./SSRContext"
+} from "./fetch-server-side-route-data"
+import { makeSwiftContext } from "./ssr-context"
 import { UniversalRouteNode } from "../../lib/document-types"
-import { IncomingMessage } from "http"
+import { IncomingMessage, ServerResponse } from "http"
 import { join, resolve } from "path"
 import { HTTPVersion, Instance as RouterInstance } from "find-my-way"
 import { HTTPHeaders } from "../../lib/http-headers.server"
 import { ProductionMode } from "./constants"
-import { writeFileToResponse } from "./writeFileWithResponse"
+import { writeFileToResponse } from "./write-file-with-response"
+import { PathHelper } from "./helper/path"
+import { ClientAppStructure } from "./client-app-structure"
+import { PageParams } from "../../lib/lunar-context"
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Router = require("find-my-way")
@@ -28,53 +31,44 @@ type RouteEntryNode = {
 
 export function BuildRoutes(
   manifestRouteNodes: RouteNodeMap,
-  swift: SwiftServer
+  appStructure: ClientAppStructure
 ): RouterInstance<HTTPVersion.V1> {
   const rootRouter = Router()
 
   rootRouter.on(
     "GET",
     "/static/*",
-    async (req: IncomingMessage, res, params, swift) => {
+    async (req: IncomingMessage, res: ServerResponse) => {
       const urlPath = GetUrlPath(req.url!)
       const resolvedPath = resolve(urlPath.replace(/^\/static/, ""))
 
-      const filePath = join(swift.cwd, "/static/", resolvedPath)
+      const filePath = join(PathHelper.cwd, "/static/", resolvedPath)
 
       return writeFileToResponse(filePath, res)
-    },
-    swift
+    }
   )
-
-  if (!ProductionMode) {
-    rootRouter.on("GET", "/dev-helper/hmr", (req, res, params, swift) => {
-      //https://deno.land/manual@v1.25.1/runtime/http_server_apis_low_level
-      console.log("hmr request", req)
-    })
-  }
 
   rootRouter.on(
     "GET",
     "/_/s/loader.js",
-    async (req, res, params, swift) => {
-      if (swift.webApp.Manifest.browserModuleLoaderFilePath) {
+    async (req: IncomingMessage, res: ServerResponse) => {
+      if (appStructure.Manifest.browserModuleLoaderFilePath) {
         return writeFileToResponse(
-          swift.getDistFilePath(
-            swift.webApp.Manifest.browserModuleLoaderFilePath
+          PathHelper.GetDistFilePath(
+            appStructure.Manifest.browserModuleLoaderFilePath
           ),
           res
         )
       }
       return res.writeHead(404).end()
-    },
-    swift
+    }
   )
 
   // source serve
   rootRouter.on(
     "GET",
     "/_/s/*",
-    async (req, res, params, swift) => {
+    async (req: IncomingMessage, res: ServerResponse) => {
       const urlPath = GetUrlPath(req.url!)
       const shardPath = CutOffQuery(urlPath.replace(/^\/_\/s\//, ""))
 
@@ -85,22 +79,26 @@ export function BuildRoutes(
         const isMap = /\.map$/.test(shardPath)
         if (isMap) {
           const realShardPath = shardPath.replace(/\.map$/, "")
-          const shard = swift.getShard(realShardPath)
-          return writeFileToResponse(
-            swift.getDistFilePath(shard.RealPath + ".map"),
-            res
-          )
+          const shard = appStructure.shards.get(realShardPath)
+          if (shard && shard.IsPublicShard) {
+            return writeFileToResponse(
+              PathHelper.GetDistFilePath(shard.RealPath + ".map"),
+              res
+            )
+          }
         }
       }
 
-      const shard = swift.getShard(shardPath)
-      if (shard) {
-        return writeFileToResponse(swift.getDistFilePath(shard.RealPath), res)
+      const shard = appStructure.shards.get(shardPath)
+      if (shard && shard.IsPublicShard) {
+        return writeFileToResponse(
+          PathHelper.GetDistFilePath(shard.RealPath),
+          res
+        )
       }
 
       return res.writeHead(404).end()
-    },
-    swift
+    }
   )
 
   const routePatterns = Object.keys(manifestRouteNodes)
@@ -137,15 +135,15 @@ export function BuildRoutes(
     rootRouter.on(
       "GET",
       routePattern,
-      async (req, res, params, swift) => {
+      async (req: IncomingMessage, res: ServerResponse, params: PageParams) => {
         // req.
         console.log("Enter(URL):", req.url)
         /**
          * 나중엔 nested 라우트를 지원하기 위해 라우팅 트리 노드를 모아서 배열로 전달
          */
         const renderResult = await RenderPage(
-          swift.cwd,
-          swift.webApp,
+          PathHelper.cwd,
+          appStructure,
           req,
           params,
           ascendFlatRouteNodeList
@@ -158,8 +156,7 @@ export function BuildRoutes(
           )
           .end(renderResult.data)
         return res
-      },
-      swift
+      }
     )
 
     /**
@@ -168,7 +165,7 @@ export function BuildRoutes(
     rootRouter.on(
       "GET", // @Todo: change to post
       "/_/r" + routePattern,
-      async (req, res, params, swift) => {
+      async (req: IncomingMessage, res: ServerResponse, params: PageParams) => {
         // req.
         /**
          * 나중엔 nested 라우트를 지원하기 위해 라우팅 트리 노드를 모아서 배열로 전달
@@ -184,7 +181,7 @@ export function BuildRoutes(
             // childNodes:[],
             matchPattern: node.routePattern,
             upperRouteMatchPattern: node.upperRoutePattern,
-            shardPath: swift.webApp.Manifest.entries[node.entryPath].shardPath,
+            shardPath: appStructure.Manifest.entries[node.entryPath].shardPath,
           }))
 
         const urlPath = GetUrlPath(req.url!).replace(/^\/_\/r/, "") // url 패스를 실제 page 패스에 맞추기 위해 앞의 "/_/r" 경로는 제거 한다
@@ -211,10 +208,10 @@ export function BuildRoutes(
         /**
          * _init.server.tsx 파일이 존재 한다면 먼저 처리 한다.
          */
-        if (swift.webApp.Manifest.initServerShardPath) {
+        if (appStructure.Manifest.initServerShardPath) {
           const initServerScript: any =
-            swift.webApp.LoadedEntryModuleMap[
-              swift.webApp.Manifest.initServerShardPath
+            appStructure.LoadedEntryModuleMap[
+              appStructure.Manifest.initServerShardPath
             ].default
 
           const ret: boolean = await initServerScript(context)
@@ -231,7 +228,7 @@ export function BuildRoutes(
               ;(async function () {
                 const result = await FetchingServerSideRouteData(
                   routeNode,
-                  swift.webApp,
+                  appStructure,
                   context
                 )
                 fetchedDataList.push(result)
@@ -249,10 +246,10 @@ export function BuildRoutes(
          * _app.server.tsx 파일이 있다면 해당 파일에 대한 처리
          */
         const serverSideAppEntryShardInfo =
-          swift.webApp.Manifest.entries["app/routes/_app.server.tsx"]
+          appStructure.Manifest.entries["app/routes/_app.server.tsx"]
         if (serverSideAppEntryShardInfo) {
           const appServerSideModule: any =
-            swift.webApp.LoadedEntryModuleMap[
+            appStructure.LoadedEntryModuleMap[
               serverSideAppEntryShardInfo.shardPath
             ]
           const appServerFetchFunction = appServerSideModule.serverFetches
@@ -281,8 +278,7 @@ export function BuildRoutes(
             r: ascendRouteNodeList,
           })
         )
-      },
-      swift
+      }
     )
   })
   return rootRouter

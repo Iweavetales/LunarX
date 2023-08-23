@@ -1,7 +1,7 @@
-import { spawn } from "child_process"
 import { join } from "path"
 import packageJson from "../../package.json"
-export default async function Dev(options: {}) {
+import { LunarServer } from "../../node-runtime"
+export default async function Dev(options: { buildDir: string }) {
   console.log(options, packageJson)
 
   return new Promise((resolve, reject) => {
@@ -16,12 +16,14 @@ export default async function Dev(options: {}) {
       const buildContext = await createBuildContext(() => {
         // built
         console.log("built")
+        server.load()
       })
       await buildContext.watch()
 
-      const server = nodeServerModule.server
-      console.log("ss", server)
-      await server()
+      const lunarServer = nodeServerModule.LunarServer as typeof LunarServer
+      const server = new lunarServer({ BuildDir: options.buildDir })
+
+      await server.run()
 
       resolve(true)
     })()

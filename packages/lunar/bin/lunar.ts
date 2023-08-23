@@ -19,7 +19,7 @@ import { Command } from "commander"
         "Select runtime for run application",
         "node"
       )
-      .option("-b, --builtDir <string>", "locate built directory", "./dist")
+      .option("-b, --buildDir <string>", "locate built directory", "./dist")
       .option("-h, --help", "Show this")
       .action(async (options) => {
         await startCommand({
@@ -32,6 +32,7 @@ import { Command } from "commander"
     lunar
       .command("dev")
       .description("Development lunar")
+      .option("-b, --buildDir <string>", "locate built directory", "./dist")
       .action(async (options) => {
         await devCommand(options)
         resolve(true)

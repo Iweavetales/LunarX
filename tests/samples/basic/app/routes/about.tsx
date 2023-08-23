@@ -9,8 +9,10 @@ export default function IndexPage() {
   return (
     <div>
       <div style={{ textAlign: "center" }}>
-        About
-        <Link href={"/"}>To Index</Link>
+        <div>About LunarX ssssss</div>
+        <div>
+          <Link href={"/"}>To Index</Link>
+        </div>
         <Outlet />
       </div>
     </div>

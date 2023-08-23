@@ -1,12 +1,12 @@
-import { LunarContext } from "../../lib/lunar-context"
-import { GetUrlPath } from "./urlUtils"
+import { LunarContext, PageParams } from "../../lib/lunar-context"
+
 import { IncomingMessage } from "http"
 import { HTTPHeaders } from "../../lib/http-headers.server"
 
 export function makeSwiftContext(
   req: IncomingMessage,
   urlPath: string,
-  params: { [k: string]: string | undefined },
+  params: PageParams,
   requestHeaders: HTTPHeaders,
   responseHeaders: HTTPHeaders
 ): LunarContext {

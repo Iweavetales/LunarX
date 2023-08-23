@@ -46,6 +46,7 @@ The simplified & light SSR front framework, offering greater flexibility than Ne
 * Support for Go and Rust runtimes 
 * Multi-thread optimized server-side processing(for Deno,Bun runtime)
 * Enhanced features for front-end applications
+* Solid 
 
 
 # Getting Started

@@ -133,5 +133,25 @@ export default function (
     }
   }
 
+  // socket
+  const socket = new WebSocket(`ws://${location.host}/_hmr`)
+  console.log("Socket", socket)
+  socket.addEventListener("open", (event) => {
+    console.log("Socket Connected", socket)
+    socket.send("Hello Server!")
+  })
+  // Listen for messages
+  socket.addEventListener("message", (event) => {
+    console.log("Message from server ", event.data)
+  })
+
+  socket.addEventListener("close", (event) => {
+    console.log("WebSocket connection closed:", event)
+  })
+
+  socket.addEventListener("error", (event) => {
+    console.error("WebSocket error:", event)
+  })
+
   Startup()
 }

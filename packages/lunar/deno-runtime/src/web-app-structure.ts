@@ -58,7 +58,7 @@ export interface WebAppStructure {
   }
 }
 
-// class WebApp implements WebAppStructure {}
+// class WebApp implements ClientAppStructure {}
 
 const LibEntryFinder = {
   react: /^node_modules\/react\/index\.js/,
@@ -73,7 +73,7 @@ const LibEntryFinder = {
 /**
  * Check this SourceFile can be exposed client
  * 클라이언트에서 동작 할 소스코드가
- * WebAppStructure.ClientSourceFileMap 에 등록 될 때
+ * ClientAppStructure.ClientSourceFileMap 에 등록 될 때
  * 해당 소스파일이 클라이언트에 노출 되어도 괜찮은지를 체크 하는 함수
  * ex) app/lib/entry.server.tsx 파일은 서버사이드 랜더링에만 사용 되고,
  *     감춰진 API 를 호출 할 수도 있기 때문에 클라이언트에 노출 되어선 안된다.

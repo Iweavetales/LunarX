@@ -21,7 +21,7 @@ export default async function handleRequest(
    */
   React.useLayoutEffect = React.useEffect
 
-  console.log("documentSheet", documentSheet)
+  // console.log("documentSheet", documentSheet)
 
   // Render Document
   const enteredRouteData = JSON.stringify(
@@ -122,7 +122,6 @@ export default async function handleRequest(
     </DocumentWrapper>
   )
 
-  console.log("DocumentElement", DocumentElement)
   return `
     <!DOCTYPE html>
     ${reactDomServer.renderToString(DocumentElement)}

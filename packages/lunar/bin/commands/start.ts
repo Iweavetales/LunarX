@@ -1,6 +1,7 @@
 import { spawn } from "child_process"
 import { join } from "path"
 import { SupportingRuntime } from "../../lib/runtime"
+import type { LunarServer } from "../../node-runtime"
 
 export default async function Start(options: {
   runtime: SupportingRuntime
@@ -16,7 +17,6 @@ export default async function Start(options: {
     if (options.runtime == "deno") {
       const server = spawn("deno", [
         "run",
-
         "--allow-all",
         join(process.cwd(), options.buildDir, "deno-server.js"),
       ])
@@ -38,9 +38,10 @@ export default async function Start(options: {
         const module = await import(
           join(process.cwd(), options.buildDir, "node-server.js")
         )
-        const server = module.server
-        console.log("ss", server)
-        await server()
+        const Lunar = module.LunarServer as typeof LunarServer
+        const server = new Lunar({ BuildDir: options.buildDir })
+        await server.load()
+        await server.run()
 
         resolve(true)
       })()

@@ -1,11 +1,8 @@
-import { IncomingMessage, ServerResponse } from "http"
+import { ServerResponse } from "http"
 import { readFileSync, statSync } from "fs"
 import { getType } from "mime"
 
-export function writeFileToResponse(
-  filePath: string,
-  res: ServerResponse<IncomingMessage>
-) {
+export function writeFileToResponse(filePath: string, res: ServerResponse) {
   let fileSize
   try {
     const stat = statSync(filePath)

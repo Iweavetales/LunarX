@@ -1,4 +1,4 @@
-import { WebAppStructure } from "./WebAppStructure"
+import { ClientAppStructure } from "./client-app-structure"
 import { GetUrlPath } from "./urlUtils"
 import { GenerateRandomBytes } from "./random"
 import { DocumentSheet, UniversalRouteNode } from "../../lib/document-types"
@@ -7,17 +7,18 @@ import {
   FetchingServerSideRouteData,
   ServerSideFetchResult,
   ServerSideRouteFetchResult,
-} from "./FetchServerSideRouteData"
-import { makeSwiftContext } from "./SSRContext"
+} from "./fetch-server-side-route-data"
+import { makeSwiftContext } from "./ssr-context"
 import { IncomingMessage } from "http"
 import { EntryServerHandler } from "../../lib/types.server"
 import { HTTPHeaders } from "../../lib/http-headers.server"
+import { PageParams } from "../../lib/lunar-context"
 
 export function RenderPage(
   currentWorkDirectory: string,
-  webApp: WebAppStructure,
+  webApp: ClientAppStructure,
   req: IncomingMessage,
-  params: { [k: string]: string | undefined },
+  params: PageParams,
   /**
    * beginToTerminalRouteStem
    * 최상위 라우트 부터 최종적으로 매치된 라우트와 그 사이 라우트노드를 포함한 라우트 노드 배열
@@ -37,6 +38,12 @@ export function RenderPage(
 }> {
   // beginToTerminalRouteStem 의 역순으로 라우트 노드를 배열
   // const reverseRouteStem = ArrayClone(ascendFlatRouteNodeList).reverse();
+
+  /**
+   * 모든 라우트 노드들을 조회 하며
+   * 모든 라우터가 포함된 라우트 맵이 아닌
+   * 현재 매치된 라우트의 길만 포함 하는 라우트 노드 목록 생성
+   */
   const routeNodeMap: RouteNodeMap = {}
   for (let i = 0; i < ascendFlatRouteNodeList.length; i++) {
     const routeNode = ascendFlatRouteNodeList[i]
@@ -153,7 +160,7 @@ export function RenderPage(
           })
         )
 
-        console.log("fetchedDataList", fetchedDataList)
+        // console.log("fetchedDataList", fetchedDataList)
         const routeServerFetchesResultMap: {
           [pattern: string]: ServerSideRouteFetchResult | undefined
         } = {}
@@ -184,7 +191,7 @@ export function RenderPage(
           routeServerFetchesResultMap["_app"] = appServerSideFetchResult
         }
 
-        console.log("routeNodeMap", routeNodeMap)
+        // console.log("routeNodeMap", routeNodeMap)
 
         /**
          * router.server.tsx 를 실행해 리액트 라우터 컴포넌트 트리를 생성한다
@@ -194,35 +201,6 @@ export function RenderPage(
           routeNodeMap,
           getRouteModule
         )
-
-        console.log("router", router)
-        /**
-         * reverseRouteStem 를 사용해
-         * 모든 라우터가 포함된 라우트 맵이 아닌
-         * 현재 매치된 라우트의 길만 포함 하는 라우트 노드 생성
-         */
-        // let browserRouteNodeFragment: BrowserRouteNode | null = null;
-        // reverseRouteStem.forEach((node) => {
-        // 	if (browserRouteNodeFragment === null) {
-        // 		browserRouteNodeFragment = {
-        // 			pattern: node.routePattern,
-        // 			module: webApp.Manifest.entries[node.entryPath]
-        // 				.shardPath,
-        // 		};
-        // 	} else {
-        // 		/**
-        // 		 * 배열 요소 인덱스가 올라 갈수록 상위 라우터를 의미 하므로
-        // 		 * 현재 browserRouteNodeFragment 저장된 라우터 노드를 하위로 내리고
-        // 		 * browserRouteNodeFragment 에 현재 라우터 정보를 입력 한다.
-        // 		 */
-        // 		browserRouteNodeFragment = {
-        // 			pattern: node.routePattern,
-        // 			module: webApp.Manifest.entries[node.entryPath]
-        // 				.shardPath,
-        // 			children: [browserRouteNodeFragment],
-        // 		};
-        // 	}
-        // });
 
         try {
           /**
@@ -277,7 +255,7 @@ export function RenderPage(
             router
           )
 
-          console.log("result", result)
+          console.log("response lunar page")
 
           /**
            * Response 객체 생성
