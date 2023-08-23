@@ -17,9 +17,15 @@ importers:
       '@babel/preset-typescript':
         specifier: ^7.22.5
         version: 7.22.5(@babel/core@7.21.0)
-      '@lunargate/lunar':
+      '@lunargate/lunar-ts-plugin':
         specifier: workspace:*
-        version: link:packages/lunar
+        version: link:packages/tsconfig-plugin-lunar
+      '@types/react':
+        specifier: ^18.0.15
+        version: 18.0.15
+      '@types/react-dom':
+        specifier: ^18.0.6
+        version: 18.0.6
       '@typescript-eslint/eslint-plugin':
         specifier: ^5.62.0
         version: 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.47.0)(typescript@5.1.6)
@@ -56,6 +62,9 @@ importers:
       eslint-plugin-react-hooks:
         specifier: ^4.6.0
         version: 4.6.0(eslint@8.47.0)
+      lunarx:
+        specifier: workspace:*
+        version: link:packages/lunar
       playwright:
         specifier: ^1.37.1
         version: 1.37.1
@@ -80,6 +89,8 @@ importers:
       typescript:
         specifier: ^5.1.6
         version: 5.1.6
+
+  packages/create-lunar-app: {}
 
   packages/lunar:
     dependencies:
@@ -243,6 +254,12 @@ importers:
       yaml:
         specifier: ^2.1.1
         version: 2.1.1
+
+  packages/tsconfig-plugin-lunar:
+    devDependencies:
+      typescript:
+        specifier: ^5.1.6
+        version: 5.1.6
 
 packages:
 

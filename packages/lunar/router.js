@@ -1,1 +1,1 @@
-module.exports = require("./dist/src/router")
+module.exports = require("./dist/impl/react/router")

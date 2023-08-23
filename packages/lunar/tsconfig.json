@@ -4,6 +4,7 @@
     "module": "esnext",
     "target": "ES2017",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "moduleResolution": "node",
     "jsx": "react",
     "stripInternal": true,
@@ -14,7 +15,7 @@
   },
 
   //  "include": [
-  //    "ApplicationBuilder/src/index.ts"
+  //    "builder/src/index.ts"
   //  ],
   "exclude": [
     "node_modules/**/*",

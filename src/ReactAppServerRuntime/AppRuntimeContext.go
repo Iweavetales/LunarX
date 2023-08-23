@@ -51,10 +51,10 @@ func (appCtx *ReactAppRuntimeContext) Init() {
 }
 
 func (appCtx *ReactAppRuntimeContext) LoaderHelperScripts() {
-	content, err := os.ReadFile("./ApplicationBuilder/src/ssrHelpers/TextEncoding.js")
-	//content, err := os.ReadFile("./ApplicationBuilder/dist/ssrHelpers.js")
+	content, err := os.ReadFile("./builder/src/ssrHelpers/TextEncoding.js")
+	//content, err := os.ReadFile("./builder/dist/ssrHelpers.js")
 	if err != nil {
-		panic(fmt.Errorf("failed to read SSR Helper script check ApplicationBuilder build-helpers:%s\n", err.Error()))
+		panic(fmt.Errorf("failed to read SSR Helper script check builder build-helpers:%s\n", err.Error()))
 	}
 
 	val, err := appCtx.RunScript(fmt.Sprintf(`

@@ -7,8 +7,8 @@ const ts = require("typescript")
 module.exports = {
   *builder(task, opts) {
     yield esbuild.build({
-      entryPoints: ["ApplicationBuilder/src/index.ts"],
-      outfile: "dist/ApplicationBuilder/index.js",
+      entryPoints: ["builder/src/index.ts"],
+      outfile: "dist/builder/index.js",
       bundle: true,
       platform: "node",
       external: ["@swc", "esbuild"],
@@ -21,8 +21,8 @@ module.exports = {
 
   *nodeRuntime(task, opts) {
     yield esbuild.build({
-      entryPoints: ["nodeRuntime/index.ts"],
-      outfile: "dist/nodeRuntime/node-server.js",
+      entryPoints: ["node-runtime/index.ts"],
+      outfile: "dist/node-runtime/node-server.js",
       bundle: true,
       platform: "node",
       sourcemap: "external",
@@ -121,18 +121,18 @@ module.exports = {
 }
 // export async function builder(task, opts){
 //     // "build:builder": "npm run escape-lightningcss-error &&
-//     // esbuild ApplicationBuilder/src/index.ts
+//     // esbuild builder/src/index.ts
 //     // --bundle
 //     // --platform=node
-//     // --outfile=ApplicationBuilder/dist/builder.js
+//     // --outfile=builder/dist/builder.js
 //     // --external:esbuild
 //     // --external:@swc
 //     // --sourcemap=external
 //     // --loader:.node=file",
 //
 //     await esbuild.build({
-//         entryPoints: ["ApplicationBuilder/src/index.ts"],
-//         outfile: "dist/ApplicationBuilder/index.js",
+//         entryPoints: ["builder/src/index.ts"],
+//         outfile: "dist/builder/index.js",
 //         bundle: true,
 //         platform: "node",
 //         external:['@swc', 'esbuild'],

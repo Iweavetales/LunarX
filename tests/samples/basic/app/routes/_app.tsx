@@ -1,6 +1,7 @@
-import { SwiftRenderer } from "@lunargate/lunar/lunarApp"
+import { SwiftRenderer } from "lunarx/app"
 import React from "react"
-import { useServerFetches } from "@lunargate/lunar/serverFetches"
+import { useServerFetches } from "lunarx/ssfetch"
+
 export default () => {
   const fetches = useServerFetches()
 

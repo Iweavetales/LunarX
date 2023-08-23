@@ -1,4 +1,4 @@
-import { LunarContext } from "@lunargate/lunar/lunarContext"
+import { LunarContext } from "lunarx/context"
 export async function serverFetches(ctx: LunarContext) {
   // /client-session/info
 

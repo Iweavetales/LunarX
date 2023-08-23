@@ -5,32 +5,32 @@ export default async function Build(options: Record<any, any>) {
   console.log(options)
 
   /**
-   * Builds the user's application utilizing the ApplicationBuilder program (located at ApplicationBuilder/index.js).
+   * Builds the user's application utilizing the builder program (located at builder/index.js).
    * * The executable Lunar binary is constructed as the final step.
-   * * Hence, by the time the Lunar binary file begins its build process, ApplicationBuilder/index.js will already exist.
-   * The ApplicationBuilder from the lunar package is invoked to construct the user's application.
+   * * Hence, by the time the Lunar binary file begins its build process, builder/index.js will already exist.
+   * The builder from the lunar package is invoked to construct the user's application.
    */
-  await require("../../dist/ApplicationBuilder/index.js").build(() => {
+  await require("../../dist/builder/index.js").build(() => {
     console.log("built")
   })
 
   /**
-   * Copy the `denoRuntime.js` file from the `lunar` package to the dist directory where the application is built.
+   * Copy the `deno-runtime.js` file from the `lunar` package to the dist directory where the application is built.
    */
   copyFileSync(
-    join(__dirname, "../denoRuntime/deno-server.js"),
+    join(__dirname, "../deno-runtime/deno-server.js"),
     join(process.cwd(), "./dist/deno-server.js")
   )
 
   /**
-   * Copy the `denoRuntime.js` file from the `lunar` package to the dist directory where the application is built.
+   * Copy the `deno-runtime.js` file from the `lunar` package to the dist directory where the application is built.
    */
   copyFileSync(
-    join(__dirname, "../nodeRuntime/node-server.js"),
+    join(__dirname, "../node-runtime/node-server.js"),
     join(process.cwd(), "./dist/node-server.js")
   )
   copyFileSync(
-    join(__dirname, "../nodeRuntime/node-server.js.map"),
+    join(__dirname, "../node-runtime/node-server.js.map"),
     join(process.cwd(), "./dist/node-server.js.map")
   )
 }

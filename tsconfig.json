@@ -17,7 +17,9 @@
     "baseUrl": "./app",
     "typeRoots": ["./node_modules/@types", " ./app/types"],
     "paths": {},
-    "plugins": [],
+    "plugins": [{
+      "transform": "@lunargate/lunar-ts-plugin"
+    }],
     "sourceMap": true
   },
   "include": ["commonLib/Manifest.d.ts", "**/*.ts", "**/*.tsx"],

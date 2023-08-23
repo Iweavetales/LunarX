@@ -1,1 +1,1 @@
-module.exports = require("./dist/src/head")
+module.exports = require("./dist/impl/react/head")

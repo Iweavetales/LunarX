@@ -1,3 +1,3 @@
-import Router from "./dist/src/router"
-export * from "./dist/src/router"
+import Router from "./dist/impl/react/router"
+export * from "./dist/impl/react/router"
 export default Router

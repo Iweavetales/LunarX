@@ -1,7 +1,7 @@
 {
-  "name": "@lunargate/lunar",
+  "name": "lunarx",
   "version": "0.0.2",
-  "description": "The LunarGate that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
+  "description": "The Lunar that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
   "main": "index.js",
   "scripts": {
     "clean-lunar-dist": "pnpm run clean",
@@ -10,10 +10,9 @@
     "prepublishOnly": "pnpm run clean && cd ../../ && turbo run build",
     "release": "taskr release",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deno-runtime-fmt": "deno fmt ./packages/LunarGate/denoRuntime/",
-    "deno-runtime-lint": "deno lint ./packages/LunarGate/denoRuntime/",
-    "deno-runtime": "NODE_ENV=development deno run --allow-all packages/LunarGate/denoRuntime/index.ts ",
-    "build:deno-runtime": "mkdir -p ./dist/denoRuntime/ && deno bundle ./denoRuntime/index.ts ./dist/denoRuntime/deno-server.js"
+    "deno-runtime-fmt": "deno fmt ./packages/LunarGate/deno-runtime/",
+    "deno-runtime-lint": "deno lint ./packages/LunarGate/deno-runtime/",
+    "build:deno-runtime": "mkdir -p ./dist/deno-runtime/ && deno bundle ./deno-runtime/index.ts ./dist/deno-runtime/deno-server.js"
   },
   "author": "Iweavetales",
   "license": "MIT",
@@ -21,20 +20,21 @@
     "lunar": "./dist/bin/lunar"
   },
   "files": [
-    "dist",
+    "dist/",
+    "react/",
     "config.d.ts",
     "document.d.ts",
     "document.js",
     "head.d.ts",
     "head.js,",
-    "lunarApp.d.ts",
-    "lunarApp.js",
-    "lunarContext.d.ts",
-    "lunarContext.js,",
+    "app.d.ts",
+    "app.js",
+    "context.d.ts",
+    "context.js,",
     "router.d.ts",
     "router.js",
-    "serverFetches.d.ts",
-    "serverFetches.js"
+    "ssfetch.d.ts",
+    "ssfetch.js"
   ],
   "dependencies": {
     "esbuild": "^0.19.1",

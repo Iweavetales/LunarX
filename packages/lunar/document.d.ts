@@ -1,3 +1,3 @@
-import document from "./dist/src/document"
-export * from "./dist/src/document"
+import document from "./dist/impl/react/document"
+export * from "./dist/impl/react/document"
 export default document

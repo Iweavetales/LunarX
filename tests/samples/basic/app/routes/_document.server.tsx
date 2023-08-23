@@ -1,10 +1,6 @@
-import { LunarContext } from "@lunargate/lunar/lunarContext"
-import React, { StrictMode } from "react"
-import {
-  Bootstrap,
-  DocumentLinks,
-  DocumentScripts,
-} from "@lunargate/lunar/document"
+import { LunarContext } from "lunarx/context"
+import React from "react"
+import { Bootstrap, DocumentLinks, DocumentScripts } from "lunarx/document"
 import reactDomServer from "react-dom/server"
 // import { ServerStyleSheet } from 'styled-components';
 
