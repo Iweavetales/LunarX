@@ -3,11 +3,12 @@
  *
  * 브라우저 상에서 샤드 스크립트를 로드하고 제공 하는 스크립트
  */
-
+type RequireFunction = (deps: string[]) => any
+type ModuleFactory = (...deps: string[]) => any
 type ModuleContent = {
   name: string
   deps: string[]
-  moduleFactory: (deps: string, require: any) => any
+  moduleFactory: ModuleFactory
 }
 ;(function () {
   const moduleMap: { [absoluteModulePath: string]: ModuleContent } = {}
@@ -82,7 +83,7 @@ type ModuleContent = {
     return editing
   }
 
-  function _define(moduleName: string, deps: string[], factory: any) {
+  function _define(moduleName: string, deps: string[], factory: ModuleFactory) {
     console.log("shard define", moduleName)
     moduleMap[moduleName] = {
       name: moduleName,
@@ -108,14 +109,22 @@ type ModuleContent = {
     return false
   }
 
-  function moduleCall(moduleContent: ModuleContent, _callback: () => any) {
-    console.log("shard called", moduleContent.name, moduleContent)
-    const deps = moduleContent.deps
-    const moduleName = moduleContent.name
+  type ModuleMeta = {
+    name: string
+    deps: string[]
+  }
+  function moduleCall(
+    moduleMeta: ModuleMeta,
+    _callback: (module: ModuleContent) => void
+  ) {
+    console.log("shard called", moduleMeta.name, moduleMeta)
+    const deps = moduleMeta.deps
+    const moduleName = moduleMeta.name
 
-    if (loadedModule[moduleContent.name]) {
-      console.log("cached module", moduleContent.name, moduleContent)
-      return _callback(loadedModule[moduleContent.name])
+    if (loadedModule[moduleMeta.name]) {
+      console.log("cached module", moduleMeta.name, moduleMeta)
+      _callback(loadedModule[moduleMeta.name])
+      return
     }
 
     const targetModuleContents = deps.map((depModuleName) => {
@@ -138,7 +147,7 @@ type ModuleContent = {
 
     const exportObject = {}
     let hasSubModuleCall = false
-    targetModuleContents.forEach((content, i) => {
+    targetModuleContents.forEach((content: any, i: number) => {
       if (content === "exports") {
         loadedModules[i] = exportObject
       } else if (content === "require") {
@@ -149,7 +158,7 @@ type ModuleContent = {
          * @param callback
          */
         loadedModules[i] = (moduleNames: string[], callback: () => any) =>
-          _require(moduleNames, callback, moduleContent.name)
+          _require(moduleNames, callback, moduleMeta.name)
       } else {
         hasSubModuleCall = true
 
@@ -163,9 +172,9 @@ type ModuleContent = {
             /**
              * 모듈을 가져 온다
              */
-            moduleContent.moduleFactory(...loadedModules)
+            moduleMeta.moduleFactory(...loadedModules)
             // 모듈 캐시 저장
-            loadedModule[moduleContent.name] = exportObject
+            loadedModule[moduleMeta.name] = exportObject
             // 모듈 반환
             _callback(exportObject)
           }
@@ -175,46 +184,12 @@ type ModuleContent = {
 
     // 서브 모듈 호출이 없다면 즉시 모듈 반환 콜백 호출
     if (hasSubModuleCall === false) {
-      moduleContent.moduleFactory(...loadedModules)
+      moduleMeta.moduleFactory(...loadedModules)
       // 모듈 캐시 저장
-      loadedModule[moduleContent.name] = exportObject
+      loadedModule[moduleMeta.name] = exportObject
       // 모듈 반환
       _callback(exportObject)
     }
-    //
-    // let exportObject = {}
-    // for (let i = 0; i < deps.length; i++) {
-    //   /**
-    //    * 콜백에서 i 를 참조 할 수 없기 떄문에 i 의 값을 미리 복사 해둠
-    //    */
-    //   let indexCopy = i;
-    //
-    //   /**
-    //    * 참조 모듈 상대경로
-    //    */
-    //   let dep = deps[i];
-    //   if (dep === "exports") {
-    //     loadedModules[indexCopy] = exportObject;
-    //   } else if (dep === "require") {
-    //     loadedModules[indexCopy] = _require
-    //   } else {
-    //     let absoluteModulePath = resolvePath(moduleContent.name, dep)
-    //     let referencingModuleContent = moduleMap[absoluteModulePath]
-    //
-    //     moduleCall(referencingModuleContent, (module) => {
-    //       loadedModules[indexCopy] = module
-    //
-    //       console.log('ref module loaded', referencingModuleContent.name, loadedModules)
-    //
-    //       /**
-    //        * 모든 모듈이 로드 완료 되었는지 체크
-    //        */
-    //       if (HasArrayUndefinedElement(loadedModules) === false) {
-    //         _callback(exportObject)
-    //       }
-    //     })
-    //   }
-    // }
   }
 
   /**
@@ -223,7 +198,11 @@ type ModuleContent = {
    * @param _callback
    * @param _from 모듈 호출 위치
    */
-  function _require(deps: string[], _callback, _from: string | null = null) {
+  function _require(
+    deps: string[],
+    _callback: (modules: any[]) => any,
+    _from: string | null = null
+  ) {
     const loadedModules = new Array(deps.length)
 
     const targetModuleContents = deps.map((moduleName) => {

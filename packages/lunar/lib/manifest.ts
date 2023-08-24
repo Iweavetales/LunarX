@@ -18,13 +18,18 @@ export type ShardSourceType =
   | "mapFile"
   | "unknown"
 
+/**
+ * ShardPath is an absolute path that starts from dist/[client|esm|cjs]/.
+ */
+export type ShardPath = string
+
 export type BuiltShardInfo = {
   isEntry: boolean
   isChunk: boolean
   isServerSideShard: boolean
   serverSideOutputPath: string // esm output 경로
   clientSideOutputPath: string | undefined // cjs output 경로
-  shardPath: string
+  shardPath: ShardPath
   type: ShardSourceType
   fileSize: {
     amd?: number

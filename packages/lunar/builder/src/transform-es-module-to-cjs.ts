@@ -42,5 +42,7 @@ export async function TransformEsModuleToCjs(
   return {
     size: result.code.length,
     name: cjsFileName,
+    mapData: result.map,
+    codeData: result.code,
   }
 }

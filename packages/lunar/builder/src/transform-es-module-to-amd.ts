@@ -6,7 +6,7 @@ import chalk from "chalk"
 import { LunarConfig } from "../../lib/lunar-config"
 import { transformFileSync as swcTransformFileSync } from "@swc/core"
 
-export function TransformEsModuleToAmd(
+export async function TransformEsModuleToAmd(
   transpiler: "babel" | "swc",
   outputShardPath: string,
   normalizedRelativePath: string,
@@ -17,7 +17,7 @@ export function TransformEsModuleToAmd(
 
   if (transpiler === "swc") {
     console.log(chalk.bgBlue("BUILD with SWC"))
-    const result = swcTransformFileSync(outputShardPath, {
+    const result = await swcTransformFileSync(outputShardPath, {
       // Some options cannot be specified in .swcrc
       filename: normalizedRelativePath,
       sourceMaps: process.env.NODE_ENV === "production" ? false : true,
@@ -54,7 +54,7 @@ export function TransformEsModuleToAmd(
     // cjsTranspiler === "babel"
     console.log(chalk.bgBlue("BUILD with Babel"))
 
-    const compiled = babelTransformFileSync(outputShardPath, {
+    const compiled = await babelTransformFileSync(outputShardPath, {
       plugins: [
         pluginTransformModulesAmd,
         [
@@ -85,6 +85,12 @@ export function TransformEsModuleToAmd(
       inputSourceMap: JSON.parse((esmSourceMapFile || "{}").toString()),
     })
 
-    return { code: compiled?.code, map: JSON.stringify(compiled?.map) }
+    if (compiled) {
+      return {
+        code: compiled?.code,
+        map: JSON.stringify(compiled?.map),
+      }
+    }
   }
+  return {}
 }

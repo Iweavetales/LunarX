@@ -1,7 +1,9 @@
 import { Metafile } from "esbuild"
 
 export enum DiffStatus {
+  UN_CHANGED,
   ADDED,
+  MODIFIED,
   DELETED,
 }
 export type DiffResult = {

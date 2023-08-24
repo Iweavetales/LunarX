@@ -2,6 +2,7 @@ import {
   BuiltShardInfo,
   LunarJSManifest,
   ShardSourceType,
+  ShardPath,
 } from "../../lib/manifest"
 import { Metafile } from "esbuild"
 import { DiffMetaOutput, DiffResult, DiffStatus } from "./meta-file"
@@ -11,13 +12,7 @@ import {
   ResultOfDetermineServerSideShard,
 } from "./server-side-script"
 import chalk from "chalk"
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from "fs"
+import { copyFileSync, readFileSync, writeFileSync } from "fs"
 import { TransformEsModuleToCjs } from "./transform-es-module-to-cjs"
 import { TransformEsModuleToAmd } from "./transform-es-module-to-amd"
 import { obfuscate } from "javascript-obfuscator"
@@ -30,6 +25,22 @@ import { BuildRouteNodeMap } from "./routing"
 import { GetBrowserModuleLoaderScript } from "./script-transpile"
 import { ensureDirectoryExists } from "./directory"
 
+enum ModuleType {
+  CommonJS,
+  AMD,
+  ESM,
+}
+
+type ProcessResultRecordsMap = {
+  [shardPath: ShardPath]: ProcessResultRecord[]
+}
+type ProcessResultRecord = {
+  moduleType?: ModuleType
+  resultSize: number
+  codeData?: string
+  mapData?: string
+  data?: Buffer
+}
 export type ProcessingOptions = {
   esmDirectory: string
   cjsDirectory: string
@@ -42,13 +53,19 @@ type MetafileOutputKey = keyof Metafile["outputs"]
 type MetafileOutputInfo = Metafile["outputs"][MetafileOutputKey]
 
 export class PostProcessor {
-  manifest: LunarJSManifest
+  manifest!: LunarJSManifest
   oldMeta: Metafile
   options: ProcessingOptions
   config: LunarConfig
 
   constructor(config: LunarConfig, options: ProcessingOptions) {
     this.oldMeta = { inputs: {}, outputs: {} }
+    this.initManifest()
+    this.options = options
+    this.config = config
+  }
+
+  initManifest() {
     this.manifest = {
       entries: {},
       chunks: {},
@@ -57,8 +74,6 @@ export class PostProcessor {
       browserModuleLoaderFilePath: "",
       builtVersion: Date.now().toString(36),
     }
-    this.options = options
-    this.config = config
   }
 
   warnIfAmbiguousServerSideShard(
@@ -76,95 +91,129 @@ export class PostProcessor {
     }
   }
 
-  private async processStylesheet(outputShardPath: string) {
+  private async processStylesheet(
+    outputPath: string
+  ): Promise<ProcessResultRecord[]> {
+    const processResultRecords: ProcessResultRecord[] = []
+
     // stylesheet 는 esm to cjs 디렉토리로 복사만 수행
-    // console.log(chalk.blue(`Copy stylesheet shard ${outputShardPath}`));
-    const from = outputShardPath
+    // console.log(chalk.blue(`Copy stylesheet shard ${outputPath}`));
+    const from = outputPath
     const to = from.replace(/^dist\/esm/, "dist/client/")
     const targetDirectory = dirname(to)
-    if (!existsSync(targetDirectory)) {
-      mkdirSync(targetDirectory, { recursive: true })
-    }
+
+    ensureDirectoryExists(targetDirectory)
     copyFileSync(from, to)
 
     // map 파일도 복사
     if (process.env.NODE_ENV === "development") {
-      const from = outputShardPath + ".map"
+      const from = outputPath + ".map"
       const to = from.replace(/^dist\/esm/, "dist/client/")
 
       copyFileSync(from, to)
     }
+
+    return processResultRecords
   }
 
-  private async processCopyAsPublic(outputShardPath: string) {
-    const from = outputShardPath
+  private async processCopyAsPublic(
+    outputPath: string
+  ): Promise<ProcessResultRecord[]> {
+    const processResultRecords: ProcessResultRecord[] = []
+
+    const from = outputPath
     const to = from.replace(/^dist\/esm/, "dist/client/")
     copyFileSync(from, to)
+
+    return processResultRecords
   }
 
   private async processJavascript(
-    outputShardPath: string,
+    outputPath: string,
     normalizedRelativePath: string,
     esmSourceMapFile: Buffer | null,
     serverSideShardInfo: ResultOfDetermineServerSideShard
-  ) {
+  ): Promise<ProcessResultRecord[]> {
+    const processResultRecord: ProcessResultRecord[] = []
     // Transform for node-runtime CJS whether shard is server-side shard or not
-    const { size: cjsFileSize } = await TransformEsModuleToCjs(
-      outputShardPath,
+    const {
+      size: cjsFileSize,
+      codeData,
+      mapData,
+    } = await TransformEsModuleToCjs(
+      outputPath,
       normalizedRelativePath,
       esmSourceMapFile
     )
+
+    processResultRecord.push({
+      resultSize: cjsFileSize,
+      moduleType: ModuleType.CommonJS,
+      codeData: codeData,
+      mapData: mapData,
+    })
 
     if (serverSideShardInfo.isServerSideShard === false) {
       /**
        * Transform to AMD for client
        */
-      const transpiledESMSource = TransformEsModuleToAmd(
+      const transpiledESMSource = await TransformEsModuleToAmd(
         this.config.build.cjsTranspiler,
-        outputShardPath,
+        outputPath,
         normalizedRelativePath,
         esmSourceMapFile,
         this.config
       )
 
-      // console.log('transpiledESMSource', transpiledESMSource);
+      if (!transpiledESMSource.code) {
+        console.error("failed to transform esm to amd", outputPath)
+        return processResultRecord
+      }
 
-      const cjsFileName = outputShardPath.replace(/^dist\/esm/, "dist/client")
+      processResultRecord.push({
+        resultSize: transpiledESMSource.code?.length ?? 0,
+        moduleType: ModuleType.AMD,
+        codeData: transpiledESMSource.code ?? undefined,
+        mapData: transpiledESMSource.map,
+      })
+
+      const cjsFileName = outputPath.replace(/^dist\/esm/, "dist/client")
       const cjsMapFileName = cjsFileName + ".map"
 
       const targetDirectory = dirname(cjsFileName)
-      if (!existsSync(targetDirectory)) {
-        mkdirSync(targetDirectory, { recursive: true })
-      }
+      ensureDirectoryExists(targetDirectory)
 
-      if (transpiledESMSource?.code) {
-        // 트랜스파일된 파일내용을 디스크에 쓴다
+      // 트랜스파일된 파일내용을 디스크에 쓴다
 
-        writeFileSync(
-          cjsFileName,
-          this.config.build.obfuscate
-            ? obfuscate(
-                transpiledESMSource.code,
-                defaultObfuscateOptions
-              ).getObfuscatedCode()
-            : transpiledESMSource.code
-        )
+      writeFileSync(
+        cjsFileName,
+        this.config.build.obfuscate
+          ? obfuscate(
+              transpiledESMSource.code,
+              defaultObfuscateOptions
+            ).getObfuscatedCode()
+          : transpiledESMSource.code
+      )
 
-        if (transpiledESMSource.map) {
-          // 트랜스파일된 소스맵을 디스크에 쓴다
-          writeFileSync(cjsMapFileName, transpiledESMSource.map)
-        }
+      if (transpiledESMSource.map) {
+        // 트랜스파일된 소스맵을 디스크에 쓴다
+        writeFileSync(cjsMapFileName, transpiledESMSource.map)
       }
     } else {
       // server side shard 라면
     }
+
+    return processResultRecord
   }
 
   private async processingOutputs(
     diffResult: DiffResult,
     outputInfo: MetafileOutputInfo,
-    outputShardPath: string
-  ) {
+    outputPath: string
+  ): Promise<{
+    shardPath: ShardPath
+    processResultRecords: ProcessResultRecord[]
+  }> {
     /**
      * 빌드된 스크립트의 상대 경로
      *  dist/esm/app/routes/importtest.js -> app\routes\importtest.js
@@ -172,23 +221,22 @@ export class PostProcessor {
      *
      *  esm 형식이나 cjs 형식이나 상대경로는 동일 하다
      */
-    const outputRelativePath = relative(
-      this.options.esmDirectory,
-      outputShardPath
-    )
+    const outputRelativePath = relative(this.options.esmDirectory, outputPath)
 
-    const normalizedRelativePath = normalizePath(outputRelativePath)
+    const normalizedRelativePath: ShardPath = normalizePath(outputRelativePath)
 
     // map 파일 여부
     const isMapFile = checkMapFile(normalizedRelativePath)
     if (isMapFile) {
-      // nothing to do for .map file
-      return
+      /**
+       * There's nothing to do with the .map file because it is processed by each source processor.
+       */
+      return {
+        shardPath: normalizedRelativePath,
+        processResultRecords: [],
+      }
     }
 
-    /**
-     * map file 이 아니면 분류를 시작합니다
-     */
     const entryPoint = outputInfo.entryPoint
     const inputs = outputInfo.inputs
 
@@ -213,29 +261,30 @@ export class PostProcessor {
       normalizedRelativePath
     )
 
+    let processResultRecords: ProcessResultRecord[] = []
     /**
      * ADDED 일때만 트랜스파일 or 카피 를 수행 한다
      */
     if (diffResult && diffResult.status === DiffStatus.ADDED) {
-      console.log(chalk.greenBright(`ADDED ESM shard ${outputShardPath}`))
+      console.log(chalk.greenBright(`ADDED ESM shard ${outputPath}`))
 
       const esmSourceMapFile =
         process.env.NODE_ENV === "production"
           ? null
-          : readFileSync(outputShardPath + ".map")
+          : readFileSync(outputPath + ".map")
 
       if (moduleType === "javascript") {
-        await this.processJavascript(
-          outputShardPath,
+        processResultRecords = await this.processJavascript(
+          outputPath,
           normalizedRelativePath,
           esmSourceMapFile,
           serverSideShardInfo
         )
       } else if (moduleType === "stylesheet") {
-        await this.processStylesheet(outputShardPath)
+        processResultRecords = await this.processStylesheet(outputPath)
       } else if (moduleType === "unknown") {
         // Copy shard to be accessed by client
-        await this.processCopyAsPublic(outputShardPath)
+        processResultRecords = await this.processCopyAsPublic(outputPath)
       }
     }
 
@@ -253,34 +302,35 @@ export class PostProcessor {
         entryFileName: entryFilename, //ex) entry.server.js
         entryName: entryFilename!.replace(/\.[a-zA-Z]+$/, ""), //ex) entry.server
         entryFileRelativeDir: entryFilepathTokens.join("/"),
-        fileSize: {},
 
         shardPath: normalizedRelativePath,
         isServerSideShard: serverSideShardInfo.isServerSideShard,
         isEntry: true,
         isChunk: false,
-        serverSideOutputPath: outputShardPath,
+        serverSideOutputPath: outputPath,
         clientSideOutputPath: serverSideShardInfo.isServerSideShard
           ? undefined
-          : outputShardPath.replace("esm", "client"),
+          : outputPath.replace("esm", "client"),
       } as BuiltShardInfo
     } else {
       // chunks
 
-      this.manifest.chunks[outputShardPath] = {
+      this.manifest.chunks[outputPath] = {
         shardPath: normalizedRelativePath,
         isServerSideShard: serverSideShardInfo.isServerSideShard,
         isEntry: true,
         isChunk: false,
         type: moduleType,
-        serverSideOutputPath: outputShardPath,
+        serverSideOutputPath: outputPath,
         clientSideOutputPath: serverSideShardInfo.isServerSideShard
           ? undefined
-          : outputShardPath.replace("esm", "client"),
+          : outputPath.replace("esm", "client"),
 
         fileSize: {},
       }
     }
+
+    return { shardPath: normalizedRelativePath, processResultRecords }
   }
 
   async setupClientLoaderScript() {
@@ -327,30 +377,39 @@ export class PostProcessor {
   }
 
   async run(meta: Metafile) {
-    const diffResult = DiffMetaOutput(
+    this.initManifest()
+
+    const diffResults = DiffMetaOutput(
       this.oldMeta || { outputs: {}, inputs: {} },
       meta
     )
 
-    const outputShardPaths = Object.keys(meta.outputs)
+    const outputPaths = Object.keys(meta.outputs)
 
+    const updatedShardPaths: ShardPath[] = []
     /**
      * Processing serial each output shard with Promise
      */
     const processingResults = await Promise.all(
-      outputShardPaths.map((outputShardPath) => {
-        const outputDiffStatus = diffResult[outputShardPath]
-        const outputInfo = meta.outputs[outputShardPath]
+      outputPaths.map(async (outputPath) => {
+        const outputDiffStatus = diffResults[outputPath]
+        const outputInfo = meta.outputs[outputPath]
 
-        return this.processingOutputs(
+        // return ProcessResultRecordsMap
+        const result = await this.processingOutputs(
           outputDiffStatus,
           outputInfo,
-          outputShardPath
+          outputPath
         )
+
+        switch (outputDiffStatus.status) {
+          case DiffStatus.ADDED:
+          case DiffStatus.MODIFIED:
+            updatedShardPaths.push(result.shardPath)
+            break
+        }
       })
     )
-
-    console.log("processingResults", processingResults)
 
     const entryKeys = Object.keys(this.manifest.entries)
     entryKeys.forEach((key) => {
@@ -371,15 +430,15 @@ export class PostProcessor {
     })
 
     /**
-     * 라우트 노드맵 생성
+     * Generate route node map
      */
     const routeNodes = BuildRouteNodeMap(this.manifest.entries)
     this.manifest.routeNodes = routeNodes
 
-    // 추가 스크립트 설치
+    // Setup client loader script to dist/client
     await this.setupClientLoaderScript()
 
-    // manifest 쓰기
+    // Write manifest as file for server-runtime
     writeFileSync(
       join(this.options.distDirectoryPath, "manifest.json"),
       JSON.stringify(this.manifest)
@@ -388,8 +447,10 @@ export class PostProcessor {
     this.oldMeta = meta
 
     /**
-     * Meta 쓰기
+     * Write Meta as file
      */
     writeFileSync(this.options.absoluteESMMetafilePath, JSON.stringify(meta))
+
+    return { updatedShardPaths, manifest: this.manifest }
   }
 }
