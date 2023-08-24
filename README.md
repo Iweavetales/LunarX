@@ -30,15 +30,15 @@ The simplified & light SSR front framework, offering greater flexibility than Ne
 * Loosely coupled with the framework
 
 ## Features 
-* Supports Deno runtime
+* Supports Deno runtime ( in progress )
 * File based routing
 * Nested routing
 * Scroll position memory
-* Server-side rendering (note: this seems repetitive given the React SSR mention)
-* TypeScript support
+* Server-side rendering  
 * Supports NodeJS runtime
+* Page reload on edit
 * SEO (in progress)
-* HMR (in progress)
+* Fast Refresh aka. HMR (in progress)
 
 ## Future Enhancements
 * Highly customizable with both shallow and deep modifications
@@ -46,14 +46,20 @@ The simplified & light SSR front framework, offering greater flexibility than Ne
 * Support for Go and Rust runtimes 
 * Multi-thread optimized server-side processing(for Deno,Bun runtime)
 * Enhanced features for front-end applications
-* Solid 
+* SolidJS
 
 
 # Getting Started
 
 ```shell
-pnpx create-lunarx-app example
+# pnpx create-lunarx-app example ( Unavailable yet )
+lunar dev 
+lunar start 
+lunar build
 ```
+
+## Project structure 
+You could refer `/examples/basic` or `/tests/samples/basic` for now.
 
 # Architecture
 ## Response-Render Pipeline
