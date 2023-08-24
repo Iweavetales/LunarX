@@ -34,7 +34,7 @@ The simplified & light SSR front framework, offering greater flexibility than Ne
 * File based routing
 * Nested routing
 * Scroll position memory
-* Server-side rendering  
+* Server-side fetching
 * Supports NodeJS runtime
 * Page reload on edit
 * SEO (in progress)
