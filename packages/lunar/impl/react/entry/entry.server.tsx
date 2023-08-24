@@ -42,7 +42,7 @@ export default async function handleRequest(
             var APP_DATA = {rd:${enteredRouteData}, ascRouteNodes:${ascRouteNode}};
             
             require([${browserEntryModulePathArgument}], function (modules) {
-              modules[0].default(APP_DATA, ${ascRouteNode}, ${customAppModuleShardPathArgument}, require)
+              modules[0].default(APP_DATA, ${ascRouteNode}, ${customAppModuleShardPathArgument}, ${browserEntryModulePathArgument}, require)
             })
           })()`
 

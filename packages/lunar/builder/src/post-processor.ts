@@ -41,13 +41,14 @@ type ProcessResultRecord = {
   mapData?: string
   data?: Buffer
 }
+
 export type ProcessingOptions = {
   esmDirectory: string
   cjsDirectory: string
   absoluteCJSMetafilePath: string
   absoluteESMMetafilePath: string
   distDirectoryPath: string
-  builtNoticeCallback: () => void
+  builtNoticeCallback: (updatedShardPaths: string[]) => void
 }
 type MetafileOutputKey = keyof Metafile["outputs"]
 type MetafileOutputInfo = Metafile["outputs"][MetafileOutputKey]
@@ -402,11 +403,13 @@ export class PostProcessor {
           outputPath
         )
 
-        switch (outputDiffStatus.status) {
-          case DiffStatus.ADDED:
-          case DiffStatus.MODIFIED:
-            updatedShardPaths.push(result.shardPath)
-            break
+        if (outputDiffStatus) {
+          switch (outputDiffStatus.status) {
+            case DiffStatus.ADDED:
+            case DiffStatus.MODIFIED:
+              updatedShardPaths.push(result.shardPath)
+              break
+          }
         }
       })
     )

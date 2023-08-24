@@ -113,13 +113,14 @@ type ModuleContent = {
     name: string
     deps: string[]
   }
-  function moduleCall(
-    moduleMeta: ModuleMeta,
-    _callback: (module: ModuleContent) => void
-  ) {
+  type ModuleCallback = (module: ModuleContent) => void
+  type ModuleNamesCallback = (
+    moduleNames: string[],
+    callback: () => any
+  ) => void
+
+  function moduleCall(moduleMeta: ModuleMeta, _callback: ModuleCallback): void {
     console.log("shard called", moduleMeta.name, moduleMeta)
-    const deps = moduleMeta.deps
-    const moduleName = moduleMeta.name
 
     if (loadedModule[moduleMeta.name]) {
       console.log("cached module", moduleMeta.name, moduleMeta)
@@ -127,69 +128,100 @@ type ModuleContent = {
       return
     }
 
-    const targetModuleContents = deps.map((depModuleName) => {
-      if (depModuleName === "exports") {
-        return depModuleName
-      } else if (depModuleName === "require") {
-        return depModuleName
-      } else {
-        const absoluteModulePath = resolvePath(moduleName, depModuleName)
-        const referencingModuleContent = moduleMap[absoluteModulePath]
-
-        if (referencingModuleContent) {
-          return referencingModuleContent
-        }
-
-        throw new Error(`Module[${moduleName}] not found.`)
-      }
-    })
-    const loadedModules = new Array(deps.length)
-
+    const targetModuleContents = getTargetModuleContents(moduleMeta)
+    const loadedModules = new Array(targetModuleContents.length)
     const exportObject = {}
+
+    handleSubModules(
+      targetModuleContents,
+      loadedModules,
+      moduleMeta,
+      exportObject,
+      _callback
+    )
+  }
+
+  function getTargetModuleContents(moduleMeta: ModuleMeta): any[] {
+    return moduleMeta.deps.map((depModuleName) => {
+      if (["exports", "require"].includes(depModuleName)) {
+        return depModuleName
+      }
+      const absoluteModulePath = resolvePath(moduleMeta.name, depModuleName)
+      const referencingModuleContent = moduleMap[absoluteModulePath]
+
+      if (referencingModuleContent) {
+        return referencingModuleContent
+      }
+
+      throw new Error(`Module[${moduleMeta.name}] not found.`)
+    })
+  }
+
+  function handleSubModules(
+    targetModuleContents: any[],
+    loadedModules: any[],
+    moduleMeta: ModuleMeta,
+    exportObject: any,
+    _callback: ModuleCallback
+  ): void {
     let hasSubModuleCall = false
-    targetModuleContents.forEach((content: any, i: number) => {
+
+    targetModuleContents.forEach((content, i) => {
       if (content === "exports") {
         loadedModules[i] = exportObject
       } else if (content === "require") {
-        /**
-         * 모듈 내에서 사용된 require 는 모듈의 위치 기준으로 상대 경로로 호출 되기 때문에
-         * 호출한 모듈의 경로를 입력한 함수로 전달
-         * @param moduleNames
-         * @param callback
-         */
-        loadedModules[i] = (moduleNames: string[], callback: () => any) =>
-          _require(moduleNames, callback, moduleMeta.name)
+        loadedModules[i] = createModuleNamesCallback(moduleMeta)
       } else {
         hasSubModuleCall = true
-
-        moduleCall(content, (module: any) => {
-          loadedModules[i] = module
-
-          /**
-           * 모든 모듈이 로드 완료 되었는지 체크
-           */
-          if (HasArrayUndefinedElement(loadedModules) === false) {
-            /**
-             * 모듈을 가져 온다
-             */
-            moduleMeta.moduleFactory(...loadedModules)
-            // 모듈 캐시 저장
-            loadedModule[moduleMeta.name] = exportObject
-            // 모듈 반환
-            _callback(exportObject)
-          }
-        })
+        handleModuleContent(
+          content,
+          loadedModules,
+          i,
+          moduleMeta,
+          exportObject,
+          _callback
+        )
       }
     })
 
-    // 서브 모듈 호출이 없다면 즉시 모듈 반환 콜백 호출
-    if (hasSubModuleCall === false) {
-      moduleMeta.moduleFactory(...loadedModules)
-      // 모듈 캐시 저장
-      loadedModule[moduleMeta.name] = exportObject
-      // 모듈 반환
-      _callback(exportObject)
+    if (!hasSubModuleCall) {
+      finalizeModule(moduleMeta, loadedModules, exportObject, _callback)
     }
+  }
+
+  function createModuleNamesCallback(
+    moduleMeta: ModuleMeta
+  ): ModuleNamesCallback {
+    return (moduleNames: string[], callback: () => any) =>
+      _require(moduleNames, callback, moduleMeta.name)
+  }
+
+  function handleModuleContent(
+    content: any,
+    loadedModules: any[],
+    index: number,
+    moduleMeta: ModuleMeta,
+    exportObject: any,
+    _callback: ModuleCallback
+  ): void {
+    moduleCall(content, (module) => {
+      loadedModules[index] = module
+
+      if (!HasArrayUndefinedElement(loadedModules)) {
+        finalizeModule(moduleMeta, loadedModules, exportObject, _callback)
+      }
+    })
+  }
+
+  function finalizeModule(
+    moduleMeta: ModuleMeta,
+    loadedModules: any[],
+    exportObject: any,
+    _callback: ModuleCallback
+  ): void {
+    moduleMeta.moduleFactory(...loadedModules)
+    loadedModule[moduleMeta.name] = exportObject
+    _callback(exportObject)
   }
 
   /**

@@ -26,12 +26,14 @@ const plugin: TranspilePlugin = (config, options) => {
         q.push(async (cb) => {
           ensureDirectoryExists(options.distDirectoryPath)
 
-          if (result.metafile) {
-            await postProcessor.run(result.metafile)
+          if (!result.metafile) {
+            return
           }
 
+          const postProcessingResult = await postProcessor.run(result.metafile)
+
           // Notice finish build at time // 업데이트된 소스, 그리고 해당 소스를 의존중인 소스 모두를 트리 형식으로 데이터를 만들어서 전달 해야 함
-          options.builtNoticeCallback()
+          options.builtNoticeCallback(postProcessingResult.updatedShardPaths)
         })
         q.start((err) => {
           if (err) {

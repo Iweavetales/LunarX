@@ -13,9 +13,9 @@ import esbuildBabelPlugin from "./esbuild-transform-plugin"
 import merge from "lodash/merge"
 import { collectAllSourcesFromDirectory } from "./collect-all-sources-from-directory"
 import { extractRuntimeOptionsFromConfig } from "./extract-runtime-options-from-config"
-import { RuntimeOptions } from "../../lib/runtime"
+import { ShardPath } from "../../lib/manifest"
 
-type BuiltCallback = (runtimeOptions: RuntimeOptions) => void
+type BuiltCallback = () => void
 
 async function CreateBuildOptions(
   builtCallback: BuiltCallback
@@ -151,7 +151,7 @@ async function CreateBuildOptions(
         esmDirectory: config.js.esmDirectory,
         absoluteCJSMetafilePath: absoluteCJSMetafilePath,
         absoluteESMMetafilePath: absoluteESMMetafilePath,
-        builtNoticeCallback: () => {
+        builtNoticeCallback: (updatedShardPaths: ShardPath[]) => {
           const runtimeOptions = extractRuntimeOptionsFromConfig(config)
           // write runtime options json file to outDir
           writeFileSync(
@@ -159,7 +159,7 @@ async function CreateBuildOptions(
             JSON.stringify(runtimeOptions)
           )
 
-          builtCallback && builtCallback(runtimeOptions)
+          builtCallback && builtCallback(updatedShardPaths)
         },
       }),
     ],

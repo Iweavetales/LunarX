@@ -12,7 +12,7 @@ import Router, { HTTPVersion, Instance as RouterInstance } from "find-my-way"
 import http, { IncomingMessage, ServerResponse } from "http"
 import { join } from "path"
 import { ReadJson } from "./json-reader"
-import { LunarJSManifest } from "../../lib/manifest"
+import { LunarJSManifest, ShardPath } from "../../lib/manifest"
 import WebSocket, { WebSocketServer } from "ws"
 import { parse } from "url"
 
@@ -42,7 +42,7 @@ export class LunarServer {
     )
   }
 
-  async load() {
+  async load(updatedShardPaths: ShardPath[]) {
     const runtimeConfig = ReadJson<RuntimeConfig>(
       join(this.options.BuildDir, "runtime.json")
     )
@@ -52,7 +52,7 @@ export class LunarServer {
     )
 
     const structure = await MakeClientAppStructureFromManifest(manifest)
-    this.updateWebApp(structure)
+    this.updateWebApp(structure, updatedShardPaths)
   }
 
   /**
@@ -60,11 +60,11 @@ export class LunarServer {
    * 라우터와 웹엡 구조를 업데이트 한다
    * @param webApp
    */
-  updateWebApp(structure: ClientAppStructure) {
+  updateWebApp(structure: ClientAppStructure, updatedShardPaths: ShardPath[]) {
     this.router = BuildRoutes(structure.Manifest.routeNodes, structure)
 
     for (const ws of this.wsConnectionPool) {
-      ws.send("updated")
+      ws.send(JSON.stringify({ type: "updated-sources", updatedShardPaths }))
     }
   }
 

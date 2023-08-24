@@ -1,4 +1,4 @@
-import { hydrateRoot } from "react-dom/client"
+import { createRoot, hydrateRoot } from "react-dom/client"
 import React from "react"
 import { BrowserRouter } from "react-router-dom"
 import { RouteFetchResult, ServerFetchesProvider } from "../ssfetch"
@@ -35,6 +35,7 @@ export default function (
   appDataFromServer: TAppData,
   ascRouteNodes: UniversalRouteNode[],
   customAppEntryModulePath: string,
+  browserEntryModulePath: string,
   require: RequireFunction
 ) {
   async function Startup() {
@@ -143,6 +144,47 @@ export default function (
   // Listen for messages
   socket.addEventListener("message", (event) => {
     console.log("Message from server ", event.data)
+    try {
+      const message = JSON.parse(event.data)
+      const messageType = message.type
+      if (messageType === "updated-sources") {
+        const updatedShards: string[] = message.updatedShardPaths
+        console.log("updated", updatedShards)
+        // location.reload()
+
+        Promise.all(
+          updatedShards.map(async (shardPath: string) => {
+            const sourceResponse = await fetch(`/_/s/${shardPath}`)
+            console.log(shardPath, "source", sourceResponse)
+            if (sourceResponse.body) {
+              const reader = sourceResponse.body.getReader()
+              const { done, value } = await reader.read()
+
+              const source = new TextDecoder().decode(value)
+              console.log(done, source)
+              try {
+                eval(source)
+              } catch (e) {
+                console.error("eval error", e)
+              }
+            }
+          })
+        ).then(() => {
+          console.log("Hot Update", browserEntryModulePath)
+          require([browserEntryModulePath], function (modules) {
+            modules[0].default(
+              appDataFromServer,
+              ascRouteNodes,
+              customAppEntryModulePath,
+              browserEntryModulePath,
+              require
+            )
+          })
+        })
+      }
+    } catch (e) {
+      console.error("Failed to parse message", e)
+    }
   })
 
   socket.addEventListener("close", (event) => {

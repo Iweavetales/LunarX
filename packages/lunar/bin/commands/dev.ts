@@ -1,6 +1,8 @@
 import { join } from "path"
 import packageJson from "../../package.json"
 import { LunarServer } from "../../node-runtime"
+import { ShardPath } from "../../lib/manifest"
+
 export default async function Dev(options: { buildDir: string }) {
   console.log(options, packageJson)
 
@@ -13,11 +15,13 @@ export default async function Dev(options: { buildDir: string }) {
         join(__dirname, "../", "./builder", "./index.js")
       )
       const createBuildContext = builderModule.createBuildContext
-      const buildContext = await createBuildContext(() => {
-        // built
-        console.log("built")
-        server.load()
-      })
+      const buildContext = await createBuildContext(
+        (updatedShardPaths: ShardPath[]) => {
+          // built
+          console.log("built")
+          server.load(updatedShardPaths)
+        }
+      )
       await buildContext.watch()
 
       const lunarServer = nodeServerModule.LunarServer as typeof LunarServer
