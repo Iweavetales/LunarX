@@ -38,4 +38,9 @@ export async function TransformEsModuleToCjs(
       writeFileSync(cjsMapFileName, result.map)
     }
   }
+
+  return {
+    size: result.code.length,
+    name: cjsFileName,
+  }
 }

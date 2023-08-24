@@ -40,7 +40,7 @@ export default function IndexPage() {
         </div>
 
         <div style={{ marginTop: 30 }}>
-          <Link href={"/about"}>To Abouts</Link>
+          <Link href={"/about"}>To Abouts</Link> ss
         </div>
         <Outlet />
       </div>

@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, writeFileSync } from "fs"
 
 import { getAllFiles } from "./files"
 import { defaultConfig, LunarConfig } from "../../lib/lunar-config"
-import esbuildBabelPlugin from "./esbuild-babel-plugin"
+import esbuildBabelPlugin from "./esbuild-transform-plugin"
 import merge from "lodash/merge"
 import { collectAllSourcesFromDirectory } from "./collect-all-sources-from-directory"
 import { extractRuntimeOptionsFromConfig } from "./extract-runtime-options-from-config"

@@ -4,22 +4,23 @@ export enum DiffStatus {
   ADDED,
   DELETED,
 }
-type DiffResult = {
-  [outputFile: string]: {
-    status: DiffStatus
-  }
+export type DiffResult = {
+  status: DiffStatus
+}
+export type DiffResults = {
+  [outputFile: string]: DiffResult
 }
 export const DiffMetaOutput = (
   oldMeta: Metafile,
   newMeta: Metafile
-): DiffResult => {
+): DiffResults => {
   const oldOutputKeys = Object.keys(oldMeta.outputs)
   const newOutputKeys = Object.keys(newMeta.outputs)
 
   const oldOutputKeysLength = oldOutputKeys.length
   const newOutputKeysLength = newOutputKeys.length
 
-  const diffRet: DiffResult = {}
+  const diffRet: DiffResults = {}
 
   let key = ""
   for (let i = 0; i < oldOutputKeysLength; i++) {

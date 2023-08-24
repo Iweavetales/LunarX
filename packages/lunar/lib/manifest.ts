@@ -12,7 +12,11 @@ export type MetaOutput = {
   exports: string[]
   entryPoint?: string
 }
-export type ShardType = "stylesheet" | "javascript" | "mapFile" | "unknown"
+export type ShardSourceType =
+  | "stylesheet"
+  | "javascript"
+  | "mapFile"
+  | "unknown"
 
 export type BuiltShardInfo = {
   isEntry: boolean
@@ -21,7 +25,13 @@ export type BuiltShardInfo = {
   serverSideOutputPath: string // esm output 경로
   clientSideOutputPath: string | undefined // cjs output 경로
   shardPath: string
-  type: ShardType
+  type: ShardSourceType
+  fileSize: {
+    amd?: number
+    cjs?: number
+    esm?: number
+    any?: number
+  } // bytes
 
   // if ShardType is "Entry" following fields are exists
   entryPoint?: string

@@ -61,6 +61,14 @@ type InputSourcesOfPathOfOutputs = {
   }
 }
 
+export type ResultOfDetermineServerSideShard = {
+  isServerSideShard: boolean
+  // 애매한 서버사이드 스크립트
+  // entryPoint 에 해당하는 소스 파일에서 서버사이드 스크립트를 임포트 하고 있는 경우 애매한 서버사이드 스크립트로 간주한다
+  isAmbiguousServerSideSource: boolean
+  // entryPoint 에 입력된 서버사이드 스크립트 패스 배열
+  inputServerSideSources: string[]
+}
 /**
  * @name DetermineServerSideShard
  * @type function
@@ -72,14 +80,7 @@ type InputSourcesOfPathOfOutputs = {
 export function DetermineServerSideShard(
   entryFilepath: string | null,
   inputSources: InputSourcesOfPathOfOutputs
-): {
-  isServerSideShard: boolean
-  // 애매한 서버사이드 스크립트
-  // entryPoint 에 해당하는 소스 파일에서 서버사이드 스크립트를 임포트 하고 있는 경우 애매한 서버사이드 스크립트로 간주한다
-  isAmbiguousServerSideSource: boolean
-  // entryPoint 에 입력된 서버사이드 스크립트 패스 배열
-  inputServerSideSources: string[]
-} {
+): ResultOfDetermineServerSideShard {
   if (entryFilepath) {
     if (ThisIsServerSideShard(entryFilepath)) {
       return {
