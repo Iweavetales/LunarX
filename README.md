@@ -83,3 +83,7 @@ Lunar uses `SWC` for transpile to ensure compatibility with both client-side and
 ## Server Side Script
 
 Files ending in .server.tsx will only be executed on the server side and won't be exposed to the public.
+
+# Author
+
+Iweavetales@github
