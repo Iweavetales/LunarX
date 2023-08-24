@@ -1,6 +1,6 @@
 {
   "name": "lunarx",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "The Lunar that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
   "main": "index.js",
   "scripts": {

@@ -53,9 +53,15 @@ The simplified & light SSR front framework, offering greater flexibility than Ne
 
 ```shell
 # pnpx create-lunarx-app example ( Unavailable yet )
-lunar dev 
-lunar start 
-lunar build
+
+$ pnpm add lunarx
+# or
+$ npm add lunarx
+
+
+$ lunar dev 
+$ lunar start 
+$ lunar build
 ```
 
 ## Project structure 
