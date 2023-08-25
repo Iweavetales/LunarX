@@ -1,6 +1,6 @@
 {
   "name": "lunarx",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "The Lunar that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
   "main": "index.js",
   "keywords": ["react", "ssr", "framework", "light-weight", "simplified"],
@@ -20,6 +20,12 @@
   "bin": {
     "lunar": "./dist/bin/lunar"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Iweavetales/lunarx.git",
+    "directory": "packages/lunar"
+  },
+  "homepage": "https://lunarx.dev",
   "files": [
     "dist/",
     "react/",
