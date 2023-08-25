@@ -180,6 +180,7 @@
     "@typescript-eslint/no-redeclare": [
       "warn",
       { "builtinGlobals": false, "ignoreDeclarationMerge": true }
-    ]
+    ],
+    "@typescript-eslint/no-var-requires": "off"
   }
 }

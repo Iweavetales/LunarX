@@ -1,0 +1,24 @@
+{
+  "name": "lunar-example-basic",
+  "scripts": {
+    "dev": "lunar dev",
+    "build": "lunar build",
+    "start": "lunar start"
+  },
+  "dependencies": {
+    "@vanilla-extract/css": "^1.13.0",
+    "lunarx": "0.1.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router": "^6.15.0",
+    "react-router-dom": "^6.15.0",
+    "typescript": "^5.1.6"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.22.10",
+    "@babel/preset-react": "^7.22.5",
+    "@babel/preset-typescript": "^7.22.11",
+    "@vanilla-extract/esbuild-plugin": "^2.3.0",
+    "postcss": "^8.4.28"
+  }
+}

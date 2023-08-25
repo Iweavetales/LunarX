@@ -14,14 +14,12 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": "./app",
-    "typeRoots": ["./node_modules/@types", " ./app/types"],
     "paths": {},
     "plugins": [{
       "transform": "@lunargate/lunar-ts-plugin"
     }],
     "sourceMap": true
   },
-  "include": ["commonLib/Manifest.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules/"]
 }

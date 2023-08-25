@@ -8,30 +8,29 @@ import { join, relative, resolve } from "path"
 import { existsSync, mkdirSync, writeFileSync } from "fs"
 
 import { getAllFiles } from "./files"
-import { defaultConfig, LunarConfig } from "../../lib/lunar-config"
+import { baseConfig, ExtendConfig, LunarConfig } from "../../lib/lunar-config"
 import esbuildBabelPlugin from "./esbuild-transform-plugin"
-import merge from "lodash/merge"
 import { collectAllSourcesFromDirectory } from "./collect-all-sources-from-directory"
 import { extractRuntimeOptionsFromConfig } from "./extract-runtime-options-from-config"
 import { ShardPath } from "../../lib/manifest"
+import chalk from "chalk"
 
 type BuiltCallback = () => void
-
+const reservedConfigFile = "lunarx.conf.js"
 async function CreateBuildOptions(
   builtCallback: BuiltCallback
 ): Promise<BuildOptions> {
   const cwd = process.cwd()
 
-  console.log("build start")
-  let config: LunarConfig = defaultConfig
-  const userConfigPath = join(cwd, "lunar.conf.js")
+  let config: LunarConfig = baseConfig
+  const userConfigPath = join(cwd, reservedConfigFile)
   try {
     const userConfig = await import(userConfigPath)
-    config = merge(config, userConfig.default)
-    console.log("found user config", userConfig.default)
+    config = ExtendConfig(config, userConfig.default)
+    console.log("User config", userConfig.default)
   } catch (e) {
     // Nothing to do
-    console.log("Not exists user config")
+    console.log(chalk.red(`Failed to apply ${reservedConfigFile}`), e)
   }
 
   console.log("Final config", config)
