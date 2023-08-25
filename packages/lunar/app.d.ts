@@ -1,3 +1,3 @@
-import lunarApp from "./impl/react/app"
-export * from "./impl/react/app"
+import lunarApp from "./dist/impl/react/app"
+export * from "./dist/impl/react/app"
 export default lunarApp

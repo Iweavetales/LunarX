@@ -1,4 +1,4 @@
-/** @type {import('@lunargate/lunar/config').LunarConfig} */
+/** @type {import('lunarx/config').LunarConfig} */
 const lunarConfig = {}
 
 module.exports = lunarConfig
