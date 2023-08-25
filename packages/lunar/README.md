@@ -72,7 +72,7 @@ You could refer `/examples/basic` or `/tests/samples/basic` for now.
 1.
 2.
 
-## Build
+## Application Build 
 ### Bundler
 Lunar uses `esbuild` to quickly create a split-bundle source structure.
 
