@@ -1,5 +1,5 @@
 <p align="center" style="text-align: center">
-    <img src="./assets/emblem.svg" width="200" title="Lunarx Emblem">
+    <img src="https://raw.githubusercontent.com/Iweavetales/LunarX/main/assets/emblem.svg" width="200" title="Lunarx Emblem">
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@ The simplified & light SSR front framework, offering greater flexibility than Ne
 * Minimal core framework dependencies
 * Loosely coupled with the framework
 
-## Features 
+## Features
 * Supports Deno runtime ( in progress )
 * File based routing
 * Nested routing
@@ -43,7 +43,7 @@ The simplified & light SSR front framework, offering greater flexibility than Ne
 ## Future Enhancements
 * Highly customizable with both shallow and deep modifications
 * Support for BUN runtime
-* Support for Go and Rust runtimes 
+* Support for Go and Rust runtimes
 * Multi-thread optimized server-side processing(for Deno,Bun runtime)
 * Enhanced features for front-end applications
 * SolidJS
@@ -64,19 +64,19 @@ $ lunar start
 $ lunar build
 ```
 
-## Project structure 
+## Project structure
 You could refer `/examples/basic` or `/tests/samples/basic` for now.
 
 # Architecture
 ## Response-Render Pipeline
-1. 
-2. 
+1.
+2.
 
-## Build 
-### Bundler  
+## Build
+### Bundler
 Lunar uses `esbuild` to quickly create a split-bundle source structure.
 
-### Transpiler  
+### Transpiler
 Lunar uses `SWC` for transpile to ensure compatibility with both client-side and Node.js runtimes.
 
 
