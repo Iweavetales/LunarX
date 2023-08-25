@@ -139,7 +139,6 @@ export default function (
   console.log("Socket", socket)
   socket.addEventListener("open", (event) => {
     console.log("Socket Connected", socket)
-    socket.send("Hello Server!")
   })
   // Listen for messages
   socket.addEventListener("message", (event) => {
@@ -147,11 +146,14 @@ export default function (
     try {
       const message = JSON.parse(event.data)
       const messageType = message.type
+      console.log("build server message", message)
       if (messageType === "updated-sources") {
         const updatedShards: string[] = message.updatedShardPaths
         console.log("updated", updatedShards)
-        // location.reload()
+        location.reload()
 
+        // holding for Fast Refresh
+        return
         Promise.all(
           updatedShards.map(async (shardPath: string) => {
             const sourceResponse = await fetch(`/_/s/${shardPath}`)
