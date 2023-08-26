@@ -178,16 +178,16 @@ export class PostProcessor {
         mapData: transpiledESMSource.map,
       })
 
-      const cjsFileName = outputPath.replace(/^dist\/esm/, "dist/client")
-      const cjsMapFileName = cjsFileName + ".map"
+      const clientFileName = outputPath.replace(/^dist\/esm/, "dist/client")
+      const cjsMapFileName = clientFileName + ".map"
 
-      const targetDirectory = dirname(cjsFileName)
+      const targetDirectory = dirname(clientFileName)
       ensureDirectoryExists(targetDirectory)
 
       // 트랜스파일된 파일내용을 디스크에 쓴다
 
       writeFileSync(
-        cjsFileName,
+        clientFileName,
         this.config.build.obfuscate
           ? obfuscate(
               transpiledESMSource.code,
@@ -269,12 +269,12 @@ export class PostProcessor {
     if (diffResult && diffResult.status === DiffStatus.ADDED) {
       console.log(chalk.greenBright(`ADDED ESM shard ${outputPath}`))
 
-      const esmSourceMapFile =
-        process.env.NODE_ENV === "production"
-          ? null
-          : readFileSync(outputPath + ".map")
-
       if (moduleType === "javascript") {
+        const esmSourceMapFile =
+          process.env.NODE_ENV === "production"
+            ? null
+            : readFileSync(outputPath + ".map")
+
         processResultRecords = await this.processJavascript(
           outputPath,
           normalizedRelativePath,

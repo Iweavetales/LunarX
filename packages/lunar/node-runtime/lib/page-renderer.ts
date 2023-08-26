@@ -110,18 +110,31 @@ export function RenderPage(
           webApp.LoadedEntryModuleMap[routerServerEntrySource!.shardPath]
             .default
 
-        /**
-         * _init.server.tsx 파일이 존재 한다면 먼저 처리 한다.
-         */
-        if (webApp.Manifest.initServerShardPath) {
-          const initServerScript: any =
-            webApp.LoadedEntryModuleMap[webApp.Manifest.initServerShardPath]
-              .default
+        try {
+          /**
+           * _init.server.tsx 파일이 존재 한다면 먼저 처리 한다.
+           */
+          if (webApp.Manifest.initServerShardPath) {
+            const initServerScript: any =
+              webApp.LoadedEntryModuleMap[webApp.Manifest.initServerShardPath]
+                .default
 
-          const ret: boolean = await initServerScript(context)
-          if (!ret) {
-            return resolve({ data: "error", status: 404 })
+            const ret: boolean = await initServerScript(context)
+            if (!ret) {
+              return resolve({
+                data: "error",
+                status: 404,
+                responseHeaders: context.responseHeaders,
+              })
+            }
           }
+        } catch (e) {
+          console.error("Failed to server side fetch data from _init.server", e)
+          return resolve({
+            data: "",
+            status: 500,
+            responseHeaders: context.responseHeaders,
+          })
         }
 
         function getRouteModule(pattern: string): any {
@@ -143,22 +156,32 @@ export function RenderPage(
          * execute serial
          */
         const fetchedDataList: ServerSideFetchResult[] = []
-        await Promise.all(
-          ascendFlatRouteNodeList.map((routeNode) => {
-            return new Promise((resolve, reject) => {
-              ;(async function () {
-                const result = await FetchingServerSideRouteData(
-                  routeNode,
-                  webApp,
-                  context
-                )
 
-                fetchedDataList.push(result)
-                resolve(true)
-              })()
+        try {
+          await Promise.all(
+            ascendFlatRouteNodeList.map((routeNode) => {
+              return new Promise((resolve, reject) => {
+                ;(async function () {
+                  const result = await FetchingServerSideRouteData(
+                    routeNode,
+                    webApp,
+                    context
+                  )
+
+                  fetchedDataList.push(result)
+                  resolve(true)
+                })()
+              })
             })
+          )
+        } catch (e) {
+          console.error("Failed to server side fetch data", e)
+          return resolve({
+            data: "",
+            status: 500,
+            responseHeaders: context.responseHeaders,
           })
-        )
+        }
 
         // console.log("fetchedDataList", fetchedDataList)
         const routeServerFetchesResultMap: {
@@ -180,15 +203,26 @@ export function RenderPage(
         /**
          * _app.server.tsx 파일이 있다면 해당 파일에 대한 처리
          */
-        const serverSideAppEntryShardInfo =
-          webApp.Manifest.entries["app/routes/_app.server.tsx"]
-        if (serverSideAppEntryShardInfo) {
-          const appServerSideModule: any =
-            webApp.LoadedEntryModuleMap[serverSideAppEntryShardInfo.shardPath]
-          const appServerFetchFunction = appServerSideModule.serverFetches
+        try {
+          const serverSideAppEntryShardInfo =
+            webApp.Manifest.entries["app/routes/_app.server.tsx"]
+          if (serverSideAppEntryShardInfo) {
+            const appServerSideModule: any =
+              webApp.LoadedEntryModuleMap[serverSideAppEntryShardInfo.shardPath]
+            const appServerFetchFunction = appServerSideModule.serverFetches
 
-          const appServerSideFetchResult = await appServerFetchFunction(context)
-          routeServerFetchesResultMap["_app"] = appServerSideFetchResult
+            const appServerSideFetchResult = await appServerFetchFunction(
+              context
+            )
+            routeServerFetchesResultMap["_app"] = appServerSideFetchResult
+          }
+        } catch (e) {
+          console.error("Failed to server side fetch _app.server data", e)
+          return resolve({
+            data: "",
+            status: 500,
+            responseHeaders: context.responseHeaders,
+          })
         }
 
         // console.log("routeNodeMap", routeNodeMap)
@@ -271,6 +305,12 @@ export function RenderPage(
       } catch (e) {
         console.log("failed to load base libs", e)
       }
+
+      return resolve({
+        data: "",
+        status: 500,
+        responseHeaders: new HTTPHeaders(),
+      })
     }
 
     process()
