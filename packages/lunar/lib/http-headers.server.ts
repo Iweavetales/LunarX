@@ -3,7 +3,7 @@ export type HeaderMap = Map<string, string | string[]>
 export type HeaderObject = {
   [key: string]: undefined | string | string[]
 }
-export class MutableMutableHTTPHeaders {
+export class MutableHTTPHeaders {
   headers: HeaderMap
 
   constructor() {

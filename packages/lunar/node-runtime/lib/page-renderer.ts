@@ -13,7 +13,6 @@ import { IncomingMessage } from "http"
 import { EntryServerHandler } from "../../lib/types.server"
 import { MutableHTTPHeaders } from "../../lib/http-headers.server"
 import { PageParams } from "../../lib/lunar-context"
-import axios from "axios"
 
 export function RenderPage(
   currentWorkDirectory: string,
