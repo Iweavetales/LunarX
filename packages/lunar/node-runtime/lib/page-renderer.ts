@@ -11,7 +11,7 @@ import {
 import { makeSwiftContext } from "./ssr-context"
 import { IncomingMessage } from "http"
 import { EntryServerHandler } from "../../lib/types.server"
-import { HTTPHeaders } from "../../lib/http-headers.server"
+import { MutableHTTPHeaders } from "../../lib/http-headers.server"
 import { PageParams } from "../../lib/lunar-context"
 import axios from "axios"
 
@@ -35,7 +35,7 @@ export function RenderPage(
 ): Promise<{
   data?: string
   status: number
-  responseHeaders?: HTTPHeaders
+  responseHeaders?: MutableHTTPHeaders
 }> {
   // beginToTerminalRouteStem 의 역순으로 라우트 노드를 배열
   // const reverseRouteStem = ArrayClone(ascendFlatRouteNodeList).reverse();
@@ -85,7 +85,7 @@ export function RenderPage(
         /**
          * 편집 가능한 request header 를 만들기 위해 req.header 를 requestHeader 로 복사 한다
          */
-        const requestHeaders = new HTTPHeaders()
+        const requestHeaders = new MutableHTTPHeaders()
         const rawHeaders = req.rawHeaders
         const headerCount = rawHeaders.length / 2
 
@@ -97,7 +97,7 @@ export function RenderPage(
           requestHeaders.append(headerName, headerValue || "")
         }
 
-        const responseHeaders = new HTTPHeaders()
+        const responseHeaders = new MutableHTTPHeaders()
         responseHeaders.append("content-type", "text/html; charset=utf-8")
 
         const urlPath = GetUrlPath(req.url!)
@@ -316,7 +316,7 @@ export function RenderPage(
       return resolve({
         data: "",
         status: 500,
-        responseHeaders: new HTTPHeaders(),
+        responseHeaders: new MutableHTTPHeaders(),
       })
     }
 

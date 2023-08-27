@@ -13,7 +13,7 @@ import { UniversalRouteNode } from "../../lib/document-types"
 import { IncomingMessage, ServerResponse } from "http"
 import { join, resolve } from "path"
 import { HTTPVersion, Instance as RouterInstance } from "find-my-way"
-import { HTTPHeaders } from "../../lib/http-headers.server"
+import { MutableHTTPHeaders } from "../../lib/http-headers.server"
 import { ProductionMode } from "./constants"
 import { writeFileToResponse } from "./write-file-with-response"
 import { PathHelper } from "./helper/path"
@@ -186,7 +186,7 @@ export function BuildRoutes(
 
         const urlPath = GetUrlPath(req.url!).replace(/^\/_\/r/, "") // url 패스를 실제 page 패스에 맞추기 위해 앞의 "/_/r" 경로는 제거 한다
 
-        const requestHeaders = new HTTPHeaders()
+        const requestHeaders = new MutableHTTPHeaders()
         req.rawHeaders.forEach((k) => {
           const v = req.headers[k]
           if (v) {
@@ -194,7 +194,7 @@ export function BuildRoutes(
           }
         })
 
-        const responseHeaders = new HTTPHeaders()
+        const responseHeaders = new MutableHTTPHeaders()
         responseHeaders.append("content-type", "application/json")
 
         const context = makeSwiftContext(

@@ -1,14 +1,14 @@
 import { ServerContext, PageParams } from "../../lib/lunar-context"
 
 import { IncomingMessage } from "http"
-import { HTTPHeaders } from "../../lib/http-headers.server"
+import { MutableHTTPHeaders } from "../../lib/http-headers.server"
 
 export function makeSwiftContext(
   req: IncomingMessage,
   urlPath: string,
   params: PageParams,
-  requestHeaders: HTTPHeaders,
-  responseHeaders: HTTPHeaders
+  requestHeaders: MutableHTTPHeaders,
+  responseHeaders: MutableHTTPHeaders
 ): ServerContext {
   const searchMarkIndex = urlPath.indexOf("?")
   const hashMarkIndex = urlPath.indexOf("#")
