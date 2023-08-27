@@ -95,21 +95,21 @@ export function DocumentLinks() {
 //   return null;
 // }
 
-export function Bootstrap() {
-  const ctx = useContext(DocumentInjectionContext)
-  if (ctx) {
-    return (
-      <script
-        dangerouslySetInnerHTML={{
-          __html:
-            ctx.bootstrapScript +
-            // 화면이 로드 된 후에 데이터 태그를 숨기기 위해 삭제 한다
-            `;document.getElementById("${ctx.bootstrapScriptId}").remove();`,
-        }}
-        nonce={ctx.nonce}
-        id={ctx.bootstrapScriptId}
-      />
-    )
-  }
-  return null
+export function Bootstrap(props: {
+  script: string
+  scriptId: string
+  nonce: string
+}) {
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html:
+          props.script +
+          // 화면이 로드 된 후에 데이터 태그를 숨기기 위해 삭제 한다
+          `;document.getElementById("${props.scriptId}").remove();`,
+      }}
+      nonce={props.nonce}
+      id={props.scriptId}
+    />
+  )
 }

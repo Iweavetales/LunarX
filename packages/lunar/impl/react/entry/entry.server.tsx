@@ -135,7 +135,11 @@ export default async function handleRequest(
                 </ServerFetchesProvider>
               </LunarAppContainer>
             </StaticRouter>
-            <Bootstrap />
+            <Bootstrap
+              script={bootstrapScript}
+              scriptId={"s_" + Math.floor(Math.random() * 100000)}
+              nonce={documentSheet.nonce}
+            />
           </div>
         ))}
       </DocumentWrapper>
