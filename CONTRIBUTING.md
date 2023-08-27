@@ -1,7 +1,5 @@
 # Contributing to LunarX
-
-Your sentences are clear in intent, but they could benefit from some grammatical improvements. Here's a revised version:
-
+ 
 Currently, I am developing its basic features to make it production-ready.
 Feel free to contribute your code. I will review it and, if suitable, merge it into LunarX.
 
