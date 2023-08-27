@@ -1,4 +1,4 @@
-import { LunarContext, PageParams } from "../../lib/lunar-context"
+import { ServerContext, PageParams } from "../../lib/lunar-context"
 
 import { IncomingMessage } from "http"
 import { HTTPHeaders } from "../../lib/http-headers.server"
@@ -9,7 +9,7 @@ export function makeSwiftContext(
   params: PageParams,
   requestHeaders: HTTPHeaders,
   responseHeaders: HTTPHeaders
-): LunarContext {
+): ServerContext {
   const searchMarkIndex = urlPath.indexOf("?")
   const hashMarkIndex = urlPath.indexOf("#")
 

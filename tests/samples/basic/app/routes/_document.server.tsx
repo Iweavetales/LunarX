@@ -1,11 +1,11 @@
-import { LunarContext } from "lunarx/context"
+import { ServerContext } from "lunarx/context"
 import React from "react"
 import { Bootstrap, DocumentLinks, DocumentScripts } from "lunarx/document"
 import reactDomServer from "react-dom/server"
 // import { ServerStyleSheet } from 'styled-components';
 
 export default async function (
-  context: LunarContext,
+  context: ServerContext,
   res: Response,
   Main: () => React.ReactElement
 ) {

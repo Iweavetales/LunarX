@@ -2,7 +2,7 @@ import { ClientAppStructure } from "./client-app-structure"
 import { GetUrlPath } from "./urlUtils"
 import { GenerateRandomBytes } from "./random"
 import { DocumentSheet, UniversalRouteNode } from "../../lib/document-types"
-import { RouteNode, RouteNodeMap } from "../../lib/manifest"
+import { BuiltShardInfo, RouteNode, RouteNodeMap } from "../../lib/manifest"
 import {
   FetchingServerSideRouteData,
   ServerSideFetchResult,
@@ -13,6 +13,7 @@ import { IncomingMessage } from "http"
 import { EntryServerHandler } from "../../lib/types.server"
 import { HTTPHeaders } from "../../lib/http-headers.server"
 import { PageParams } from "../../lib/lunar-context"
+import axios from "axios"
 
 export function RenderPage(
   currentWorkDirectory: string,
@@ -65,10 +66,10 @@ export function RenderPage(
     (key) => webApp.Manifest.entries[key]
   )
 
-  const routerServerEntrySource = entriesArray.find(
+  const routerServerEntrySource: BuiltShardInfo | undefined = entriesArray.find(
     (entry) => entry.entryName === "router.server"
   )
-  const entryServerEntrySource = entriesArray.find(
+  const entryServerEntrySource: BuiltShardInfo | undefined = entriesArray.find(
     (entry) => entry.entryName === "entry.server"
   )
   if (!(routerServerEntrySource && entryServerEntrySource)) {
@@ -85,12 +86,16 @@ export function RenderPage(
          * 편집 가능한 request header 를 만들기 위해 req.header 를 requestHeader 로 복사 한다
          */
         const requestHeaders = new HTTPHeaders()
-        req.rawHeaders.forEach((k) => {
-          const v = req.headers[k]
-          if (v) {
-            requestHeaders.append(k, v)
-          }
-        })
+        const rawHeaders = req.rawHeaders
+        const headerCount = rawHeaders.length / 2
+
+        for (let i = 0; i < headerCount; i++) {
+          const headerPosition = i * 2
+          const headerName = rawHeaders[headerPosition]
+          const headerValue = rawHeaders[headerPosition + 1]
+
+          requestHeaders.append(headerName, headerValue || "")
+        }
 
         const responseHeaders = new HTTPHeaders()
         responseHeaders.append("content-type", "text/html; charset=utf-8")
@@ -129,7 +134,8 @@ export function RenderPage(
             }
           }
         } catch (e) {
-          console.error("Failed to server side fetch data from _init.server", e)
+          console.error("Failed to server side fetch data from _init.server")
+          console.error(e)
           return resolve({
             data: "",
             status: 500,
@@ -175,7 +181,8 @@ export function RenderPage(
             })
           )
         } catch (e) {
-          console.error("Failed to server side fetch data", e)
+          console.error("Failed to server side fetch data")
+          console.error(e)
           return resolve({
             data: "",
             status: 500,

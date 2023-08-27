@@ -12,7 +12,7 @@ import {
   SwiftRouterContext,
   SwiftRouterProvider,
 } from "./router"
-import { AppRootPipeContext } from "./app-root-pipe-context"
+import { AppRootServerContext } from "./app-root-pipe-context"
 
 /**
  * LunarAppContainer
@@ -32,7 +32,7 @@ export default function LunarAppContainer(props: {
   // store: any;
 }) {
   return (
-    <AppRootPipeContext.Provider
+    <AppRootServerContext.Provider
       value={{
         loader: props.loader,
         routeShardPrepareTrigger: props.routeShardPrepareTrigger,
@@ -47,7 +47,7 @@ export default function LunarAppContainer(props: {
         {/*<SwiftRenderer />*/}
         {props.children}
       </SwiftRouterProvider>
-    </AppRootPipeContext.Provider>
+    </AppRootServerContext.Provider>
   )
 }
 
@@ -57,7 +57,7 @@ export default function LunarAppContainer(props: {
  * @constructor
  */
 export const SwiftRenderer = () => {
-  const pipeCtx = useContext(AppRootPipeContext)
+  const pipeCtx = useContext(AppRootServerContext)
   const routeCtx = useContext(SwiftRouterContext)
 
   let loc = null

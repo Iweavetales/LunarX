@@ -2,11 +2,11 @@ import { RouteNode, RouteNodeMap } from "../../../lib/manifest"
 import React from "react"
 import { Routes, Route } from "react-router"
 import { ServerFetchesProvider } from "../ssfetch"
-import { LunarContext } from "../../../lib/lunar-context"
+import { ServerContext } from "../../../lib/lunar-context"
 import { GetRouterModule } from "../../../lib/types"
 
 export default function ServerBuildRouter(
-  context: LunarContext,
+  context: ServerContext,
   routeNodes: RouteNodeMap,
   getRouterModule: GetRouterModule
 ) {

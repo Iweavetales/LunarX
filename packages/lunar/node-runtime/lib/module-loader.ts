@@ -2,9 +2,14 @@
 
 import { join } from "path"
 import { PathHelper } from "./helper/path"
+import { ShardPath } from "../../lib/manifest"
+
+export function ShardPathToRealModulePath(shardPath: ShardPath): string {
+  return join(PathHelper.cwd, "/dist/cjs/", shardPath)
+}
 
 export async function LoadBuiltShardEntryModule(shardPath: string) {
-  const modulePath = join(PathHelper.cwd, "/dist/cjs/", shardPath)
+  const modulePath = ShardPathToRealModulePath(shardPath)
 
   /**
    * Loader use timestamp, randomized numbers to reload renewed module.

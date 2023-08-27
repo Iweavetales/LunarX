@@ -6,7 +6,7 @@ import { ShardLoader } from "./router"
  * SwiftApp 컴포넌트의 루트 컨텍스트로 사용 되며
  * SwiftRouter 등에게 데이터를 전달 한다.
  */
-export const AppRootPipeContext = createContext<{
+export const AppRootServerContext = createContext<{
   loader?: ShardLoader
   routeShardPrepareTrigger?: (shardPaths: string[]) => Promise<void>
   //
@@ -16,7 +16,7 @@ export const AppRootPipeContext = createContext<{
 }>({})
 
 export function useRouteShardPreparing() {
-  const ctx = useContext(AppRootPipeContext)
+  const ctx = useContext(AppRootServerContext)
 
   return async function (shardPaths: string[]) {
     if (ctx.routeShardPrepareTrigger) {

@@ -1,5 +1,5 @@
-import { LunarContext } from "lunarx/context"
-export async function serverFetches(ctx: LunarContext) {
+import { ServerContext } from "lunarx/context"
+export async function serverFetches(ctx: ServerContext) {
   // /client-session/info
 
   return {

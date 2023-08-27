@@ -4,8 +4,6 @@ import { LunarServer } from "../../node-runtime"
 import { ShardPath } from "../../lib/manifest"
 
 export default async function Dev(options: { buildDir: string }) {
-  console.log(options, packageJson)
-
   return new Promise((resolve, reject) => {
     ;(async function () {
       const nodeServerModule = await import(

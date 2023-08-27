@@ -5,7 +5,7 @@ export type PageParams = {
   [name: string]: undefined | string | string[]
 }
 
-export interface LunarContext {
+export interface ServerContext {
   req: IncomingMessage
   requestHeaders: HTTPHeaders // req 객체에서 복사해온 헤더
   responseHeaders: HTTPHeaders // req 객체에서 복사해온 헤더
@@ -25,4 +25,4 @@ export interface LunarContext {
   // };
 }
 
-export default LunarContext
+export default ServerContext

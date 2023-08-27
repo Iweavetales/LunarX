@@ -1,6 +1,6 @@
-import { LunarContext } from "lunarx/context"
+import { ServerContext } from "lunarx/context"
 
-export async function serverFetches(ctx: LunarContext) {
+export async function serverFetches(ctx: ServerContext) {
   return {
     data: {
       // articles: jsonResponse.data,

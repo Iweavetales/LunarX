@@ -6,7 +6,7 @@
     "start": "lunar start"
   },
   "dependencies": {
-    "@lunargate/lunar": "latest",
+    "lunarx": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router": "^6.15.0",

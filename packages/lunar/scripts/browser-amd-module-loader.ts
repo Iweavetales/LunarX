@@ -84,14 +84,11 @@ type ModuleContent = {
   }
 
   function _define(moduleName: string, deps: string[], factory: ModuleFactory) {
-    console.log("shard define", moduleName)
     moduleMap[moduleName] = {
       name: moduleName,
       deps: deps,
       moduleFactory: factory,
     }
-
-    console.log("module map", moduleMap)
   }
 
   /**
@@ -120,10 +117,7 @@ type ModuleContent = {
   ) => void
 
   function moduleCall(moduleMeta: ModuleMeta, _callback: ModuleCallback): void {
-    console.log("shard called", moduleMeta.name, moduleMeta)
-
     if (loadedModule[moduleMeta.name]) {
-      console.log("cached module", moduleMeta.name, moduleMeta)
       _callback(loadedModule[moduleMeta.name])
       return
     }

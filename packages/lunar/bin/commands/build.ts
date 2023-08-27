@@ -2,8 +2,6 @@ import { copyFileSync, readFileSync } from "fs"
 import { join } from "path"
 
 export default async function Build(options: Record<any, any>) {
-  console.log(options)
-
   /**
    * Builds the user's application utilizing the builder program (located at builder/index.js).
    * * The executable Lunar binary is constructed as the final step.

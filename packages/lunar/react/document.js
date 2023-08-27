@@ -1,1 +1,1 @@
-module.exports = require("../dist/impl/react/Document")
+module.exports = require("../dist/impl/react/document")

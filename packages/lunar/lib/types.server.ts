@@ -1,8 +1,8 @@
-import { LunarContext } from "./lunar-context"
+import { ServerContext } from "./lunar-context"
 import { DocumentSheet } from "./document-types"
 
 export type EntryServerHandler = (
-  context: LunarContext,
+  context: ServerContext,
   documentSheet: DocumentSheet,
   LunarJSApp: any
 ) => Promise<string>

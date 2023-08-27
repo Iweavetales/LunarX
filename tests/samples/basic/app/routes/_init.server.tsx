@@ -1,5 +1,5 @@
-import { LunarContext } from "lunarx/context"
+import { ServerContext } from "lunarx/context"
 
-export default async function (ctx: LunarContext): Promise<boolean> {
+export default async function (ctx: ServerContext): Promise<boolean> {
   return true
 }

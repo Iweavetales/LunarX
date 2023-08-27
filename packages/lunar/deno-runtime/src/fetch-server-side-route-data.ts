@@ -1,7 +1,7 @@
 import { uuidV5Generate } from "./deps.ts"
 import { RouteNode } from "../../lib/manifest.ts"
 import { WebAppStructure } from "./web-app-structure.ts"
-import { LunarContext } from "../lib/lunar-context.ts"
+import { ServerContext } from "../lib/lunar-context.ts"
 
 const NAMESPACE_URL = "6ba7b811-9dad-11d1-80b4-00c04fd430c8"
 
@@ -15,7 +15,7 @@ export type ServerSideRouteFetchResult = {
 export async function FetchingServerSideRouteData(
   routeNode: RouteNode,
   webApp: WebAppStructure,
-  context: LunarContext
+  context: ServerContext
 ) {
   const serverSideEntry = routeNode.serverSideEntryPath
   if (serverSideEntry) {

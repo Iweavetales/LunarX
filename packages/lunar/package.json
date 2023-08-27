@@ -1,9 +1,15 @@
 {
   "name": "lunarx",
-  "version": "0.1.7",
+  "version": "0.1.13",
   "description": "The Lunar that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
   "main": "index.js",
-  "keywords": ["react", "ssr", "framework", "light-weight", "simplified"],
+  "keywords": [
+    "react",
+    "ssr",
+    "framework",
+    "light-weight",
+    "simplified"
+  ],
   "scripts": {
     "clean-lunar-dist": "pnpm run clean",
     "clean": "rm -rf ./dist/",
@@ -37,7 +43,6 @@
     "app.d.ts",
     "app.js",
     "context.d.ts",
-    "context.js,",
     "router.d.ts",
     "router.js",
     "ssfetch.d.ts",
@@ -78,6 +83,7 @@
     "@types/ws": "^8.5.5",
     "@vanilla-extract/esbuild-plugin": "^2.2.2",
     "autoprefixer": "^10.4.13",
+    "axios": "^1.5.0",
     "babel-plugin-styled-components": "^2.0.7",
     "chalk": "^5.0.1",
     "commander": "^11.0.0",
@@ -95,6 +101,7 @@
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.21",
     "queue": "^6.0.2",
+    "release-it": "^16.1.5",
     "sass": "^1.56.1",
     "table": "^6.8.1",
     "tailwindcss": "^3.2.2",

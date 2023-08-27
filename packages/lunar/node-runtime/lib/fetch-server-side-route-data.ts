@@ -1,6 +1,6 @@
 import { RouteNode } from "../../lib/manifest"
 import { ClientAppStructure } from "./client-app-structure"
-import { LunarContext } from "../../lib/lunar-context"
+import { ServerContext } from "../../lib/lunar-context"
 import { v4 as uuidV4 } from "uuid"
 
 export type ServerSideRouteFetchResult = {
@@ -18,7 +18,7 @@ export type ServerSideFetchResult = {
 export async function FetchingServerSideRouteData(
   routeNode: RouteNode,
   webApp: ClientAppStructure,
-  context: LunarContext
+  context: ServerContext
 ): Promise<ServerSideFetchResult> {
   const serverSideEntry = routeNode.serverSideEntryPath
   if (serverSideEntry) {

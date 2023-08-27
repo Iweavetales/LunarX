@@ -11,8 +11,6 @@ export default async function Start(options: {
   options.runtime = options.runtime ?? "node"
   options.buildDir = options.buildDir ?? "./dist"
 
-  console.log("options", process.argv, options, options)
-
   return new Promise((resolve, reject) => {
     if (options.runtime == "deno") {
       const server = spawn("deno", [

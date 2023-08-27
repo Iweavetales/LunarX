@@ -1,12 +1,11 @@
-import { LunarContext } from "../../../lib/lunar-context"
+import { ServerContext } from "../../../lib/lunar-context"
 import React, { StrictMode } from "react"
 import { DocumentLinks, DocumentScripts } from "../document"
 import reactDomServer from "react-dom/server"
 // import { ServerStyleSheet } from 'styled-components';
 
 export default async function (
-  context: LunarContext,
-  res: Response | null,
+  context: ServerContext,
   Main: () => React.ReactElement
 ) {
   // const sheet = new ServerStyleSheet();
