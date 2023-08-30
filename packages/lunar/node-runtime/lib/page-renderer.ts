@@ -8,7 +8,7 @@ import {
   ServerSideFetchResult,
   ServerSideRouteFetchResult,
 } from "./fetch-server-side-route-data"
-import { makeSwiftContext } from "./ssr-context"
+import { makeServerContext } from "./ssr-context"
 import { IncomingMessage } from "http"
 import { EntryServerHandler } from "../../lib/types.server"
 import { MutableHTTPHeaders } from "../../lib/http-headers.server"
@@ -100,7 +100,7 @@ export function RenderPage(
         responseHeaders.append("content-type", "text/html; charset=utf-8")
 
         const urlPath = GetUrlPath(req.url!)
-        const context = makeSwiftContext(
+        const context = makeServerContext(
           req,
           urlPath,
           params,

@@ -7,7 +7,7 @@ import {
   FetchingServerSideRouteData,
   ServerSideRouteFetchResult,
 } from "./fetch-server-side-route-data.ts"
-import { makeSwiftContext } from "./ssr-context.ts"
+import { makeServerContext } from "./ssr-context.ts"
 
 export function RenderPage(
   currentWorkDirectory: string,
@@ -71,7 +71,7 @@ export function RenderPage(
         response.headers.append("content-type", "text/html; charset=utf-8")
 
         const urlPath = GetUrlPath(req.url)
-        const context = makeSwiftContext(req, urlPath, params, response)
+        const context = makeServerContext(req, urlPath, params, response)
 
         const entryServerHandler: any =
           webApp.LoadedEntryModuleMap[entryServerEntrySource!.shardPath].default

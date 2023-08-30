@@ -11,7 +11,7 @@ import {
   FetchingServerSideRouteData,
   ServerSideRouteFetchResult,
 } from "./fetch-server-side-route-data.ts"
-import { makeSwiftContext } from "./ssr-context.ts"
+import { makeServerContext } from "./ssr-context.ts"
 import { UniversalRouteNode } from "../../lib/document-types.ts"
 
 export { Node }
@@ -200,7 +200,7 @@ export function BuildRoutes(manifestRouteNodes: RouteNodeMap): Node {
           }))
 
         const urlPath = GetUrlPath(req.url).replace(/^\/_\/r/, "") // url 패스를 실제 page 패스에 맞추기 위해 앞의 "/_/r" 경로는 제거 한다
-        const context = makeSwiftContext(req, urlPath, params, response)
+        const context = makeServerContext(req, urlPath, params, response)
 
         /**
          * _init.server.tsx 파일이 존재 한다면 먼저 처리 한다.

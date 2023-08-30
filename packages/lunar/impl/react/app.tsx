@@ -69,6 +69,8 @@ export const SwiftRenderer = () => {
     loc = routeCtx.currentLocation
   }
 
+  console.log("location", loc)
+  console.log(" routeCtx.routeTree", routeCtx.routeTree)
   return (
     <>
       <Routes location={loc ?? undefined}>
@@ -137,6 +139,12 @@ const GenerateSwiftRouteNode = (options: {
   // const serverFetchesResult = options.routeDataMap[options.routeNode.matchPattern];
   // const serverFetchError = serverFetchesResult?.error;
 
+  console.log(
+    "options.routeNode.matchPattern",
+    options.routeNode.matchPattern,
+    options.routeNode,
+    component
+  )
   return (
     <Route
       key={options.routeNode.matchPattern}

@@ -289,7 +289,7 @@ export const EmptyRoute = (props: {}) => {
   useEffect(() => {
     console.log("empty route")
   })
-  return <div>404</div>
+  return <div>404 Not found</div>
 }
 
 export function Link(props: {

@@ -8,7 +8,7 @@ import {
   ServerSideFetchResult,
   ServerSideRouteFetchResult,
 } from "./fetch-server-side-route-data"
-import { makeSwiftContext } from "./ssr-context"
+import { makeServerContext } from "./ssr-context"
 import { UniversalRouteNode } from "../../lib/document-types"
 import { IncomingMessage, ServerResponse } from "http"
 import { join, resolve } from "path"
@@ -197,7 +197,7 @@ export function BuildRoutes(
         const responseHeaders = new MutableHTTPHeaders()
         responseHeaders.append("content-type", "application/json")
 
-        const context = makeSwiftContext(
+        const context = makeServerContext(
           req,
           urlPath,
           params,

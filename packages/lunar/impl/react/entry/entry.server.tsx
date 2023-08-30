@@ -103,7 +103,7 @@ export default async function handleRequest(
     >
       {await DocumentFactory(context, () => (
         <div id={RootElementID}>
-          <StaticRouter location={context.path}>
+          <StaticRouter location={context.req.url!}>
             <LunarAppContainer
               ascendRouteNodeList={documentSheet.ascendRouteNodeList}
               dataMatchMap={documentSheet.routeServerFetchesResultMap}
