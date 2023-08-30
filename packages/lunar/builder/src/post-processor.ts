@@ -426,7 +426,7 @@ export class PostProcessor {
           this.manifest.customizeAppShardPath = entry.shardPath
         } else if (/routes\/_document\.server\.tsx$/.test(entryPoint)) {
           this.manifest.customizeServerDocumentShardPath = entry.shardPath
-        } else if (/routes\/_init\.server\.tsx$/.test(entryPoint)) {
+        } else if (/routes\/_init\.server\.tsx?$/.test(entryPoint)) {
           this.manifest.initServerShardPath = entry.shardPath
         }
       }

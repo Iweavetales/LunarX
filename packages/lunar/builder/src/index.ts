@@ -66,13 +66,13 @@ async function CreateBuildOptions(
   /**
    * Make route file list
    */
-  const dirtyRouteFiles: any = [] // 필터링 되지않은(dirty) 모든 라우트 디렉토리 내의 파일들
-  getAllFiles(routeDirectory, dirtyRouteFiles)
+  const rawRouteFiles: any = []
+  getAllFiles(routeDirectory, rawRouteFiles)
   /**
-   * 라우트 디렉토리의 .tsx 확장자를 가진 파일만 필터링 한다
+   * 라우트 디렉토리의 .tsx|js|ts|jsx 확장자를 가진 파일만 필터링 한다
    */
-  const filteredRouteFiles = dirtyRouteFiles
-    .filter((filename: string) => /\.tsx/.test(filename))
+  const filteredRouteFiles = rawRouteFiles
+    .filter((filename: string) => /\.[jt]sx?$/.test(filename))
     .map((filename: string) => relative(cwd, filename))
 
   const targetFrameworkEntryFiles = collectAllSourcesFromDirectory(

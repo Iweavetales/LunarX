@@ -68,13 +68,9 @@ export class LunarServer {
     }
   }
 
-  setupHMR() {}
-
-  // resolveSourcePath(sourceId: string) {}
-
   async run() {
     if (this.running) {
-      console.error("Swift server is already running")
+      console.error("LunarX server is already running")
       return
     }
 
@@ -108,7 +104,7 @@ export class LunarServer {
     hmrWebsocketServer.on("connection", (ws) => {
       this.wsConnectionPool.push(ws)
 
-      console.log("Connection something...")
+      console.log("Connection for auto refresh")
       ws.on("error", console.error)
       ws.on("message", function message(data) {
         console.log("received: %s", data)
@@ -120,7 +116,7 @@ export class LunarServer {
         ws.close()
       })
 
-      ws.send("Hi,")
+      ws.send(JSON.stringify({ type: "greeting" }))
     })
 
     // server.on("upgrade", (req, socket, head) => {

@@ -136,7 +136,7 @@ export default function (
 
   // socket
   const socket = new WebSocket(`ws://${location.host}/_hmr`)
-  console.log("Socket", socket)
+
   socket.addEventListener("open", (event) => {
     console.log("Socket Connected", socket)
   })

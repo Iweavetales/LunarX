@@ -6,7 +6,6 @@ import reactDomServer from "react-dom/server"
 
 export default async function (
   context: ServerContext,
-  res: Response,
   Main: () => React.ReactElement
 ) {
   // const sheet = new ServerStyleSheet();
@@ -31,7 +30,6 @@ export default async function (
           async
           defer
         ></script>
-        {/*{sheet.getStyleElement()}*/}
       </head>
       <body>
         <Main />

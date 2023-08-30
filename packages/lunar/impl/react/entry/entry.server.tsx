@@ -76,74 +76,54 @@ export default async function handleRequest(
    * Document Element 를 DocumentWrapper 로 감싸 실제 데이터가 전달 되도록 한다
    */
   const DocumentElement = (
-    <>
-      <DocumentWrapper
-        nonce={documentSheet.nonce}
-        scripts={[
-          {
-            element: (
-              <script
-                src={documentSheet.loaderScriptUrl}
-                nonce={documentSheet.nonce}
-                key={"loader"}
-              ></script>
-            ),
-          },
-          ...documentSheet.scripts.map((script) => ({
-            src: script.url,
-          })),
-        ]}
-        links={[
-          ...documentSheet.styles.map((style) => ({
-            href: style.url,
-            rel: "stylesheet",
-          })),
-        ]}
-        bootstrapScript={bootstrapScript}
-        bootstrapScriptId={"s_" + Math.floor(Math.random() * 100000)}
-      >
-        {/*<DocumentFactory context={context}>*/}
-        {/*  <div id={RootElementID}>*/}
-        {/*    <StaticRouter location={context.path}>*/}
-        {/*      <LunarAppContainer*/}
-        {/*        ascendRouteNodeList={documentSheet.ascendRouteNodeList}*/}
-        {/*        dataMatchMap={documentSheet.routeServerFetchesResultMap}*/}
-        {/*        enterLocation={context.location}*/}
-        {/*        loader={documentSheet.requireFunction}*/}
-        {/*      >*/}
-        {/*        /!*_app.server.tsx 에 로드 한 데이터를 _app.tsx 에 공급 하기 위해 ServerFetchesProvider 사용*!/*/}
-        {/*        <ServerFetchesProvider dataKey={"_app"}>*/}
-        {/*          <App />*/}
-        {/*        </ServerFetchesProvider>*/}
-        {/*      </LunarAppContainer>*/}
-        {/*    </StaticRouter>*/}
-        {/*    <Bootstrap />*/}
-        {/*  </div>*/}
-        {/*</DocumentFactory>*/}
-        {await DocumentFactory(context, () => (
-          <div id={RootElementID}>
-            <StaticRouter location={context.path}>
-              <LunarAppContainer
-                ascendRouteNodeList={documentSheet.ascendRouteNodeList}
-                dataMatchMap={documentSheet.routeServerFetchesResultMap}
-                enterLocation={context.location}
-                loader={documentSheet.requireFunction}
-              >
-                {/*_app.server.tsx 에 로드 한 데이터를 _app.tsx 에 공급 하기 위해 ServerFetchesProvider 사용*/}
-                <ServerFetchesProvider dataKey={"_app"}>
-                  <App />
-                </ServerFetchesProvider>
-              </LunarAppContainer>
-            </StaticRouter>
-            <Bootstrap
-              script={bootstrapScript}
-              scriptId={"s_" + Math.floor(Math.random() * 100000)}
+    <DocumentWrapper
+      nonce={documentSheet.nonce}
+      scripts={[
+        {
+          element: (
+            <script
+              src={documentSheet.loaderScriptUrl}
               nonce={documentSheet.nonce}
-            />
-          </div>
-        ))}
-      </DocumentWrapper>
-    </>
+              key={"loader"}
+            ></script>
+          ),
+        },
+        ...documentSheet.scripts.map((script) => ({
+          src: script.url,
+        })),
+      ]}
+      links={[
+        ...documentSheet.styles.map((style) => ({
+          href: style.url,
+          rel: "stylesheet",
+        })),
+      ]}
+      bootstrapScript={bootstrapScript}
+      bootstrapScriptId={"s_" + Math.floor(Math.random() * 100000)}
+    >
+      {await DocumentFactory(context, () => (
+        <div id={RootElementID}>
+          <StaticRouter location={context.path}>
+            <LunarAppContainer
+              ascendRouteNodeList={documentSheet.ascendRouteNodeList}
+              dataMatchMap={documentSheet.routeServerFetchesResultMap}
+              enterLocation={context.location}
+              loader={documentSheet.requireFunction}
+            >
+              {/*_app.server.tsx 에 로드 한 데이터를 _app.tsx 에 공급 하기 위해 ServerFetchesProvider 사용*/}
+              <ServerFetchesProvider dataKey={"_app"}>
+                <App />
+              </ServerFetchesProvider>
+            </LunarAppContainer>
+          </StaticRouter>
+          <Bootstrap
+            script={bootstrapScript}
+            scriptId={"s_" + Math.floor(Math.random() * 100000)}
+            nonce={documentSheet.nonce}
+          />
+        </div>
+      ))}
+    </DocumentWrapper>
   )
 
   return `
