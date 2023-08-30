@@ -13,6 +13,7 @@ import { IncomingMessage } from "http"
 import { EntryServerHandler } from "../../lib/types.server"
 import { MutableHTTPHeaders } from "../../lib/http-headers.server"
 import { PageParams } from "../../lib/lunar-context"
+import { rawHeaderStringArrayToMutableHTTPHeaders } from "./http-header"
 
 export function RenderPage(
   currentWorkDirectory: string,
@@ -84,18 +85,10 @@ export function RenderPage(
         /**
          * 편집 가능한 request header 를 만들기 위해 req.header 를 requestHeader 로 복사 한다
          */
-        const requestHeaders = new MutableHTTPHeaders()
-        const rawHeaders = req.rawHeaders
-        const headerCount = rawHeaders.length / 2
 
-        for (let i = 0; i < headerCount; i++) {
-          const headerPosition = i * 2
-          const headerName = rawHeaders[headerPosition]
-          const headerValue = rawHeaders[headerPosition + 1]
-
-          requestHeaders.append(headerName, headerValue || "")
-        }
-
+        const requestHeaders = rawHeaderStringArrayToMutableHTTPHeaders(
+          req.rawHeaders
+        )
         const responseHeaders = new MutableHTTPHeaders()
         responseHeaders.append("content-type", "text/html; charset=utf-8")
 

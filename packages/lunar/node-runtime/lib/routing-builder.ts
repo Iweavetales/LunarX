@@ -19,6 +19,7 @@ import { writeFileToResponse } from "./write-file-with-response"
 import { PathHelper } from "./helper/path"
 import { ClientAppStructure } from "./client-app-structure"
 import { PageParams } from "../../lib/lunar-context"
+import { rawHeaderStringArrayToMutableHTTPHeaders } from "./http-header"
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Router = require("find-my-way")
@@ -186,13 +187,9 @@ export function BuildRoutes(
 
         const urlPath = GetUrlPath(req.url!).replace(/^\/_\/r/, "") // url 패스를 실제 page 패스에 맞추기 위해 앞의 "/_/r" 경로는 제거 한다
 
-        const requestHeaders = new MutableHTTPHeaders()
-        req.rawHeaders.forEach((k) => {
-          const v = req.headers[k]
-          if (v) {
-            requestHeaders.append(k, v)
-          }
-        })
+        const requestHeaders = rawHeaderStringArrayToMutableHTTPHeaders(
+          req.rawHeaders
+        )
 
         const responseHeaders = new MutableHTTPHeaders()
         responseHeaders.append("content-type", "application/json")
