@@ -1,7 +1,7 @@
 import { ServerContext } from "../lib/lunar-context.ts"
 import { GetUrlPath } from "./url-utils.ts"
 
-export function makeSwiftContext(
+export function makeServerContext(
   req: Request,
   urlPath: string,
   params: Map<string, string>,

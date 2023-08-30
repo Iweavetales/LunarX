@@ -3,7 +3,7 @@ import { ServerContext, PageParams } from "../../lib/lunar-context"
 import { IncomingMessage } from "http"
 import { MutableHTTPHeaders } from "../../lib/http-headers.server"
 
-export function makeSwiftContext(
+export function makeServerContext(
   req: IncomingMessage,
   urlPath: string,
   params: PageParams,
@@ -12,12 +12,6 @@ export function makeSwiftContext(
 ): ServerContext {
   const searchMarkIndex = urlPath.indexOf("?")
   const hashMarkIndex = urlPath.indexOf("#")
-
-  /**
-   * search mark '?' 또는 hash mark '#' 가 시작되는 인덱스
-   * ? 가 # 보다 앞에 오기 때문에 ?가 없을 경우 hash 의 인덱스로 지정 하기 위해 Math.min 을 사용하였음
-   */
-  const markStartIndex = Math.min(searchMarkIndex, hashMarkIndex)
 
   const urlPathLength = urlPath.length
 
@@ -30,7 +24,7 @@ export function makeSwiftContext(
     location: {
       pathname: urlPath.substring(
         0,
-        markStartIndex === -1 ? urlPathLength : markStartIndex
+        searchMarkIndex === -1 ? urlPathLength : searchMarkIndex
       ),
       search:
         searchMarkIndex !== -1
