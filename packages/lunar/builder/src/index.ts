@@ -87,7 +87,6 @@ async function CreateBuildOptions(
    * cssModulesPlugin 에러를 방지 하기 위해 process.env.CSS_TRANSFORMER_WASM 를 빈값으로 설정
    */
   // process.env.CSS_TRANSFORMER_WASM = '';
-  console.log("process.env", process.env)
   const esbuildOptions: BuildOptions = {
     entryPoints: [
       ...targetFrameworkEntryFiles,

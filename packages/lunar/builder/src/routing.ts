@@ -7,7 +7,6 @@ export function BuildRouteNodeMap(entries: {
 
   const entryPaths = Object.keys(entries)
 
-  console.log("entryPaths", entryPaths)
   /**
    * 라우트 패턴에 해당하는 프래그먼트 매치 맵
    */
@@ -71,7 +70,6 @@ export function BuildRouteNodeMap(entries: {
     return a.length - b.length
   })
 
-  console.log("serverSideShardsInRouteDir", serverSideShardsInRouteDir)
   /**
    * 길이가 짧은 순서대로 정렬된 라우트 패턴 배열로 라우트 노드 맵을 최종적으로 생성 한다.
    */
