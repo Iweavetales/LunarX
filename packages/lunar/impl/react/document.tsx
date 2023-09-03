@@ -100,13 +100,17 @@ export function Bootstrap(props: {
   scriptId: string
   nonce: string
 }) {
+  let scriptContent = props.script
+  // # defined by esbuild
+  // eslint-disable-next-line no-undef
+  if (DEFINE_DELETE_BOOTSTRAP_BLOCK_AFTER_BOOT) {
+    scriptContent += `;document.getElementById("${props.scriptId}").remove();`
+  }
+
   return (
     <script
       dangerouslySetInnerHTML={{
-        __html:
-          props.script +
-          // 화면이 로드 된 후에 데이터 태그를 숨기기 위해 삭제 한다
-          `;document.getElementById("${props.scriptId}").remove();`,
+        __html: scriptContent,
       }}
       nonce={props.nonce}
       id={props.scriptId}

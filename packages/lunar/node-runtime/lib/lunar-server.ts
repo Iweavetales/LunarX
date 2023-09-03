@@ -1,18 +1,18 @@
 import { RuntimeConfig } from "./config"
 import {
   ShardMeta,
-  ClientAppStructure,
-  MakeClientAppStructureFromManifest,
+  AppStructureContext,
+  MakeAppStructureContextFromManifest,
 } from "./client-app-structure"
-import { BuildRoutes } from "./routing-builder"
+import { BuildRoutes } from "./build-routes"
 
-import { GetUrlPath } from "./urlUtils"
+import { GetUrlPath } from "./url-utils"
 
 import Router, { HTTPVersion, Instance as RouterInstance } from "find-my-way"
 import http, { IncomingMessage, ServerResponse } from "http"
 import { join } from "path"
 import { ReadJson } from "./json-reader"
-import { LunarJSManifest, ShardPath } from "../../lib/manifest"
+import { LunarJSManifest, ShardPath } from "~/core/manifest"
 import WebSocket, { WebSocketServer } from "ws"
 import { parse } from "url"
 
@@ -26,23 +26,16 @@ export class LunarServer {
   options: ServerOptions
 
   running = false
-  router: RouterInstance<HTTPVersion.V1>
+  #router: RouterInstance<HTTPVersion.V1>
   wsConnectionPool: WebSocket[]
 
   constructor(options: ServerOptions) {
     this.options = options
     this.wsConnectionPool = []
-    this.router = Router()
-    this.router.on(
-      "GET",
-      "*",
-      async (req: IncomingMessage, res: ServerResponse) => {
-        return res.writeHead(200).end("I'm Busy")
-      }
-    )
+    this.#router = Router()
   }
 
-  async load(updatedShardPaths: ShardPath[]) {
+  async loadAppManifest(updatedShardPaths: ShardPath[]) {
     const runtimeConfig = ReadJson<RuntimeConfig>(
       join(this.options.BuildDir, "runtime.json")
     )
@@ -51,7 +44,7 @@ export class LunarServer {
       join(runtimeConfig.js.distDirectory, "manifest.json")
     )
 
-    const structure = await MakeClientAppStructureFromManifest(manifest)
+    const structure = await MakeAppStructureContextFromManifest(manifest)
     this.updateWebApp(structure, updatedShardPaths)
   }
 
@@ -60,8 +53,9 @@ export class LunarServer {
    * 라우터와 웹엡 구조를 업데이트 한다
    * @param webApp
    */
-  updateWebApp(structure: ClientAppStructure, updatedShardPaths: ShardPath[]) {
-    this.router = BuildRoutes(structure.Manifest.routeNodes, structure)
+  updateWebApp(structure: AppStructureContext, updatedShardPaths: ShardPath[]) {
+    this.#router = BuildRoutes(structure.Manifest.routeInfoNodes, structure)
+    console.log(this.#router.prettyPrint({ commonPrefix: false }))
 
     for (const ws of this.wsConnectionPool) {
       ws.send(JSON.stringify({ type: "updated-sources", updatedShardPaths }))
@@ -88,7 +82,7 @@ export class LunarServer {
      * 웹서버 시작
      */
     const server = http.createServer(async (req, res) => {
-      this.router.lookup(req, res)
+      this.#router.lookup(req, res)
     })
 
     server.on("upgrade", function upgrade(req, socket, head) {

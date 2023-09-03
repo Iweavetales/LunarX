@@ -32,7 +32,7 @@ module.exports = {
     })
   },
 
-  *app(task) {
+  *compileTs(task) {
     // Compile with tsconfig.json
 
     const projectDir = "." // Current directory
@@ -41,6 +41,7 @@ module.exports = {
       ts.sys.fileExists,
       "tsconfig.json"
     )
+
     const readConfigHost = {
       readFile: ts.sys.readFile,
       readDirectory: ts.sys.readDirectory,
@@ -112,7 +113,7 @@ module.exports = {
   },
 
   *prebuild(task) {
-    yield task.parallel(["builder", "app", "nodeRuntime"])
+    yield task.parallel(["builder", "compileTs", "nodeRuntime"])
   },
 
   *release(task) {

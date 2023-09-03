@@ -1,5 +1,5 @@
-import { LunarConfig } from "../../lib/lunar-config"
-import { RuntimeOptions } from "../../lib/runtime"
+import { LunarConfig } from "~/core/lunar-config"
+import { RuntimeOptions } from "~/core/runtime"
 
 export function extractRuntimeOptionsFromConfig(
   config: LunarConfig

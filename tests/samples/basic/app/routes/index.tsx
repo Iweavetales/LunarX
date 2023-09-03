@@ -2,11 +2,12 @@ import React from "react"
 //
 import { Outlet } from "react-router"
 import { Link } from "lunarx/router"
-// import { useServerFetches } from '../swift2/serverFetches';
+import { useServerFetches } from "lunarx/ssfetch"
 
 export default function IndexPage() {
-  // const serverFetches = useServerFetches();
-
+  const serverFetches = useServerFetches()
+  const posts = serverFetches?.data?.posts || []
+  console.log("posts", posts)
   return (
     <div>
       <div style={{ textAlign: "center" }}>
@@ -42,6 +43,34 @@ export default function IndexPage() {
         <div style={{ marginTop: 30 }}>
           <Link href={"/about"}>To Abouts</Link>
         </div>
+
+        <h1 style={{ textAlign: "left" }}>Posts</h1>
+        <div
+          style={{
+            height: 200,
+            overflow: "auto",
+            backgroundColor: "#bbb",
+            border: "1px solid #333",
+          }}
+        >
+          <ul style={{ textAlign: "left" }}>
+            {posts.map(
+              (post: {
+                body: string
+                id: number
+                title: string
+                userId: number
+              }) => (
+                <li key={post.id}>
+                  <Link href={`/post/${post.id}`}>
+                    [{post.id}] {post.title}
+                  </Link>
+                </li>
+              )
+            )}
+          </ul>
+        </div>
+
         <Outlet />
       </div>
     </div>

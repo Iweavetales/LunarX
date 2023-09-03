@@ -11,17 +11,18 @@
     "declaration": true,
     "outDir": "./dist",
 
-    "paths": {}
+    "baseUrl": "./",
+    "paths": {
+      "~/core/*": ["./lib/*"]
+    },
   },
 
-  //  "include": [
-  //    "builder/src/index.ts"
-  //  ],
   "exclude": [
-    "node_modules/**/*",
+    "node_modules",
     "**/*.js",
     "utils/**/*",
-    "./*.d.ts",
-    "react-router-dom"
+    "*.d.ts",
+    "react-router-dom",
+    "deno-runtime/**/*"
   ]
 }

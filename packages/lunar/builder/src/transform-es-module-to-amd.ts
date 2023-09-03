@@ -1,7 +1,6 @@
 import { transformFileSync as babelTransformFileSync } from "@babel/core"
 
-import pluginTransformModulesAmd from "@babel/plugin-transform-modules-amd"
-
+const pluginTransformModulesAmd = require("@babel/plugin-transform-modules-amd")
 import chalk from "chalk"
 import { LunarConfig } from "../../lib/lunar-config"
 import { transformFileSync as swcTransformFileSync } from "@swc/core"

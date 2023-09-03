@@ -1,13 +1,13 @@
 import {
-  TopUniversalRouteNodes,
-  UniversalRouteNode,
-} from "../../lib/document-types"
+  TopLevelUniversalRouteInfoNodes,
+  UniversalRouteInfoNode,
+} from "~/core/document-types"
 
 export function FindRouteNodeByPattern(
   matchPattern: string,
-  topUniversalRouteNodes: TopUniversalRouteNodes
-): UniversalRouteNode[] {
-  const tracedNodes: UniversalRouteNode[] = [] // 노드 계보
+  topUniversalRouteInfoNodes: TopLevelUniversalRouteInfoNodes
+): UniversalRouteInfoNode[] {
+  const tracedNodes: UniversalRouteInfoNode[] = [] // 노드 계보
   //
   const patternToken = matchPattern.split("/")
 
@@ -20,7 +20,7 @@ export function FindRouteNodeByPattern(
     const lastTraced = tracedNodes[tracedNodes.length - 1]
     const testTargets = lastTraced
       ? lastTraced.childNodes
-      : topUniversalRouteNodes
+      : topUniversalRouteInfoNodes
 
     console.log(patternThatJoinedTokens, lastTraced, testTargets)
     if (testTargets) {

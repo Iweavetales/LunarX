@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from "react"
-import { SwiftRouterContext } from "./router"
+import { AppRouterContext } from "./lib/router-context"
 
 export type RouteFetchResult = {
   data?: any
@@ -18,7 +18,7 @@ export const ServerFetchesProvider = function (props: {
   children?: React.ReactNode
   dataKey: string
 }) {
-  const routeCtx = useContext(SwiftRouterContext)
+  const routeCtx = useContext(AppRouterContext)
   const serverFetchesResult = routeCtx.routeDataMap[props.dataKey]
 
   if (serverFetchesResult?.error) {

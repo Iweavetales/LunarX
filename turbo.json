@@ -2,10 +2,8 @@
   "$schema": "https://turborepo.org/schema.json",
   "pipeline": {
     "build": {
-      "inputs": [
-        "../../packages/**/*.ts"
-      ],
-      "dependsOn": ["build:deno-runtime", "^build"]
+
+      "dependsOn": [  "^build"]
     },
     "build:deno-runtime": {
       "dependsOn": ["^build:deno-runtime"]

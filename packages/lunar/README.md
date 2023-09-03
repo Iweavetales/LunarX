@@ -9,11 +9,10 @@
 <a aria-label="License" href="https://github.com/lunarx/license.md">
     <img alt="" src="https://img.shields.io/npm/l/lunarx.svg?style=for-the-badge&labelColor=000000">
 </a> 
-</p>
-
-[//]: # ([![NPM Downloads][downloads-image]][downloads-url])
-[//]: # (![Lunar Emblem]&#40;./assets/emblem.svg&#41;)
-
+<a aria-label="Download" href="https://github.com/lunarx/license.md">
+    <img alt="" src="https://img.shields.io/npm/dw/lunarx?style=for-the-badge&labelColor=000000">
+</a> 
+</p> 
 
 
 React SSR Framework with NodeJS and Deno
@@ -21,32 +20,43 @@ React SSR Framework with NodeJS and Deno
 The simplified & light SSR front framework, offering greater flexibility than Next.js and Remix.Run, empower to build powerful front-end applications.
 
 
-# Why Lunar?
-* Flexible collaboration in business logic
-* Intuitive division between backend API and front-end components
-* Backend API abstraction (or "Concealed backend API" if you're implying security or hiding)
-* Versatile user customization options
-* Minimal core framework dependencies
-* Loosely coupled with the framework
+# Why LunarX?
+* Flexibility in Business Logic Collaboration
+* Unrestricted Manipulation and Persistence of Headers in Server-Side Render Pipeline
+* Clear Separation Between Backend API and Front-End Components
+* Secure Backend Processing Concealment When Using `.server` Extension at second from last 
+* Extensive User Customization Options
+* Minimal Dependencies on Core Framework
+* Loose Coupling with the Framework
+* Full Support for Server-Side Processing in All Route Files
+* Configurable Front-End App Architecture
 
 ## Features
-* Supports Deno runtime ( in progress )
+
+[//]: # (* Supports Deno runtime &#40; in progress &#41;)
 * File based routing
 * Nested routing
 * Scroll position memory
 * Server-side fetching
 * Supports NodeJS runtime
 * Page reload on edit
-* SEO (in progress)
-* Fast Refresh aka. HMR (in progress)
 
-## Future Enhancements
-* Highly customizable with both shallow and deep modifications
-* Support for BUN runtime
-* Support for Go and Rust runtimes
-* Multi-thread optimized server-side processing(for Deno,Bun runtime)
-* Enhanced features for front-end applications
-* SolidJS
+[//]: # (* SEO &#40;in progress&#41;)
+[//]: # (* Fast Refresh aka. HMR &#40;in progress&#41;)
+
+[//]: # (## Future Enhancements)
+
+[//]: # (* Highly customizable with both shallow and deep modifications)
+
+[//]: # (* Support for BUN runtime)
+
+[//]: # (* Support for Go and Rust runtimes)
+
+[//]: # (* Multi-thread optimized server-side processing&#40;for Deno,Bun runtime&#41;)
+
+[//]: # (* Enhanced features for front-end applications)
+
+[//]: # (* SolidJS)
 
 
 # Getting Started
@@ -59,9 +69,9 @@ $ pnpm add lunarx
 $ npm add lunarx
 
 
-$ lunar dev 
-$ lunar start 
-$ lunar build
+$ lunarx dev 
+$ lunarx start 
+$ lunarx build
 ```
 
 ## Project structure
@@ -82,7 +92,18 @@ Lunar uses `SWC` for transpile to ensure compatibility with both client-side and
 
 ## Server Side Script
 
-Files ending in .server.tsx will only be executed on the server side and won't be exposed to the public.
+Files ending in `.server.tsx` will only be executed on the server side and won't be exposed to the public.
+
+
+# Roadmap
+1. Support error & 404 page
+2. Optimize and persist routing states from upper nested routing rendering & fetch
+3. `Server Action` like submit as Post
+4. Support deno-runtime
+5. 
+
+
+
 
 # Author
 

@@ -1,4 +1,4 @@
-import { LunarJSManifest } from "../../lib/manifest"
+import { LunarJSManifest } from "~/core/manifest"
 import { LoadBuiltShardEntryModule } from "./module-loader"
 
 export type RoutableEntryPointName = string
@@ -23,7 +23,7 @@ export type ShardMeta = {
   IsPublicShard: boolean
 }
 
-export interface ClientAppStructure {
+export interface AppStructureContext {
   /**
    라우팅 상관없이 엔트리 포인트로 지정된 모듈 목록
    map[엔트리포인트 값]엔트리청크정보
@@ -44,7 +44,7 @@ export interface ClientAppStructure {
   OrderedBrowserStyleShards: string[]
 }
 
-// class WebApp implements ClientAppStructure {}
+// class WebApp implements AppStructureContext {}
 
 const LibEntryFinder = {
   react: /^node_modules\/react\/index\.js/,
@@ -61,10 +61,10 @@ const LibEntryFinder = {
 // HTTP 라우팅이 가능한 엔트리 목록을 추출
 // relativeRoutesRoot : App Root 베이스의 routesRoot 상대경로
 // ex) relativeRoutesRoot == "./app/routes"
-export async function MakeClientAppStructureFromManifest(
+export async function MakeAppStructureContextFromManifest(
   manifest: LunarJSManifest
-): Promise<ClientAppStructure> {
-  const webapp: ClientAppStructure = {
+): Promise<AppStructureContext> {
+  const webapp: AppStructureContext = {
     Manifest: manifest,
     LoadedEntryModuleMap: {},
     shards: new Map<string, ShardMeta>(),

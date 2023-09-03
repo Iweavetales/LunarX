@@ -1,6 +1,6 @@
-import { RouteNode } from "../../lib/manifest"
-import { ClientAppStructure } from "./client-app-structure"
-import { ServerContext } from "../../lib/lunar-context"
+import { RawRouteInfoNode } from "~/core/manifest"
+import { AppStructureContext } from "./client-app-structure"
+import { ServerContext } from "~/core/lunar-context"
 import { v4 as uuidV4 } from "uuid"
 
 export type ServerSideRouteFetchResult = {
@@ -16,8 +16,8 @@ export type ServerSideFetchResult = {
   result?: ServerSideRouteFetchResult
 }
 export async function FetchingServerSideRouteData(
-  routeNode: RouteNode,
-  webApp: ClientAppStructure,
+  routeNode: RawRouteInfoNode,
+  webApp: AppStructureContext,
   context: ServerContext
 ): Promise<ServerSideFetchResult> {
   const serverSideEntry = routeNode.serverSideEntryPath

@@ -23,6 +23,10 @@ export type LunarConfig = {
   runtime: {
     type: SupportingRuntime
   }
+
+  etc: {
+    deleteBootstrapScriptAfterBoot: boolean
+  }
 }
 
 export const baseConfig: LunarConfig = {
@@ -48,6 +52,10 @@ export const baseConfig: LunarConfig = {
 
   runtime: {
     type: "node",
+  },
+
+  etc: {
+    deleteBootstrapScriptAfterBoot: true,
   },
 }
 
@@ -83,6 +91,11 @@ export function ExtendConfig(
     runtime: {
       ...original.runtime,
       ...override.runtime,
+    },
+
+    etc: {
+      ...original.etc,
+      ...override.etc,
     },
   }
 }

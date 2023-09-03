@@ -2,9 +2,10 @@ import { createRoot, hydrateRoot } from "react-dom/client"
 import React from "react"
 import { BrowserRouter } from "react-router-dom"
 import { RouteFetchResult, ServerFetchesProvider } from "../ssfetch"
-import { UniversalRouteNode } from "../../../lib/document-types"
-import LunarAppContainer, { SwiftRenderer } from "../app"
-import { RootElementID } from "../../../lib/constants"
+import { UniversalRouteInfoNode } from "~/core/document-types"
+import LunarAppContainer from "../lib/root-app-container"
+import { RootElementID } from "~/core/constants"
+import { SwiftRenderer } from "../app"
 
 type ReactRouteNode = {
   element: React.ReactElement
@@ -20,10 +21,13 @@ type TAppData = {
   rd: {
     [routePattern: string]: RouteFetchResult
   }
-  ascendRouteNodeList: UniversalRouteNode[]
+  ascendRouteNodeList: UniversalRouteInfoNode[]
 }
 
-function PromiseRequire(require: RequireFunction, modulePath: string): any {
+function PromiseRequire(
+  require: RequireFunction,
+  modulePath: string
+): Promise<any> {
   return new Promise((resolve) => {
     require([modulePath], ([module]) => {
       resolve(module)
@@ -33,14 +37,14 @@ function PromiseRequire(require: RequireFunction, modulePath: string): any {
 
 export default function (
   appDataFromServer: TAppData,
-  ascRouteNodes: UniversalRouteNode[],
+  ascRouteNodes: UniversalRouteInfoNode[],
   customAppEntryModulePath: string,
   browserEntryModulePath: string,
   require: RequireFunction
 ) {
   async function Startup() {
     let App: () => React.ReactElement
-    console.log("customAppEntryModulePath", customAppEntryModulePath)
+
     if (customAppEntryModulePath) {
       console.log("Used customized App module")
       const customAppModule: any = await PromiseRequire(
@@ -101,6 +105,21 @@ export default function (
       ascRouteNodes.map((routeNode) => routeNode.shardPath)
     )
 
+    const preloadedComponents = await Promise.all(
+      /**
+       * Resolves [shardPath, React.FunctionComponent]
+       */
+      ascRouteNodes.map(async (routeNode) => [
+        routeNode.shardPath,
+        (await PromiseRequire(require, routeNode.shardPath)).default,
+      ])
+    ).then((pairs) =>
+      /**
+       * Reduce [[shardPath, React.FunctionComponent], ...] -> { ... }
+       */
+      pairs.reduce((acc, cur) => ({ ...acc, [cur[0]]: cur[1] }), {})
+    )
+
     // const nativeScrollTo = window.scrollTo;
     // window.scrollTo = (...args) => console.trace('scrollTo', args);
 
@@ -123,6 +142,7 @@ export default function (
               }}
               ascendRouteNodeList={ascRouteNodes}
               dataMatchMap={appDataFromServer.rd}
+              preloadedComponents={preloadedComponents}
             >
               <ServerFetchesProvider dataKey={"_app"}>
                 <App />
@@ -134,68 +154,72 @@ export default function (
     }
   }
 
-  // socket
-  const socket = new WebSocket(`ws://${location.host}/_hmr`)
+  // # defined by esbuild
+  // eslint-disable-next-line no-undef
+  if (DEFINE_ENABLE_FAST_REFRESH) {
+    // socket
+    const socket = new WebSocket(`ws://${location.host}/_hmr`)
 
-  socket.addEventListener("open", (event) => {
-    console.log("Socket Connected", socket)
-  })
-  // Listen for messages
-  socket.addEventListener("message", (event) => {
-    console.log("Message from server ", event.data)
-    try {
-      const message = JSON.parse(event.data)
-      const messageType = message.type
-      console.log("build server message", message)
-      if (messageType === "updated-sources") {
-        const updatedShards: string[] = message.updatedShardPaths
-        console.log("updated", updatedShards)
-        location.reload()
+    socket.addEventListener("open", (event) => {
+      console.log("Socket Connected", socket)
+    })
+    // Listen for messages
+    socket.addEventListener("message", (event) => {
+      console.log("Message from server ", event.data)
+      try {
+        const message = JSON.parse(event.data)
+        const messageType = message.type
+        console.log("build server message", message)
+        if (messageType === "updated-sources") {
+          const updatedShards: string[] = message.updatedShardPaths
+          console.log("updated", updatedShards)
+          location.reload()
 
-        // holding for Fast Refresh
-        return
-        Promise.all(
-          updatedShards.map(async (shardPath: string) => {
-            const sourceResponse = await fetch(`/_/s/${shardPath}`)
-            console.log(shardPath, "source", sourceResponse)
-            if (sourceResponse.body) {
-              const reader = sourceResponse.body.getReader()
-              const { done, value } = await reader.read()
+          // holding for Fast Refresh
+          return
+          Promise.all(
+            updatedShards.map(async (shardPath: string) => {
+              const sourceResponse = await fetch(`/_/s/${shardPath}`)
+              console.log(shardPath, "source", sourceResponse)
+              if (sourceResponse.body) {
+                const reader = sourceResponse.body.getReader()
+                const { done, value } = await reader.read()
 
-              const source = new TextDecoder().decode(value)
-              console.log(done, source)
-              try {
-                eval(source)
-              } catch (e) {
-                console.error("eval error", e)
+                const source = new TextDecoder().decode(value)
+                console.log(done, source)
+                try {
+                  eval(source)
+                } catch (e) {
+                  console.error("eval error", e)
+                }
               }
-            }
+            })
+          ).then(() => {
+            console.log("Hot Update", browserEntryModulePath)
+            require([browserEntryModulePath], function (modules) {
+              modules[0].default(
+                appDataFromServer,
+                ascRouteNodes,
+                customAppEntryModulePath,
+                browserEntryModulePath,
+                require
+              )
+            })
           })
-        ).then(() => {
-          console.log("Hot Update", browserEntryModulePath)
-          require([browserEntryModulePath], function (modules) {
-            modules[0].default(
-              appDataFromServer,
-              ascRouteNodes,
-              customAppEntryModulePath,
-              browserEntryModulePath,
-              require
-            )
-          })
-        })
+        }
+      } catch (e) {
+        console.error("Failed to parse message", e)
       }
-    } catch (e) {
-      console.error("Failed to parse message", e)
-    }
-  })
+    })
 
-  socket.addEventListener("close", (event) => {
-    console.log("WebSocket connection closed:", event)
-  })
+    socket.addEventListener("close", (event) => {
+      console.log("WebSocket connection closed:", event)
+    })
 
-  socket.addEventListener("error", (event) => {
-    console.error("WebSocket error:", event)
-  })
+    socket.addEventListener("error", (event) => {
+      console.error("WebSocket error:", event)
+    })
+  }
 
   Startup()
 }

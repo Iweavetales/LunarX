@@ -1,9 +1,13 @@
-import { BuiltShardInfo, RouteNode, RouteNodeMap } from "../../lib/manifest"
+import {
+  BuiltShardInfo,
+  RawRouteInfoNode,
+  RawRouteInfoNodeMap,
+} from "~/core/manifest"
 
 export function BuildRouteNodeMap(entries: {
   [entryPath: string]: BuiltShardInfo
-}): RouteNodeMap {
-  const routeNodeMap: RouteNodeMap = {}
+}): RawRouteInfoNodeMap {
+  const routeInfoNodeMap: RawRouteInfoNodeMap = {}
 
   const entryPaths = Object.keys(entries)
 
@@ -82,21 +86,27 @@ export function BuildRouteNodeMap(entries: {
      * 지금까지 생성된 라우트 맵 내에서 현재 라우트패턴의 상위 라우트 패턴을 찾는다
      * 상위 패턴에 해당하는 라우트가 존재 할 경우 반드시 라우트 맵에 생성이 되어 있다( 라우트패턴의 길이가 짧은 순서대로 맵을 생성 하기 때문에 )
      */
-    const upperRoutePattern = FindUpperRoutePattern(routeNodeMap, routePattern)
+    const upperRoutePattern = FindUpperRoutePattern(
+      routeInfoNodeMap,
+      routePattern
+    )
 
     if (upperRoutePattern) {
       // 상위 라우트 노드에 children 배열이 생성되어 있지 않다면 빈배열을 할당
-      if (!routeNodeMap[upperRoutePattern].childrenRoutePatterns) {
-        routeNodeMap[upperRoutePattern].childrenRoutePatterns = []
+      if (!routeInfoNodeMap[upperRoutePattern].childrenRoutePatterns) {
+        routeInfoNodeMap[upperRoutePattern].childrenRoutePatterns = []
       }
 
-      routeNodeMap[upperRoutePattern].childrenRoutePatterns!.push(routePattern)
+      routeInfoNodeMap[upperRoutePattern].childrenRoutePatterns!.push(
+        routePattern
+      )
     }
 
     const serverSideRouteLoaderShard = serverSideShardsInRouteDir[routePattern]
-    routeNodeMap[routePattern] = {
+
+    routeInfoNodeMap[routePattern] = {
       routePattern: routePattern,
-      entryPath: entryShard.entryPoint,
+      entryPath: entryShard.entryPoint!,
 
       /**
        * 위에서 찾은 상위라우터를 입력한다
@@ -115,11 +125,11 @@ export function BuildRouteNodeMap(entries: {
     }
   }
 
-  return routeNodeMap
+  return routeInfoNodeMap
 }
 
 function FindUpperRoutePattern(
-  routeNodeMap: RouteNodeMap,
+  routeNodeMap: RawRouteInfoNodeMap,
   routePattern: string
 ): string | undefined {
   //

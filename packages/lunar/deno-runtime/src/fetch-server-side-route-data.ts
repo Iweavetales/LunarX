@@ -1,5 +1,5 @@
 import { uuidV5Generate } from "./deps.ts"
-import { RouteNode } from "../../lib/manifest.ts"
+import { RawRouteInfoNode } from "../../lib/manifest.ts"
 import { WebAppStructure } from "./web-app-structure.ts"
 import { ServerContext } from "../lib/lunar-context.ts"
 
@@ -13,7 +13,7 @@ export type ServerSideRouteFetchResult = {
   data?: any
 }
 export async function FetchingServerSideRouteData(
-  routeNode: RouteNode,
+  routeNode: RawRouteInfoNode,
   webApp: WebAppStructure,
   context: ServerContext
 ) {

@@ -1,3 +1,5 @@
+import { ShardPath } from "./manifest"
+
 export type BrowserRouteNode = {
   path: string
   module: string
@@ -5,12 +7,12 @@ export type BrowserRouteNode = {
 }
 
 /**
- * server 와 browser 둘 다에서 통용되는 RouteNode
+ * server 와 browser 둘 다에서 통용되는 RawRouteInfoNode
  */
-export type UniversalRouteNode = {
+export interface UniversalRouteInfoNode {
   matchPattern: string
-  childNodes?: UniversalRouteNode[]
-  upperRouteMatchPattern: string
+  childNodes?: UniversalRouteInfoNode[]
+  upperRouteMatchPattern?: string
   shardPath: string
 }
 export type RouteServerFetchDataMap = {
@@ -20,7 +22,7 @@ export type RouteServerFetchDataMap = {
 /**
  * 최상위 라우트 노드 목록
  */
-export type TopUniversalRouteNodes = UniversalRouteNode[]
+export type TopLevelUniversalRouteInfoNodes = UniversalRouteInfoNode[]
 
 export type DocumentSheet = {
   scripts: { scriptId: string; url: string }[]
@@ -45,8 +47,12 @@ export type DocumentSheet = {
    * 오름차순 라우트 노드 리스트
    * 주의: 트리 형식이 아닌 최종 매치 라우트 까지의 계층이 오름차순으로 나열 된 리스트이다
    */
-  ascendRouteNodeList: UniversalRouteNode[]
-  requireFunction: (shardPath: string) => any
+  /**
+   * Universal [R]oute [I]nfo [N]ode List
+   */
+  universalRINListRootToLeaf: UniversalRouteInfoNode[]
+  // ascendRouteNodeList: UniversalRouteInfoNode[]
+  requireFunction: (shardPath: ShardPath) => any
 
   nonce: string // script 에 사용되는 nonce 값
 }

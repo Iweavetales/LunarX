@@ -3,7 +3,7 @@ import queue from "queue"
 
 import { Plugin, PluginBuild } from "esbuild"
 
-import { LunarConfig } from "../../lib/lunar-config"
+import { LunarConfig } from "~/core/lunar-config"
 import { PostProcessor, ProcessingOptions } from "./post-processor"
 import { ensureDirectoryExists } from "./directory"
 // eslint-disable-next-line no-unused-vars

@@ -2,7 +2,7 @@
 
 import { join } from "path"
 import { PathHelper } from "./helper/path"
-import { ShardPath } from "../../lib/manifest"
+import { ShardPath } from "~/core/manifest"
 
 export function ShardPathToRealModulePath(shardPath: ShardPath): string {
   return join(PathHelper.cwd, "/dist/cjs/", shardPath)

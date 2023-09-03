@@ -1,6 +1,6 @@
 import { spawn } from "child_process"
 import { join } from "path"
-import { SupportingRuntime } from "../../lib/runtime"
+import { SupportingRuntime } from "~/core/runtime"
 import type { LunarServer } from "../../node-runtime"
 
 export default async function Start(options: {
@@ -38,7 +38,7 @@ export default async function Start(options: {
         )
         const Lunar = module.LunarServer as typeof LunarServer
         const server = new Lunar({ BuildDir: options.buildDir })
-        await server.load()
+        await server.loadAppManifest([])
         await server.run()
 
         resolve(true)

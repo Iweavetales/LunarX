@@ -1,23 +1,27 @@
-import { ClientAppStructure } from "./client-app-structure"
-import { GetUrlPath } from "./urlUtils"
+import { AppStructureContext } from "./client-app-structure"
+import { GetUrlPath } from "./url-utils"
 import { GenerateRandomBytes } from "./random"
-import { DocumentSheet, UniversalRouteNode } from "../../lib/document-types"
-import { BuiltShardInfo, RouteNode, RouteNodeMap } from "../../lib/manifest"
+import { DocumentSheet, UniversalRouteInfoNode } from "~/core/document-types"
+import {
+  BuiltShardInfo,
+  RawRouteInfoNode,
+  RawRouteInfoNodeMap,
+} from "~/core/manifest"
 import {
   FetchingServerSideRouteData,
   ServerSideFetchResult,
   ServerSideRouteFetchResult,
 } from "./fetch-server-side-route-data"
-import { makeServerContext } from "./ssr-context"
+import { makeServerContext } from "./make-server-context"
 import { IncomingMessage } from "http"
-import { EntryServerHandler } from "../../lib/types.server"
-import { MutableHTTPHeaders } from "../../lib/http-headers.server"
-import { PageParams } from "../../lib/lunar-context"
+import { EntryServerHandler } from "~/core/types.server"
+import { MutableHTTPHeaders } from "~/core/http-headers.server"
+import { PageParams } from "~/core/lunar-context"
 import { rawHeaderStringArrayToMutableHTTPHeaders } from "./http-header"
 
 export function RenderPage(
   currentWorkDirectory: string,
-  webApp: ClientAppStructure,
+  webApp: AppStructureContext,
   req: IncomingMessage,
   params: PageParams,
   /**
@@ -31,7 +35,8 @@ export function RenderPage(
    *
    * ["/blog", "/blog/post"] 이 순서로 라우트 노드가 들어 있게 됨
    */
-  ascendFlatRouteNodeList: RouteNode[]
+  rawRouteInfoNodeListRootToLeaf: RawRouteInfoNode[],
+  universalRouteInfoNodeList: UniversalRouteInfoNode[]
 ): Promise<{
   data?: string
   status: number
@@ -45,22 +50,11 @@ export function RenderPage(
    * 모든 라우터가 포함된 라우트 맵이 아닌
    * 현재 매치된 라우트의 길만 포함 하는 라우트 노드 목록 생성
    */
-  const routeNodeMap: RouteNodeMap = {}
-  for (let i = 0; i < ascendFlatRouteNodeList.length; i++) {
-    const routeNode = ascendFlatRouteNodeList[i]
+  const routeNodeMap: RawRouteInfoNodeMap = {}
+  for (let i = 0; i < rawRouteInfoNodeListRootToLeaf.length; i++) {
+    const routeNode = rawRouteInfoNodeListRootToLeaf[i]
     routeNodeMap[routeNode.routePattern] = routeNode
   }
-
-  /**
-   * beginToTerminalRouteStem 을 universalNode 배열 로 변환
-   */
-  const ascendRouteNodeList: UniversalRouteNode[] | unknown =
-    ascendFlatRouteNodeList.map((node) => ({
-      // childNodes:[],
-      matchPattern: node.routePattern,
-      upperRouteMatchPattern: node.upperRoutePattern,
-      shardPath: webApp.Manifest.entries[node.entryPath ?? "??"].shardPath,
-    }))
 
   const entriesArray = Object.keys(webApp.Manifest.entries).map(
     (key) => webApp.Manifest.entries[key]
@@ -140,7 +134,7 @@ export function RenderPage(
 
           return webApp.LoadedEntryModuleMap[
             webApp.Manifest.entries[
-              webApp.Manifest.routeNodes[pattern].entryPath ?? "??"
+              webApp.Manifest.routeInfoNodes[pattern].entryPath ?? "??"
             ].shardPath
           ].default
         }
@@ -157,7 +151,7 @@ export function RenderPage(
 
         try {
           await Promise.all(
-            ascendFlatRouteNodeList.map((routeNode) => {
+            rawRouteInfoNodeListRootToLeaf.map((routeNode) => {
               return new Promise((resolve, reject) => {
                 ;(async function () {
                   const result = await FetchingServerSideRouteData(
@@ -224,17 +218,6 @@ export function RenderPage(
           })
         }
 
-        // console.log("routeNodeMap", routeNodeMap)
-
-        /**
-         * router.server.tsx 를 실행해 리액트 라우터 컴포넌트 트리를 생성한다
-         */
-        const router = await routerServerHandler(
-          context,
-          routeNodeMap,
-          getRouteModule
-        )
-
         try {
           /**
            * 랜덤 바이트 16개를 base64 로 인코딩 해서 nonce 생성
@@ -280,12 +263,11 @@ export function RenderPage(
               // server side fetched 데이터 맵
               routeServerFetchesResultMap: routeServerFetchesResultMap,
               // 오름차순 정렬 라우트 노드 정보
-              ascendRouteNodeList: ascendRouteNodeList,
-
+              universalRINListRootToLeaf: universalRouteInfoNodeList,
               // 모듈 로드 함수
               requireFunction: requireFunction,
-            } as DocumentSheet,
-            router
+            } as DocumentSheet
+            // router
           )
 
           console.log("response lunar page")

@@ -1,4 +1,4 @@
-import { ShardSourceType } from "../../lib/manifest"
+import { ShardSourceType } from "~/core/manifest"
 
 export const REF_PATTERNS = {
   MAP_FILE: /\.map$/,

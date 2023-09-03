@@ -4,7 +4,11 @@ import { LunarServer } from "./lunar-server.ts"
 import { resolve, join } from "https://deno.land/std@0.150.0/path/mod.ts"
 import { lookup } from "https://deno.land/x/media_types/mod.ts"
 import { IsDevelopment } from "./mode.ts"
-import { BuiltShardInfo, RouteNode, RouteNodeMap } from "../../lib/manifest.ts"
+import {
+  BuiltShardInfo,
+  RawRouteInfoNode,
+  RawRouteInfoNodeMap,
+} from "../../lib/manifest.ts"
 import { GetUrlPath } from "./url-utils.ts"
 import { ArrayClone } from "./array.ts"
 import {
@@ -12,19 +16,13 @@ import {
   ServerSideRouteFetchResult,
 } from "./fetch-server-side-route-data.ts"
 import { makeServerContext } from "./ssr-context.ts"
-import { UniversalRouteNode } from "../../lib/document-types.ts"
+import { UniversalRouteInfoNode } from "../../lib/document-types.ts"
 
 export { Node }
 
 type Params = Map<string, string>
 
-type RouteEntryNode = {
-  children: RouteEntryNode[]
-  shardInfo: BuiltShardInfo
-  parent: RouteEntryNode
-}
-
-export function BuildRoutes(manifestRouteNodes: RouteNodeMap): Node {
+export function BuildRoutes(manifestRouteNodes: RawRouteInfoNodeMap): Node {
   const root = new Node()
 
   // static file routing
@@ -124,11 +122,11 @@ export function BuildRoutes(manifestRouteNodes: RouteNodeMap): Node {
 
   const routePatterns = Object.keys(manifestRouteNodes)
   routePatterns.forEach((routePattern) => {
-    const routeNode: RouteNode = manifestRouteNodes[routePattern]
+    const routeNode: RawRouteInfoNode = manifestRouteNodes[routePattern]
     const terminalToRootOrderedNodeList = []
 
     /**
-     * RouteNode 의 upperRoutePattern 을 따라
+     * RawRouteInfoNode 의 upperRoutePattern 을 따라
      * 상위 라우터를 모은다
      */
     for (let current = routeNode; current; ) {
@@ -191,7 +189,7 @@ export function BuildRoutes(manifestRouteNodes: RouteNodeMap): Node {
         /**
          * beginToTerminalRouteStem 을 universalNode 배열 로 변환
          */
-        const ascendRouteNodeList: UniversalRouteNode[] =
+        const ascendRouteNodeList: UniversalRouteInfoNode[] =
           ascendFlatRouteNodeList.map((node) => ({
             // childNodes:[],
             matchPattern: node.routePattern,

@@ -1,7 +1,7 @@
-import { ServerContext, PageParams } from "../../lib/lunar-context"
+import { ServerContext, PageParams } from "~/core/lunar-context"
 
 import { IncomingMessage } from "http"
-import { MutableHTTPHeaders } from "../../lib/http-headers.server"
+import { MutableHTTPHeaders } from "~/core/http-headers.server"
 
 export function makeServerContext(
   req: IncomingMessage,

@@ -1,8 +1,11 @@
 import { WebAppStructure } from "./web-app-structure.ts"
 import { GetUrlPath } from "./url-utils.ts"
 import { GenerateRandomBytes } from "./random.ts"
-import { DocumentSheet, UniversalRouteNode } from "../../lib/document-types.ts"
-import { RouteNode, RouteNodeMap } from "../../lib/manifest.ts"
+import {
+  DocumentSheet,
+  UniversalRouteInfoNode,
+} from "../../lib/document-types.ts"
+import { RawRouteInfoNode, RawRouteInfoNodeMap } from "../../lib/manifest.ts"
 import {
   FetchingServerSideRouteData,
   ServerSideRouteFetchResult,
@@ -25,11 +28,11 @@ export function RenderPage(
    *
    * ["/blog", "/blog/post"] 이 순서로 라우트 노드가 들어 있게 됨
    */
-  ascendFlatRouteNodeList: RouteNode[]
+  ascendFlatRouteNodeList: RawRouteInfoNode[]
 ): Promise<Response> {
   // beginToTerminalRouteStem 의 역순으로 라우트 노드를 배열
   // const reverseRouteStem = ArrayClone(ascendFlatRouteNodeList).reverse();
-  const routeNodeMap: RouteNodeMap = {}
+  const routeNodeMap: RawRouteInfoNodeMap = {}
   for (let i = 0; i < ascendFlatRouteNodeList.length; i++) {
     const routeNode = ascendFlatRouteNodeList[i]
     routeNodeMap[routeNode.routePattern] = routeNode
@@ -38,7 +41,7 @@ export function RenderPage(
   /**
    * beginToTerminalRouteStem 을 universalNode 배열 로 변환
    */
-  const ascendRouteNodeList: UniversalRouteNode[] | unknown =
+  const ascendRouteNodeList: UniversalRouteInfoNode[] | unknown =
     ascendFlatRouteNodeList.map((node) => ({
       // childNodes:[],
       matchPattern: node.routePattern,

@@ -1,7 +1,6 @@
 import { join } from "path"
-import packageJson from "../../package.json"
 import { LunarServer } from "../../node-runtime"
-import { ShardPath } from "../../lib/manifest"
+import { ShardPath } from "~/core/manifest"
 
 export default async function Dev(options: { buildDir: string }) {
   return new Promise((resolve, reject) => {
@@ -17,7 +16,7 @@ export default async function Dev(options: { buildDir: string }) {
         (updatedShardPaths: ShardPath[]) => {
           // built
           console.log("built")
-          server.load(updatedShardPaths)
+          server.loadAppManifest(updatedShardPaths)
         }
       )
       await buildContext.watch()

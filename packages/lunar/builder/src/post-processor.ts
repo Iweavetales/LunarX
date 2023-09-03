@@ -3,7 +3,7 @@ import {
   LunarJSManifest,
   ShardSourceType,
   ShardPath,
-} from "../../lib/manifest"
+} from "~/core/manifest"
 import { Metafile } from "esbuild"
 import { DiffMetaOutput, DiffResult, DiffStatus } from "./meta-file"
 import { dirname, join, relative } from "path"
@@ -19,7 +19,7 @@ import { obfuscate } from "javascript-obfuscator"
 import { defaultObfuscateOptions } from "./obfuscator"
 import { normalizePath } from "./path"
 import { checkMapFile, determineModuleType } from "./classification"
-import { LunarConfig } from "../../lib/lunar-config"
+import { LunarConfig } from "~/core/lunar-config"
 import { CheckBrowserEntrySource } from "./browser-entry"
 import { BuildRouteNodeMap } from "./routing"
 import { GetBrowserModuleLoaderScript } from "./script-transpile"
@@ -71,7 +71,7 @@ export class PostProcessor {
       entries: {},
       chunks: {},
       browserEntryShardPath: "",
-      routeNodes: {},
+      routeInfoNodes: {},
       browserModuleLoaderFilePath: "",
       builtVersion: Date.now().toString(36),
     }
@@ -436,7 +436,7 @@ export class PostProcessor {
      * Generate route node map
      */
     const routeNodes = BuildRouteNodeMap(this.manifest.entries)
-    this.manifest.routeNodes = routeNodes
+    this.manifest.routeInfoNodes = routeNodes
 
     // Setup client loader script to dist/client
     await this.setupClientLoaderScript()

@@ -44,12 +44,12 @@ export function GetBrowserModuleLoaderScript(): BabelFileResult {
   try {
     const file = readFileSync(scriptPath)
 
-    const babelRet = TranspileScript(file.toString(), "loader.ts")
+    const babelRet = TranspileScript(file.toString(), "serve-loader.ts")
     return babelRet
   } catch (e) {
     console.error(
       chalk.redBright(
-        "Failed to load browser support scripts [browser-amd-module-loader.ts] :",
+        "Failed to load browser support scripts [browser-amd-module-serve-loader.ts] :",
         e
       )
     )

@@ -1,4 +1,4 @@
-import { MutableHTTPHeaders } from "../../lib/http-headers.server"
+import { MutableHTTPHeaders } from "~/core/http-headers.server"
 
 export function rawHeaderStringArrayToMutableHTTPHeaders(
   rawHeaders: string[]

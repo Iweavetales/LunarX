@@ -3,6 +3,5 @@ import { DocumentSheet } from "./document-types"
 
 export type EntryServerHandler = (
   context: ServerContext,
-  documentSheet: DocumentSheet,
-  LunarJSApp: any
+  documentSheet: DocumentSheet
 ) => Promise<string>

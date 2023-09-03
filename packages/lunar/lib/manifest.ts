@@ -1,4 +1,4 @@
-export type MetaOutput = {
+export interface MetaOutput {
   bytes: number
   inputs: {
     [path: string]: {
@@ -19,11 +19,11 @@ export type ShardSourceType =
   | "unknown"
 
 /**
- * ShardPath is an absolute path that starts from dist/[client|esm|cjs]/.
+ * ShardPath is an absolute path that starts from `dist/[client|esm|cjs]/`.
  */
 export type ShardPath = string
 
-export type BuiltShardInfo = {
+export interface BuiltShardInfo {
   isEntry: boolean
   isChunk: boolean
   isServerSideShard: boolean
@@ -45,12 +45,9 @@ export type BuiltShardInfo = {
   entryFileRelativeDir?: string
 }
 
-export type RouteNodeMap = {
-  [routePattern: string]: RouteNode
-}
-export type RouteNode = {
+export interface RawRouteInfoNode {
   routePattern: string // /blog/:post 와 같은 라우트 패턴으로 사용 될 수 있는 실제 라우트 패스
-  entryPath: undefined | string // entries 를 가르ㄹ키는 파일 패스값
+  entryPath: string // entries 를 가르ㄹ키는 파일 패스값
   upperRoutePattern: undefined | string // 상위 라우트 노드의 경로를 가르킴
   childrenRoutePatterns?: string[] // 하위 라우트 노드 패턴
   /**
@@ -61,8 +58,13 @@ export type RouteNode = {
    */
   serverSideEntryPath?: string
 }
+
+export interface RawRouteInfoNodeMap {
+  [routePattern: string]: RawRouteInfoNode
+}
+
 // export type Entry
-export type LunarJSManifest = {
+export interface LunarJSManifest {
   // builtShards: {
   //   [shardPath: string]: BuiltShardInfo;
   // };
@@ -74,7 +76,7 @@ export type LunarJSManifest = {
     [outputPath: string]: BuiltShardInfo
   }
 
-  routeNodes: RouteNodeMap
+  routeInfoNodes: RawRouteInfoNodeMap
 
   /**
    * lib/entry.browser.tsx 엔트리 모듈에 대한 shardPath

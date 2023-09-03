@@ -15,22 +15,24 @@ import { extractRuntimeOptionsFromConfig } from "./extract-runtime-options-from-
 import { ShardPath } from "../../lib/manifest"
 import chalk from "chalk"
 
-type BuiltCallback = () => void
-const reservedConfigFile = "lunarx.conf.js"
+type BuiltCallback = (updatedShardPaths: string[]) => void
+const RESERVED_CONFIG_FILE_NAME = "lunarx.conf.js"
+
 async function CreateBuildOptions(
-  builtCallback: BuiltCallback
+  builtCallback: BuiltCallback,
+  buildType: "build" | "dev"
 ): Promise<BuildOptions> {
   const cwd = process.cwd()
 
   let config: LunarConfig = baseConfig
-  const userConfigPath = join(cwd, reservedConfigFile)
+  const userConfigPath = join(cwd, RESERVED_CONFIG_FILE_NAME)
+
   try {
     const userConfig = await import(userConfigPath)
     config = ExtendConfig(config, userConfig.default)
-    console.log("User config", userConfig.default)
   } catch (e) {
-    // Nothing to do
-    console.log(chalk.red(`Failed to apply ${reservedConfigFile}`), e)
+    console.log(chalk.red(`Failed to apply ${RESERVED_CONFIG_FILE_NAME}`))
+    throw e
   }
 
   console.log("Final config", config)
@@ -79,22 +81,11 @@ async function CreateBuildOptions(
     targetFrontFrameworkImplementEntryDirectoryPath
   )
 
-  /**
-   * lightningcss 모듈의
-   * if (process.env.CSS_TRANSFORMER_WASM  ) {
-   *   module.exports = require(`../pkg`);
-   * }
-   * cssModulesPlugin 에러를 방지 하기 위해 process.env.CSS_TRANSFORMER_WASM 를 빈값으로 설정
-   */
-  // process.env.CSS_TRANSFORMER_WASM = '';
   const esbuildOptions: BuildOptions = {
     entryPoints: [
       ...targetFrameworkEntryFiles,
       ...filteredRouteFiles,
-      // 'react',
-      // 'react-dom',
-      // 'react-dom/server',
-      // 'react-router-dom/server',
+
       ...(config.build.vendors ?? []),
     ],
 
@@ -112,6 +103,17 @@ async function CreateBuildOptions(
     // },
     // jsx: 'transform',
     // jsxFactory: 'h',
+    define: {
+      DEFINE_DELETE_BOOTSTRAP_BLOCK_AFTER_BOOT: config.etc
+        .deleteBootstrapScriptAfterBoot
+        ? "true"
+        : "false",
+      // If the application is in production mode or if the buildType is set to 'build', fast refresh (also known as HMR) will be disabled.
+      DEFINE_ENABLE_FAST_REFRESH:
+        process.env.NODE_ENV === "production" || buildType === "build"
+          ? "false"
+          : "true",
+    },
     minify: process.env.NODE_ENV === "production" ? true : false,
     entryNames:
       process.env.NODE_ENV === "production" ? "[hash]" : "[dir]/[name]-[hash]",
@@ -124,15 +126,9 @@ async function CreateBuildOptions(
     //❗ platform: "node", // ❗️Do not comment out this option. There's an issue with this option in the Deno runtime.
     format: "esm",
     target: [],
-    // outExtension: { '.js': '.mjs' }, // esm 모듈은 mjs 로
     splitting: true,
-    // external:["react","react-dom"],
-    // watch: true,
-    // incremental: true,
     metafile: true,
-    // write: false,
     treeShaking: true,
-    // watch: true,
     loader: {
       ".ttf": "file",
       ".woff2": "file",
@@ -166,17 +162,9 @@ async function CreateBuildOptions(
 }
 
 export async function createBuildContext(builtCallback: BuiltCallback) {
-  return await esbuildContext(await CreateBuildOptions(builtCallback))
+  return await esbuildContext(await CreateBuildOptions(builtCallback, "dev"))
 }
 
 export async function build(builtCallback: BuiltCallback) {
-  return await esbuildBuild(await CreateBuildOptions(builtCallback))
+  return await esbuildBuild(await CreateBuildOptions(builtCallback, "build"))
 }
-// (async function main() {
-//   console.log('ENV =', process.env.NODE_ENV);
-//
-//   console.log(appDirectory, absoluteESMDistDirectory);
-//   let buildContext = await BuildReusableBuilder();
-//   console.log('watching');
-//   await buildContext.watch();
-// })();
