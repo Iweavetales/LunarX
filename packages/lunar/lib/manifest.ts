@@ -22,6 +22,16 @@ export type ShardSourceType =
  * ShardPath is an absolute path that starts from `dist/[client|esm|cjs]/`.
  */
 export type ShardPath = string
+export type EntryPath = string
+export type EntryName = string
+/**
+ * DedicatedEntryPath
+ * Entry path ruled by LunarX
+ * * internal: @entry/...
+ * * app routes: /...
+ */
+export type DedicatedEntryPath = string
+export type DedicatedEntryName = string
 
 export interface BuiltShardInfo {
   isEntry: boolean
@@ -41,8 +51,10 @@ export interface BuiltShardInfo {
   // if ShardType is "Entry" following fields are exists
   entryPoint?: string
   entryFileName?: string
-  entryName?: string // entryFile Name without extension
+  entryName?: EntryName // entryFile Name without extension
   entryFileRelativeDir?: string
+  dedicatedEntryPath?: DedicatedEntryPath
+  dedicatedEntryName?: DedicatedEntryName
 }
 
 export interface RawRouteInfoNode {
@@ -70,10 +82,15 @@ export interface LunarJSManifest {
   // };
   builtVersion: string
   entries: {
-    [entryPath: string]: BuiltShardInfo
+    [entryPath: EntryPath]: BuiltShardInfo
   }
+
   chunks: {
     [outputPath: string]: BuiltShardInfo
+  }
+
+  entryDictionaryByDedicatedEntryName: {
+    [dedicatedEntryName: DedicatedEntryName]: EntryPath
   }
 
   routeInfoNodes: RawRouteInfoNodeMap
@@ -84,6 +101,8 @@ export interface LunarJSManifest {
    */
   browserEntryShardPath: string
   customizeAppShardPath?: string // routes/_app.tsx
+  customize404ShardPath?: string // routes/_404.tsx
+  customizeErrorShardPath?: string // routes/_error.tsx
   customizeServerDocumentShardPath?: string // routes/_document.server.tsx
   initServerShardPath?: string // routes/_init.server.tsx
 

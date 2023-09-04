@@ -60,13 +60,10 @@ export function RenderPage(
     (key) => webApp.Manifest.entries[key]
   )
 
-  const routerServerEntrySource: BuiltShardInfo | undefined = entriesArray.find(
-    (entry) => entry.entryName === "router.server"
-  )
   const entryServerEntrySource: BuiltShardInfo | undefined = entriesArray.find(
     (entry) => entry.entryName === "entry.server"
   )
-  if (!(routerServerEntrySource && entryServerEntrySource)) {
+  if (entryServerEntrySource) {
     return Promise.resolve({
       data: "Not found core",
       status: 200,
@@ -97,9 +94,6 @@ export function RenderPage(
 
         const entryServerHandler: EntryServerHandler =
           webApp.LoadedEntryModuleMap[entryServerEntrySource!.shardPath].default
-        const routerServerHandler: any =
-          webApp.LoadedEntryModuleMap[routerServerEntrySource!.shardPath]
-            .default
 
         try {
           /**
@@ -218,71 +212,53 @@ export function RenderPage(
           })
         }
 
-        try {
-          /**
-           * 랜덤 바이트 16개를 base64 로 인코딩 해서 nonce 생성
-           */
-          const nonce = btoa(GenerateRandomBytes(16))
+        /**
+         * 랜덤 바이트 16개를 base64 로 인코딩 해서 nonce 생성
+         */
+        const nonce = btoa(GenerateRandomBytes(16))
 
-          /**
-           * entry.server.ts 를 호출 해 페이지 데이터를 생성
-           */
-          const result = await entryServerHandler(
-            context,
-            {
-              scripts: webApp.OrderedBrowserScriptShards.map(
-                (shardPath: string) => {
-                  return {
-                    url:
-                      "/_/s/" +
-                      shardPath +
-                      "?v=" +
-                      webApp.Manifest.builtVersion,
-                  }
-                }
-              ),
-              styles: webApp.OrderedBrowserStyleShards.map(
-                (shardPath: string) => {
-                  return {
-                    url:
-                      "/_/s/" +
-                      shardPath +
-                      "?v=" +
-                      webApp.Manifest.builtVersion,
-                  }
-                }
-              ),
-              nonce: nonce,
-              loaderScriptUrl:
-                "/_/s/loader.js" + "?v=" + webApp.Manifest.builtVersion,
-              browserEntryModulePath: webApp.Manifest.browserEntryShardPath,
-              customAppModuleShardPath: webApp.Manifest.customizeAppShardPath,
-              customDocumentModuleShardPath:
-                webApp.Manifest.customizeServerDocumentShardPath,
+        /**
+         * entry.server.ts 를 호출 해 페이지 데이터를 생성
+         */
+        const result = await entryServerHandler(context, {
+          scripts: webApp.OrderedBrowserScriptShards.map(
+            (shardPath: string) => {
+              return {
+                url: "/_/s/" + shardPath + "?v=" + webApp.Manifest.builtVersion,
+              }
+            }
+          ),
+          styles: webApp.OrderedBrowserStyleShards.map((shardPath: string) => {
+            return {
+              url: "/_/s/" + shardPath + "?v=" + webApp.Manifest.builtVersion,
+            }
+          }),
+          nonce: nonce,
+          loaderScriptUrl:
+            "/_/s/loader.js" + "?v=" + webApp.Manifest.builtVersion,
+          browserEntryModulePath: webApp.Manifest.browserEntryShardPath,
+          customAppModuleShardPath: webApp.Manifest.customizeAppShardPath,
+          custom404ShardPath: webApp.Manifest.customize404ShardPath,
+          customErrorShardPath: webApp.Manifest.customizeErrorShardPath,
+          customDocumentModuleShardPath:
+            webApp.Manifest.customizeServerDocumentShardPath,
 
-              // server side fetched 데이터 맵
-              routeServerFetchesResultMap: routeServerFetchesResultMap,
-              // 오름차순 정렬 라우트 노드 정보
-              universalRINListRootToLeaf: universalRouteInfoNodeList,
-              // 모듈 로드 함수
-              requireFunction: requireFunction,
-            } as DocumentSheet
-            // router
-          )
+          // server side fetched 데이터 맵
+          routeServerFetchesResultMap: routeServerFetchesResultMap,
+          // 오름차순 정렬 라우트 노드 정보
+          universalRINListRootToLeaf: universalRouteInfoNodeList,
+          // 모듈 로드 함수
+          requireFunction: requireFunction,
+        } as DocumentSheet)
 
-          console.log("response lunar page")
-
-          /**
-           * Response 객체 생성
-           */
-          resolve({
-            data: result,
-            status: 200,
-            responseHeaders: responseHeaders,
-          })
-        } catch (e) {
-          console.log("module load error>", e)
-        }
+        /**
+         * Response 객체 생성
+         */
+        resolve({
+          data: result,
+          status: 200,
+          responseHeaders: responseHeaders,
+        })
       } catch (e) {
         console.log("failed to load base libs", e)
       }

@@ -7,14 +7,26 @@ import { ShardLoader } from "../router"
  * SwiftRouter 등에게 데이터를 전달 한다.
  */
 export const RootAppContext = createContext<{
-  loader?: ShardLoader
-  routeShardPrepareTrigger?: (shardPaths: string[]) => Promise<void>
-  components?: { [shardPath: string]: React.FunctionComponent }
+  loader: ShardLoader
+  routeShardPrepareTrigger: (shardPaths: string[]) => Promise<void>
+  components: { [shardPath: string]: React.FunctionComponent }
+  registerComponentByShardPath: (shardPath: string, shard: any) => void
   //
   // // client side browsing 에 긴밀하게 사용되는 속성들
   // fetchingRoute: boolean; // 현재 라우트 정보와 라우트 데이터를 가져오고 있는 중일때 true 로 세팅됨
   // latestFetchRoutePattern: string; // 가장 최근 패치를 한 라우트 패턴
-}>({})
+}>({
+  loader: async (shardPath: string) => {
+    return true
+  },
+  routeShardPrepareTrigger: async (shardPaths: string[]) => {
+    return
+  },
+  components: {},
+  registerComponentByShardPath: () => {
+    return
+  },
+})
 
 export function useRouteShardPreparing() {
   const ctx = useContext(RootAppContext)

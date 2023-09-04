@@ -1,35 +1,11 @@
-import React, { createContext, useContext } from "react"
-import { AppRouterContext } from "./lib/router-context"
+import React, { useContext } from "react"
+import { ServerFetchesContext } from "./lib/server-fetches-context"
 
 export type RouteFetchResult = {
   data?: any
   error?: {
     id: string
   }
-}
-
-type RouteDataValues = {
-  result?: RouteFetchResult
-}
-const ServerFetchesContext = createContext<RouteDataValues>({})
-
-export const ServerFetchesProvider = function (props: {
-  // result: RouteFetchResult;
-  children?: React.ReactNode
-  dataKey: string
-}) {
-  const routeCtx = useContext(AppRouterContext)
-  const serverFetchesResult = routeCtx.routeDataMap[props.dataKey]
-
-  if (serverFetchesResult?.error) {
-    return <div> Data Error : {serverFetchesResult.id}</div>
-  }
-
-  return (
-    <ServerFetchesContext.Provider value={{ result: serverFetchesResult }}>
-      {props.children}
-    </ServerFetchesContext.Provider>
-  )
 }
 
 export const useServerFetches = function (): RouteFetchResult | null {

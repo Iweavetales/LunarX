@@ -6,9 +6,10 @@ import LunarAppContainer from "../lib/root-app-container"
 import { DocumentSheet } from "~/core/document-types"
 import { Bootstrap, DocumentWrapper } from "../document"
 import DefaultDocumentFactory from "./_document.default.server"
-import { ServerFetchesProvider } from "../ssfetch"
 import { RootElementID } from "~/core/constants"
 import { SwiftRenderer } from "../app"
+import { ServerFetchesProvider } from "../lib/server-fetches-provider"
+import { TAppData } from "../lib/app-data"
 // import App from '../routes/_app';
 
 export default async function handleRequest(
@@ -38,11 +39,19 @@ export default async function handleRequest(
     ? JSON.stringify(documentSheet.browserEntryModulePath)
     : undefined
 
+  const appData: TAppData = {
+    rd: documentSheet.routeServerFetchesResultMap,
+  }
+
   const bootstrapScript = `(function (){ 
-            var APP_DATA = {rd:${enteredRouteDataArgument}, ascRouteNodes:${ascRouteNodeArgument}};
-            
-            require([${browserEntryModulePathArgument}], function (modules) {
-              modules[0].default(APP_DATA, ${ascRouteNodeArgument}, ${customAppModuleShardPathArgument}, ${browserEntryModulePathArgument}, require)
+            require([${browserEntryModulePathArgument}], function (modules) { 
+              modules[0].default( 
+                require,
+                ${JSON.stringify(appData)}, 
+                ${ascRouteNodeArgument}, 
+                ${customAppModuleShardPathArgument}, 
+                ${browserEntryModulePathArgument}
+              )
             })
           })()`
 
@@ -123,27 +132,33 @@ export default async function handleRequest(
       bootstrapScriptId={"s_" + Math.floor(Math.random() * 100000)}
     >
       {await DocumentFactory(context, () => (
-        <div id={RootElementID}>
-          <StaticRouter location={context.req.url!}>
-            <LunarAppContainer
-              ascendRouteNodeList={documentSheet.universalRINListRootToLeaf}
-              dataMatchMap={documentSheet.routeServerFetchesResultMap}
-              enterLocation={context.location}
-              loader={documentSheet.requireFunction}
-              preloadedComponents={preloadedComponents}
-            >
-              {/*_app.server.tsx 에 로드 한 데이터를 _app.tsx 에 공급 하기 위해 ServerFetchesProvider 사용*/}
-              <ServerFetchesProvider dataKey={"_app"}>
-                <App />
-              </ServerFetchesProvider>
-            </LunarAppContainer>
-          </StaticRouter>
+        <>
+          <div id={RootElementID}>
+            <StaticRouter location={context.req.url!}>
+              <LunarAppContainer
+                ascendRouteNodeList={documentSheet.universalRINListRootToLeaf}
+                dataMatchMap={documentSheet.routeServerFetchesResultMap}
+                enterLocation={context.location}
+                loader={documentSheet.requireFunction}
+                preloadedComponents={preloadedComponents}
+                routeShardPrepareTrigger={async () => {
+                  // Only used in client
+                  return
+                }}
+              >
+                {/*_app.server.tsx 에 로드 한 데이터를 _app.tsx 에 공급 하기 위해 ServerFetchesProvider 사용*/}
+                <ServerFetchesProvider dataKey={"_app"}>
+                  <App />
+                </ServerFetchesProvider>
+              </LunarAppContainer>
+            </StaticRouter>
+          </div>
           <Bootstrap
             script={bootstrapScript}
             scriptId={"s_" + Math.floor(Math.random() * 100000)}
             nonce={documentSheet.nonce}
           />
-        </div>
+        </>
       ))}
     </DocumentWrapper>
   )

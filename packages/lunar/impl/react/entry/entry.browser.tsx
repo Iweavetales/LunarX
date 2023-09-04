@@ -1,11 +1,13 @@
 import { createRoot, hydrateRoot } from "react-dom/client"
 import React from "react"
 import { BrowserRouter } from "react-router-dom"
-import { RouteFetchResult, ServerFetchesProvider } from "../ssfetch"
+import { RouteFetchResult } from "../ssfetch"
 import { UniversalRouteInfoNode } from "~/core/document-types"
 import LunarAppContainer from "../lib/root-app-container"
 import { RootElementID } from "~/core/constants"
 import { SwiftRenderer } from "../app"
+import { ServerFetchesProvider } from "../lib/server-fetches-provider"
+import { TAppData } from "../lib/app-data"
 
 type ReactRouteNode = {
   element: React.ReactElement
@@ -17,12 +19,6 @@ type RequireFunction = (
   moduleNames: string[],
   callback: (modules: any[]) => void
 ) => void
-type TAppData = {
-  rd: {
-    [routePattern: string]: RouteFetchResult
-  }
-  ascendRouteNodeList: UniversalRouteInfoNode[]
-}
 
 function PromiseRequire(
   require: RequireFunction,
@@ -36,11 +32,13 @@ function PromiseRequire(
 }
 
 export default function (
+  require: RequireFunction,
   appDataFromServer: TAppData,
   ascRouteNodes: UniversalRouteInfoNode[],
   customAppEntryModulePath: string,
   browserEntryModulePath: string,
-  require: RequireFunction
+  customNotFoundRouteShardPath?: string,
+  customErrorRouteShardPath?: string
 ) {
   async function Startup() {
     let App: () => React.ReactElement
@@ -138,7 +136,14 @@ export default function (
               routeShardPrepareTrigger={prepareRouteShards}
               // 브라우저 사이드 샤드 로더 전달
               loader={(shardPath: string) => {
-                return routeComponents[shardPath]
+                console.log(
+                  "call loader",
+                  routeComponents,
+                  shardPath,
+                  routeComponents[shardPath]
+                )
+                return PromiseRequire(require, shardPath)
+                // return routeComponents[shardPath]
               }}
               ascendRouteNodeList={ascRouteNodes}
               dataMatchMap={appDataFromServer.rd}

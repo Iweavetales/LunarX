@@ -34,6 +34,8 @@ export type DocumentSheet = {
    * Swift Platform 사용자가 커스텀 한 앱과 도큐먼트 컴포넌트
    */
   customAppModuleShardPath?: string // routes/_app.tsx
+  custom404ShardPath?: string // routes/_404.tsx
+  customErrorShardPath?: string // routes/_error.tsx
   // customAppModuleServerShardPath?: string; // routes/_app.server.ts
   customDocumentModuleShardPath?: string // routes/_document.server.tsx
 

@@ -13,7 +13,7 @@ export type RouteTreeNode = UniversalRouteInfoNode & {
   children: RouteTreeNode[]
 }
 
-export const EmptyRoute = (props: {}) => {
+export const Route404 = (props: {}) => {
   const routeCtx = useContext(AppRouterContext)
 
   useEffect(() => {

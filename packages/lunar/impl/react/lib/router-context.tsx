@@ -2,8 +2,13 @@ import { createContext } from "react"
 import { Location } from "~/core/location"
 import { RouteTreeNode } from "../router"
 
+export type pushMethod = (
+  href: string,
+  options?: { query?: { [name: string]: string | string[] } }
+) => void
+
 type SwiftRouterProvides = {
-  push: (href: string, options?: { query?: { [name: string]: any } }) => void
+  push: pushMethod
   browsing: boolean
   currentLocation: {
     auto: boolean
@@ -14,7 +19,7 @@ type SwiftRouterProvides = {
 }
 
 export const AppRouterContext = createContext<SwiftRouterProvides>({
-  push: () => {
+  push: (href, options) => {
     /**/
   },
   currentLocation: { auto: false, hash: "", pathname: "", search: "" },

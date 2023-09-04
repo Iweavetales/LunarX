@@ -1,9 +1,9 @@
 import React, { useContext } from "react"
 import { RootAppContext } from "./lib/root-app-context"
-import { EmptyRoute } from "./router"
+import { Route404 } from "./router"
 import { Route, Routes } from "react-router"
-import { GenerateSwiftRouteNode } from "./lib/root-app-container"
 import { AppRouterContext } from "./lib/router-context"
+import { GenerateRouteNode } from "./lib/generate-route-node"
 
 /**
  * props 는 받지 않고 컨텍스트로 SwiftApp 으로 부터 데이터를 전달 받아 라우트 맵을 구성하고 랜더링 한다.
@@ -11,43 +11,34 @@ import { AppRouterContext } from "./lib/router-context"
  * @constructor
  */
 export const SwiftRenderer = () => {
-  const pipeCtx = useContext(RootAppContext)
-  const routeCtx = useContext(AppRouterContext)
+  const rootAppContext = useContext(RootAppContext)
+  const appRouterContext = useContext(AppRouterContext)
 
   let loc = null
-  if (!routeCtx.currentLocation.auto) {
+  if (!appRouterContext.currentLocation.auto) {
     /**
      * 💡 swift/Router 에 의해 컨트롤 되는 값 💡
      * 이 값이 변경 되면 화면이 해당 라우트 계층으로 랜더링 된다
      */
-    loc = routeCtx.currentLocation
+    loc = appRouterContext.currentLocation
   }
 
   return (
     <>
       <Routes location={loc ?? undefined}>
-        {routeCtx.routeTree.map((node) => {
-          // return (
-          //   <RouteWrapper
-          //     key={node.matchPattern}
-          //     loader={pipeCtx.loader}
-          //     pattern={node.matchPattern}
-          //     routeNode={node}
-          //   ></RouteWrapper>
-          // );
-
-          const routeNode = GenerateSwiftRouteNode({
+        {appRouterContext.routeTree.map((node) => {
+          const routeNode = GenerateRouteNode({
             routeNode: node,
-            loader: pipeCtx.loader,
-            routeDataMap: routeCtx.routeDataMap,
+            loader: rootAppContext.loader,
+            routeDataMap: appRouterContext.routeDataMap,
           })
 
           return routeNode
         })}
-        <Route path="*" element={<EmptyRoute />} />
+        <Route path="*" element={<Route404 />} />
       </Routes>
 
-      {routeCtx.browsing && (
+      {appRouterContext.browsing && (
         <div
           style={{
             backgroundColor: "#fff",

@@ -8,11 +8,11 @@ import { join, relative, resolve } from "path"
 import { existsSync, mkdirSync, writeFileSync } from "fs"
 
 import { getAllFiles } from "./files"
-import { baseConfig, ExtendConfig, LunarConfig } from "../../lib/lunar-config"
+import { baseConfig, ExtendConfig, LunarConfig } from "~/core/lunar-config"
 import esbuildBabelPlugin from "./esbuild-transform-plugin"
 import { collectAllSourcesFromDirectory } from "./collect-all-sources-from-directory"
 import { extractRuntimeOptionsFromConfig } from "./extract-runtime-options-from-config"
-import { ShardPath } from "../../lib/manifest"
+import { ShardPath } from "~/core/manifest"
 import chalk from "chalk"
 
 type BuiltCallback = (updatedShardPaths: string[]) => void

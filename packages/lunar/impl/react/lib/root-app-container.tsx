@@ -1,19 +1,17 @@
-import React, { useContext, useState } from "react"
-import { Route, Routes } from "react-router"
+import React, { useState } from "react"
 import {
   RouteServerFetchDataMap,
   UniversalRouteInfoNode,
-} from "../../../lib/document-types"
-import { ServerFetchesProvider } from "../ssfetch"
-import { RouteTreeNode, ShardLoader } from "../router"
+} from "~/core/document-types"
+import { ShardLoader } from "../router"
 import { RootAppContext } from "./root-app-context"
-import { AppRouterProvider } from "./router"
+import { AppRouterProvider } from "./app-router-provider"
 
 export default function LunarAppContainer(props: {
   ascendRouteNodeList: UniversalRouteInfoNode[]
   loader: ShardLoader
   preloadedComponents: { [shardPath: string]: React.FunctionComponent }
-  routeShardPrepareTrigger?: (shardPaths: string[]) => Promise<void>
+  routeShardPrepareTrigger: (shardPaths: string[]) => Promise<void>
   dataMatchMap: RouteServerFetchDataMap
   children?: React.ReactNode
   enterLocation: {
@@ -32,6 +30,14 @@ export default function LunarAppContainer(props: {
         loader: props.loader,
         routeShardPrepareTrigger: props.routeShardPrepareTrigger,
         components: loadedComponents,
+        registerComponentByShardPath: (shardPath, shard) => {
+          setLoadedComponents((state) => {
+            return {
+              ...state,
+              [shardPath]: shard,
+            }
+          })
+        },
       }}
     >
       <AppRouterProvider
@@ -45,55 +51,6 @@ export default function LunarAppContainer(props: {
   )
 }
 
-const ComponentShardWrapper = (props: { shardPath: string }) => {
-  const appRouteContext = useContext(RootAppContext)
-
-  const Component: React.FunctionComponent =
-    appRouteContext.components?.[props.shardPath] ||
-    (() => <div> Not loaded yet </div>)
-
-  return <Component />
-}
-
-export const GenerateSwiftRouteNode = (options: {
-  routeNode: RouteTreeNode
-  loader?: ShardLoader
-  routeDataMap: RouteServerFetchDataMap
-}) => {
-  // 이 함수(GenerateSwiftRouteNode) 자체는 React 컴포넌트가 아니고 React Component 를 생성하는 함수이다
-  // const component = options.loader!(options.routeNode.shardPath)
-  // const serverFetchesResult = options.routeDataMap[options.routeNode.matchPattern];
-  // const serverFetchError = serverFetchesResult?.error;
-
-  console.log(
-    "options.routeNode.matchPattern",
-    options.routeNode.matchPattern,
-    options.routeNode
-    // component
-  )
-  return (
-    <Route
-      key={options.routeNode.matchPattern}
-      element={
-        <ServerFetchesProvider dataKey={options.routeNode.matchPattern}>
-          <ComponentShardWrapper shardPath={options.routeNode.shardPath} />
-
-          {/*<ShardComponent shardPath={props.routeNode.shardPath} />*/}
-        </ServerFetchesProvider>
-      }
-      path={options.routeNode.matchPattern}
-      // path={props.routeNode.matchPattern.replace(props.routeNode.upperRouteMatchPattern, '').replace(/^\/?/, '/')}
-    >
-      {options.routeNode.children.map((routeNode) =>
-        GenerateSwiftRouteNode({
-          routeNode: routeNode,
-          loader: options.loader,
-          routeDataMap: options.routeDataMap,
-        })
-      )}
-    </Route>
-  )
-}
 //
 // const RouteWrapper = (props: { routeNode: RouteTreeNode; pattern: string; loader: ShardLoader }) => {
 //   const routeCtx = useContext(SwiftRouterContext);

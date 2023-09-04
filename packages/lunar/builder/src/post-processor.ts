@@ -3,6 +3,8 @@ import {
   LunarJSManifest,
   ShardSourceType,
   ShardPath,
+  DedicatedEntryName,
+  DedicatedEntryPath,
 } from "~/core/manifest"
 import { Metafile } from "esbuild"
 import { DiffMetaOutput, DiffResult, DiffStatus } from "./meta-file"
@@ -24,6 +26,9 @@ import { CheckBrowserEntrySource } from "./browser-entry"
 import { BuildRouteNodeMap } from "./routing"
 import { GetBrowserModuleLoaderScript } from "./script-transpile"
 import { ensureDirectoryExists } from "./directory"
+import { removeCurrentDirPathToken } from "./misc/remove-current-dir-path-token"
+import { match } from "./enhanced-switch"
+import { removeLastExtensionOfFilename } from "./misc/remove-last-extension-of-filename"
 
 enum ModuleType {
   CommonJS,
@@ -70,6 +75,7 @@ export class PostProcessor {
     this.manifest = {
       entries: {},
       chunks: {},
+      entryDictionaryByDedicatedEntryName: {},
       browserEntryShardPath: "",
       routeInfoNodes: {},
       browserModuleLoaderFilePath: "",
@@ -298,11 +304,46 @@ export class PostProcessor {
       const entryFilepathTokens = entryPoint.split("/")
       const entryFilename = entryFilepathTokens.pop()
 
+      let dedicatedEntryPath: DedicatedEntryPath = ""
+      match(entryPoint)
+        .with(
+          (value) =>
+            value.indexOf(`dist/impl/${this.config.frontFramework}/entry/`),
+          (ret) => ret > -1,
+          (value, evalResult) => {
+            const internalEntryPathBase = value.substring(evalResult)
+            const entryTokenIndex = internalEntryPathBase.indexOf("entry/")
+            dedicatedEntryPath =
+              "@" + internalEntryPathBase.substring(entryTokenIndex)
+          }
+        )
+        .with(
+          (value) =>
+            value.indexOf(removeCurrentDirPathToken(this.config.js.routesRoot)),
+          (ret) => ret > -1,
+          (value, evalResult) => {
+            const appRouteEntryPathBase = value.substring(evalResult)
+            dedicatedEntryPath = appRouteEntryPathBase.substring(
+              removeCurrentDirPathToken(this.config.js.routesRoot).length
+            )
+          }
+        )
+        .once()
+
+      const dedicatedEntryName: DedicatedEntryName =
+        removeLastExtensionOfFilename(dedicatedEntryPath)
+
+      // registry into dictionary
+      this.manifest.entryDictionaryByDedicatedEntryName[dedicatedEntryName] =
+        entryPoint
+
       this.manifest.entries[entryPoint] = {
         entryPoint: entryPoint, // ex) ... /entry/entry.server.js
         entryFileName: entryFilename, //ex) entry.server.js
-        entryName: entryFilename!.replace(/\.[a-zA-Z]+$/, ""), //ex) entry.server
+        entryName: removeLastExtensionOfFilename(entryFilename!), //ex) entry.server
         entryFileRelativeDir: entryFilepathTokens.join("/"),
+        dedicatedEntryPath: dedicatedEntryPath,
+        dedicatedEntryName: dedicatedEntryName,
 
         shardPath: normalizedRelativePath,
         isServerSideShard: serverSideShardInfo.isServerSideShard,
@@ -377,6 +418,30 @@ export class PostProcessor {
       browserModuleLoaderFilepath.replace(/\/\//g, "/")
   }
 
+  classifyEntries() {
+    const entryKeys = Object.keys(this.manifest.entries)
+    entryKeys.forEach((key) => {
+      const entry = this.manifest.entries[key]
+      const entryPoint = entry.entryPoint
+
+      if (entryPoint) {
+        if (CheckBrowserEntrySource(entry)) {
+          this.manifest.browserEntryShardPath = entry.shardPath
+        } else if (/routes\/_app\.[tj]sx$/.test(entryPoint)) {
+          this.manifest.customizeAppShardPath = entry.shardPath
+        } else if (/routes\/_404\.[tj]sx$/.test(entryPoint)) {
+          this.manifest.customize404ShardPath = entry.shardPath
+        } else if (/routes\/_error\.[tj]sx$/.test(entryPoint)) {
+          this.manifest.customizeErrorShardPath = entry.shardPath
+        } else if (/routes\/_document\.server\.[tj]sx$/.test(entryPoint)) {
+          this.manifest.customizeServerDocumentShardPath = entry.shardPath
+        } else if (/routes\/_init\.server\.[tj]sx?$/.test(entryPoint)) {
+          this.manifest.initServerShardPath = entry.shardPath
+        }
+      }
+    })
+  }
+
   async run(meta: Metafile) {
     this.initManifest()
 
@@ -414,23 +479,7 @@ export class PostProcessor {
       })
     )
 
-    const entryKeys = Object.keys(this.manifest.entries)
-    entryKeys.forEach((key) => {
-      const entry = this.manifest.entries[key]
-      const entryPoint = entry.entryPoint
-
-      if (entryPoint) {
-        if (CheckBrowserEntrySource(entry)) {
-          this.manifest.browserEntryShardPath = entry.shardPath
-        } else if (/routes\/_app\.tsx$/.test(entryPoint)) {
-          this.manifest.customizeAppShardPath = entry.shardPath
-        } else if (/routes\/_document\.server\.tsx$/.test(entryPoint)) {
-          this.manifest.customizeServerDocumentShardPath = entry.shardPath
-        } else if (/routes\/_init\.server\.tsx?$/.test(entryPoint)) {
-          this.manifest.initServerShardPath = entry.shardPath
-        }
-      }
-    })
+    this.classifyEntries()
 
     /**
      * Generate route node map
