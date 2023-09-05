@@ -19,9 +19,11 @@ import { MutableHTTPHeaders } from "~/core/http-headers.server"
 import { PageParams } from "~/core/lunar-context"
 import { rawHeaderStringArrayToMutableHTTPHeaders } from "./http-header"
 
+const INTERNAL_SERVER_ABS_ENTRY_NAME = "@entry/entry.server"
+
 export function RenderPage(
   currentWorkDirectory: string,
-  webApp: AppStructureContext,
+  appStructureContext: AppStructureContext,
   req: IncomingMessage,
   params: PageParams,
   /**
@@ -56,19 +58,13 @@ export function RenderPage(
     routeNodeMap[routeNode.routePattern] = routeNode
   }
 
-  const entriesArray = Object.keys(webApp.Manifest.entries).map(
-    (key) => webApp.Manifest.entries[key]
+  const entriesArray = Object.keys(appStructureContext.Manifest.entries).map(
+    (key) => appStructureContext.Manifest.entries[key]
   )
 
   const entryServerEntrySource: BuiltShardInfo | undefined = entriesArray.find(
     (entry) => entry.entryName === "entry.server"
   )
-  if (entryServerEntrySource) {
-    return Promise.resolve({
-      data: "Not found core",
-      status: 200,
-    })
-  }
 
   return new Promise((resolve, reject) => {
     async function process() {
@@ -93,16 +89,19 @@ export function RenderPage(
         )
 
         const entryServerHandler: EntryServerHandler =
-          webApp.LoadedEntryModuleMap[entryServerEntrySource!.shardPath].default
+          appStructureContext.LoadedEntryModuleMap[
+            entryServerEntrySource!.shardPath
+          ].default
 
         try {
           /**
            * _init.server.tsx 파일이 존재 한다면 먼저 처리 한다.
            */
-          if (webApp.Manifest.initServerShardPath) {
+          if (appStructureContext.Manifest.initServerShardPath) {
             const initServerScript: any =
-              webApp.LoadedEntryModuleMap[webApp.Manifest.initServerShardPath]
-                .default
+              appStructureContext.LoadedEntryModuleMap[
+                appStructureContext.Manifest.initServerShardPath
+              ].default
 
             const ret: boolean = await initServerScript(context)
             if (!ret) {
@@ -124,17 +123,22 @@ export function RenderPage(
         }
 
         function getRouteModule(pattern: string): any {
-          console.log("getRouteModule", pattern, webApp.LoadedEntryModuleMap)
+          console.log(
+            "getRouteModule",
+            pattern,
+            appStructureContext.LoadedEntryModuleMap
+          )
 
-          return webApp.LoadedEntryModuleMap[
-            webApp.Manifest.entries[
-              webApp.Manifest.routeInfoNodes[pattern].entryPath ?? "??"
+          return appStructureContext.LoadedEntryModuleMap[
+            appStructureContext.Manifest.entries[
+              appStructureContext.Manifest.routeInfoNodes[pattern].entryPath ??
+                "??"
             ].shardPath
           ].default
         }
 
         function requireFunction(shardPath: string): any {
-          return webApp.LoadedEntryModuleMap[shardPath].default
+          return appStructureContext.LoadedEntryModuleMap[shardPath].default
         }
 
         /**
@@ -150,7 +154,7 @@ export function RenderPage(
                 ;(async function () {
                   const result = await FetchingServerSideRouteData(
                     routeNode,
-                    webApp,
+                    appStructureContext,
                     context
                   )
 
@@ -192,10 +196,12 @@ export function RenderPage(
          */
         try {
           const serverSideAppEntryShardInfo =
-            webApp.Manifest.entries["app/routes/_app.server.tsx"]
+            appStructureContext.Manifest.entries["app/routes/_app.server.tsx"]
           if (serverSideAppEntryShardInfo) {
             const appServerSideModule: any =
-              webApp.LoadedEntryModuleMap[serverSideAppEntryShardInfo.shardPath]
+              appStructureContext.LoadedEntryModuleMap[
+                serverSideAppEntryShardInfo.shardPath
+              ]
             const appServerFetchFunction = appServerSideModule.serverFetches
 
             const appServerSideFetchResult = await appServerFetchFunction(
@@ -221,27 +227,43 @@ export function RenderPage(
          * entry.server.ts 를 호출 해 페이지 데이터를 생성
          */
         const result = await entryServerHandler(context, {
-          scripts: webApp.OrderedBrowserScriptShards.map(
+          scripts: appStructureContext.OrderedBrowserScriptShards.map(
             (shardPath: string) => {
               return {
-                url: "/_/s/" + shardPath + "?v=" + webApp.Manifest.builtVersion,
+                url:
+                  "/_/s/" +
+                  shardPath +
+                  "?v=" +
+                  appStructureContext.Manifest.builtVersion,
               }
             }
           ),
-          styles: webApp.OrderedBrowserStyleShards.map((shardPath: string) => {
-            return {
-              url: "/_/s/" + shardPath + "?v=" + webApp.Manifest.builtVersion,
+          styles: appStructureContext.OrderedBrowserStyleShards.map(
+            (shardPath: string) => {
+              return {
+                url:
+                  "/_/s/" +
+                  shardPath +
+                  "?v=" +
+                  appStructureContext.Manifest.builtVersion,
+              }
             }
-          }),
+          ),
           nonce: nonce,
           loaderScriptUrl:
-            "/_/s/loader.js" + "?v=" + webApp.Manifest.builtVersion,
-          browserEntryModulePath: webApp.Manifest.browserEntryShardPath,
-          customAppModuleShardPath: webApp.Manifest.customizeAppShardPath,
-          custom404ShardPath: webApp.Manifest.customize404ShardPath,
-          customErrorShardPath: webApp.Manifest.customizeErrorShardPath,
+            "/_/s/loader.js" +
+            "?v=" +
+            appStructureContext.Manifest.builtVersion,
+          browserEntryModulePath:
+            appStructureContext.Manifest.browserEntryShardPath,
+          customAppModuleShardPath:
+            appStructureContext.Manifest.customizeAppShardPath,
+          custom404ShardPath:
+            appStructureContext.Manifest.customize404ShardPath,
+          customErrorShardPath:
+            appStructureContext.Manifest.customizeErrorShardPath,
           customDocumentModuleShardPath:
-            webApp.Manifest.customizeServerDocumentShardPath,
+            appStructureContext.Manifest.customizeServerDocumentShardPath,
 
           // server side fetched 데이터 맵
           routeServerFetchesResultMap: routeServerFetchesResultMap,

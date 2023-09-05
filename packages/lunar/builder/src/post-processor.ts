@@ -3,8 +3,8 @@ import {
   LunarJSManifest,
   ShardSourceType,
   ShardPath,
-  DedicatedEntryName,
-  DedicatedEntryPath,
+  AbstractEntryName,
+  AbstractEntryPath,
 } from "~/core/manifest"
 import { Metafile } from "esbuild"
 import { DiffMetaOutput, DiffResult, DiffStatus } from "./meta-file"
@@ -29,6 +29,7 @@ import { ensureDirectoryExists } from "./directory"
 import { removeCurrentDirPathToken } from "./misc/remove-current-dir-path-token"
 import { match } from "./enhanced-switch"
 import { removeLastExtensionOfFilename } from "./misc/remove-last-extension-of-filename"
+import { foundIndexByIndexOf } from "./misc/found-index-by-index-of"
 
 enum ModuleType {
   CommonJS,
@@ -75,7 +76,7 @@ export class PostProcessor {
     this.manifest = {
       entries: {},
       chunks: {},
-      entryDictionaryByDedicatedEntryName: {},
+      entryDictionaryByAbstractEntryName: {},
       browserEntryShardPath: "",
       routeInfoNodes: {},
       browserModuleLoaderFilePath: "",
@@ -304,37 +305,39 @@ export class PostProcessor {
       const entryFilepathTokens = entryPoint.split("/")
       const entryFilename = entryFilepathTokens.pop()
 
-      let dedicatedEntryPath: DedicatedEntryPath = ""
+      let abstractEntryPath: AbstractEntryPath = ""
+      // enhanced match closer
       match(entryPoint)
         .with(
           (value) =>
             value.indexOf(`dist/impl/${this.config.frontFramework}/entry/`),
-          (ret) => ret > -1,
+          (ret) => foundIndexByIndexOf(ret),
           (value, evalResult) => {
             const internalEntryPathBase = value.substring(evalResult)
             const entryTokenIndex = internalEntryPathBase.indexOf("entry/")
-            dedicatedEntryPath =
+            abstractEntryPath =
               "@" + internalEntryPathBase.substring(entryTokenIndex)
           }
         )
         .with(
           (value) =>
             value.indexOf(removeCurrentDirPathToken(this.config.js.routesRoot)),
-          (ret) => ret > -1,
+          (ret) => foundIndexByIndexOf(ret),
           (value, evalResult) => {
             const appRouteEntryPathBase = value.substring(evalResult)
-            dedicatedEntryPath = appRouteEntryPathBase.substring(
+            abstractEntryPath = appRouteEntryPathBase.substring(
               removeCurrentDirPathToken(this.config.js.routesRoot).length
             )
           }
         )
+        // execute match
         .once()
 
-      const dedicatedEntryName: DedicatedEntryName =
-        removeLastExtensionOfFilename(dedicatedEntryPath)
+      const abstractEntryName: AbstractEntryName =
+        removeLastExtensionOfFilename(abstractEntryPath)
 
       // registry into dictionary
-      this.manifest.entryDictionaryByDedicatedEntryName[dedicatedEntryName] =
+      this.manifest.entryDictionaryByAbstractEntryName[abstractEntryName] =
         entryPoint
 
       this.manifest.entries[entryPoint] = {
@@ -342,8 +345,8 @@ export class PostProcessor {
         entryFileName: entryFilename, //ex) entry.server.js
         entryName: removeLastExtensionOfFilename(entryFilename!), //ex) entry.server
         entryFileRelativeDir: entryFilepathTokens.join("/"),
-        dedicatedEntryPath: dedicatedEntryPath,
-        dedicatedEntryName: dedicatedEntryName,
+        abstractEntryPath: abstractEntryPath,
+        abstractEntryName: abstractEntryName,
 
         shardPath: normalizedRelativePath,
         isServerSideShard: serverSideShardInfo.isServerSideShard,

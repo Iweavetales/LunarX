@@ -25,13 +25,13 @@ export type ShardPath = string
 export type EntryPath = string
 export type EntryName = string
 /**
- * DedicatedEntryPath
+ * AbstractEntryPath
  * Entry path ruled by LunarX
- * * internal: @entry/...
- * * app routes: /...
+ * * internal entry: @entry/...
+ * * app routes entry: /...
  */
-export type DedicatedEntryPath = string
-export type DedicatedEntryName = string
+export type AbstractEntryPath = string
+export type AbstractEntryName = string
 
 export interface BuiltShardInfo {
   isEntry: boolean
@@ -53,8 +53,8 @@ export interface BuiltShardInfo {
   entryFileName?: string
   entryName?: EntryName // entryFile Name without extension
   entryFileRelativeDir?: string
-  dedicatedEntryPath?: DedicatedEntryPath
-  dedicatedEntryName?: DedicatedEntryName
+  abstractEntryPath?: AbstractEntryPath
+  abstractEntryName?: AbstractEntryName
 }
 
 export interface RawRouteInfoNode {
@@ -89,8 +89,8 @@ export interface LunarJSManifest {
     [outputPath: string]: BuiltShardInfo
   }
 
-  entryDictionaryByDedicatedEntryName: {
-    [dedicatedEntryName: DedicatedEntryName]: EntryPath
+  entryDictionaryByAbstractEntryName: {
+    [abstractEntryName: AbstractEntryName]: EntryPath
   }
 
   routeInfoNodes: RawRouteInfoNodeMap

@@ -1,12 +1,9 @@
 import { RuntimeConfig } from "./config"
 import {
-  ShardMeta,
   AppStructureContext,
   MakeAppStructureContextFromManifest,
 } from "./client-app-structure"
 import { BuildRoutes } from "./build-routes"
-
-import { GetUrlPath } from "./url-utils"
 
 import Router, { HTTPVersion, Instance as RouterInstance } from "find-my-way"
 import http, { IncomingMessage, ServerResponse } from "http"
