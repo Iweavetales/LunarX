@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from "http"
 import { PageParams } from "~/core/lunar-context"
-import { RenderPage } from "../page-renderer"
+import { renderPage } from "./render-page"
 import { PathHelper } from "../helper/path"
 import { AppRouteInstanceContext } from "./app-route-instance-context"
 
@@ -15,7 +15,7 @@ export const serveServerSideRendering = async (
   /**
    * 나중엔 nested 라우트를 지원하기 위해 라우팅 트리 노드를 모아서 배열로 전달
    */
-  const renderResult = await RenderPage(
+  const renderResult = await renderPage(
     PathHelper.cwd,
     appRouteInstanceContext.appStructureContext,
     req,

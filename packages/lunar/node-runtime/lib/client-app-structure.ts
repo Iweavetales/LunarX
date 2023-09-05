@@ -1,4 +1,4 @@
-import { AbstractEntryName, LunarJSManifest } from "~/core/manifest"
+import { AbstractEntryName, LunarJSManifest, ShardPath } from "~/core/manifest"
 import { LoadBuiltShardEntryModule } from "./module-loader"
 
 export enum ShardType {
@@ -67,7 +67,7 @@ export class AppStructureContext {
     return Boolean(this.#manifest.entryDictionaryByAbstractEntryName[name])
   }
 
-  getModuleByAbsEntryName(name: AbstractEntryName): any {
+  getShardPathByAbsEntryName(name: AbstractEntryName): ShardPath {
     const realEntryPath =
       this.#manifest.entryDictionaryByAbstractEntryName[name]
 
@@ -75,22 +75,25 @@ export class AppStructureContext {
       throw new Error(`Not found entry for ${name}`)
     }
 
-    return this.#loadedEntryModuleMap[
-      this.#manifest.entries[realEntryPath].shardPath
-    ]
+    return this.#manifest.entries[realEntryPath].shardPath
   }
-}
 
-// class WebApp implements AppStructureContext {}
+  getModuleByAbsEntryName(name: AbstractEntryName): any {
+    const shardPath = this.getShardPathByAbsEntryName(name)
 
-const LibEntryFinder = {
-  react: /^node_modules\/react\/index\.js/,
-  reactDom: /^node_modules\/react-dom\/index\.js/,
-  reactDomServer: /^node_modules\/react-dom\/server/,
-  reactRouterDomServer: /^node_modules\/react-router-dom\/server/,
+    return this.getModuleByShardPath(shardPath)
+  }
 
-  LunarJSPlatformEntryServer: /^app\/lib\/entry.server\.tsx/,
-  LunarJSPlatformHead: /^app\/lib\/head\.tsx/,
+  getModuleByShardPath(shardPath: AbstractEntryName): any {
+    return this.#loadedEntryModuleMap[shardPath]
+  }
+
+  shardPathToPublicUrlPath(shardPath: string, version = true): string {
+    if (version) {
+      return "/_/s/" + shardPath + "?v=" + version
+    }
+    return "/_/s/" + shardPath
+  }
 }
 
 // app/lib/head.tsx

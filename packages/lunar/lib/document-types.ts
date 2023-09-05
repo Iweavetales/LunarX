@@ -23,10 +23,14 @@ export type RouteServerFetchDataMap = {
  * 최상위 라우트 노드 목록
  */
 export type TopLevelUniversalRouteInfoNodes = UniversalRouteInfoNode[]
+export type DocumentStyle = { styleId: string; url: string }
+export type DocumentStyles = DocumentStyle[]
+export type DocumentScript = { scriptId: string; url: string }
+export type DocumentScripts = DocumentScript[]
 
 export type DocumentSheet = {
-  scripts: { scriptId: string; url: string }[]
-  styles: { styleId: string; url: string }[]
+  scripts: DocumentScripts
+  styles: DocumentStyles
   loaderScriptUrl: string
   browserEntryModulePath: string
 
