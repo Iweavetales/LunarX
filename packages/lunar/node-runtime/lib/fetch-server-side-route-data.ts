@@ -17,14 +17,15 @@ export type ServerSideFetchResult = {
 }
 export async function FetchingServerSideRouteData(
   routeNode: RawRouteInfoNode,
-  webApp: AppStructureContext,
+  appStructureContext: AppStructureContext,
   context: ServerContext
 ): Promise<ServerSideFetchResult> {
   const serverSideEntry = routeNode.serverSideEntryPath
   if (serverSideEntry) {
-    const routeLoaderShardInfo = webApp.Manifest.entries[serverSideEntry]
+    const routeLoaderShardInfo =
+      appStructureContext.manifest.entries[serverSideEntry]
     const serverSideLoaderModule =
-      webApp.LoadedEntryModuleMap[routeLoaderShardInfo.shardPath]
+      appStructureContext.loadedEntryModuleMap[routeLoaderShardInfo.shardPath]
 
     if (serverSideLoaderModule) {
       const fetchFunction = serverSideLoaderModule.serverFetches

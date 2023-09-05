@@ -38,12 +38,14 @@ export const serveServerSideFetching = async (
    * _init.server.tsx 파일이 존재 한다면 먼저 처리 한다.
    */
   if (
-    appRouteInstanceContext.appStructureContext.Manifest.initServerShardPath
+    appRouteInstanceContext.appStructureContext.hasEntryByAbsEntryName(
+      "/_init.server"
+    )
   ) {
     const initServerScript: any =
-      appRouteInstanceContext.appStructureContext.LoadedEntryModuleMap[
-        appRouteInstanceContext.appStructureContext.Manifest.initServerShardPath
-      ].default
+      appRouteInstanceContext.appStructureContext.getModuleByAbsEntryName(
+        "/_init.server"
+      ).default
 
     const ret: boolean = await initServerScript(context)
     //@Todo change response method
@@ -73,18 +75,15 @@ export const serveServerSideFetching = async (
     [pattern: string]: ServerSideRouteFetchResult | undefined
   } = {}
 
-  /**
-   * _app.server.tsx 파일이 있다면 해당 파일에 대한 처리
-   */
-  const serverSideAppEntryShardInfo =
-    appRouteInstanceContext.appStructureContext.Manifest.entries[
-      "app/routes/_app.server.tsx"
-    ]
-  if (serverSideAppEntryShardInfo) {
+  if (
+    appRouteInstanceContext.appStructureContext.hasEntryByAbsEntryName(
+      "/_app.server"
+    )
+  ) {
     const appServerSideModule: any =
-      appRouteInstanceContext.appStructureContext.LoadedEntryModuleMap[
-        serverSideAppEntryShardInfo.shardPath
-      ]
+      appRouteInstanceContext.appStructureContext.getModuleByAbsEntryName(
+        "/_app.server"
+      )
     const appServerFetchFunction = appServerSideModule.serverFetches
 
     const appServerSideFetchResult = await appServerFetchFunction(context)

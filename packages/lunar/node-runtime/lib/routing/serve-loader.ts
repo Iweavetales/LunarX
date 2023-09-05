@@ -10,9 +10,9 @@ export const serveLoader = async (
   params: PageParams,
   context: AppStructureContext
 ) => {
-  if (context.Manifest.browserModuleLoaderFilePath) {
+  if (context.manifest.browserModuleLoaderFilePath) {
     return writeFileToResponse(
-      PathHelper.GetDistFilePath(context.Manifest.browserModuleLoaderFilePath),
+      PathHelper.GetDistFilePath(context.manifest.browserModuleLoaderFilePath),
       res
     )
   }

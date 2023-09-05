@@ -1,7 +1,5 @@
-import { LunarJSManifest } from "~/core/manifest"
+import { AbstractEntryName, LunarJSManifest } from "~/core/manifest"
 import { LoadBuiltShardEntryModule } from "./module-loader"
-
-export type RoutableEntryPointName = string
 
 export enum ShardType {
   Chunk,
@@ -23,25 +21,64 @@ export type ShardMeta = {
   IsPublicShard: boolean
 }
 
-export interface AppStructureContext {
-  /**
-   라우팅 상관없이 엔트리 포인트로 지정된 모듈 목록
-   map[엔트리포인트 값]엔트리청크정보
-   */
-  // ModuleEntries: { [key: string]: EntryPointInfo };
+export class AppStructureContext {
+  #manifest: LunarJSManifest
+  #loadedEntryModuleMap: { [shardPath: string]: any }
 
-  // ChunkFileMap: ChunkFileMap;
-
-  Manifest: LunarJSManifest
-  LoadedEntryModuleMap: { [shardPath: string]: any }
-
-  shards: Map<string, ShardMeta>
+  #shards: Map<string, ShardMeta>
 
   /**
    * 순서 있는 샤드 배열
    */
-  OrderedBrowserScriptShards: string[]
-  OrderedBrowserStyleShards: string[]
+  #orderedBrowserScriptShards: string[]
+  #orderedBrowserStyleShards: string[]
+
+  constructor(
+    manifest: LunarJSManifest,
+    loadedEntryModuleMap: { [shardPath: string]: any },
+    shards: Map<string, ShardMeta>,
+    orderedBrowserScriptShards: string[],
+    orderedBrowserStyleShards: string[]
+  ) {
+    this.#manifest = manifest
+    this.#loadedEntryModuleMap = loadedEntryModuleMap
+    this.#shards = shards
+    this.#orderedBrowserScriptShards = orderedBrowserScriptShards
+    this.#orderedBrowserStyleShards = orderedBrowserStyleShards
+  }
+
+  get manifest(): LunarJSManifest {
+    return this.#manifest
+  }
+  get loadedEntryModuleMap(): { [shardPath: string]: any } {
+    return this.#loadedEntryModuleMap
+  }
+  get shards(): Map<string, ShardMeta> {
+    return this.#shards
+  }
+  get orderedBrowserScriptShards(): string[] {
+    return this.#orderedBrowserScriptShards
+  }
+  get orderedBrowserStyleShards(): string[] {
+    return this.#orderedBrowserStyleShards
+  }
+
+  hasEntryByAbsEntryName(name: AbstractEntryName): boolean {
+    return Boolean(this.#manifest.entryDictionaryByAbstractEntryName[name])
+  }
+
+  getModuleByAbsEntryName(name: AbstractEntryName): any {
+    const realEntryPath =
+      this.#manifest.entryDictionaryByAbstractEntryName[name]
+
+    if (!realEntryPath) {
+      throw new Error(`Not found entry for ${name}`)
+    }
+
+    return this.#loadedEntryModuleMap[
+      this.#manifest.entries[realEntryPath].shardPath
+    ]
+  }
 }
 
 // class WebApp implements AppStructureContext {}
@@ -64,13 +101,9 @@ const LibEntryFinder = {
 export async function MakeAppStructureContextFromManifest(
   manifest: LunarJSManifest
 ): Promise<AppStructureContext> {
-  const webapp: AppStructureContext = {
-    Manifest: manifest,
-    LoadedEntryModuleMap: {},
-    shards: new Map<string, ShardMeta>(),
-    OrderedBrowserScriptShards: [],
-    OrderedBrowserStyleShards: [],
-  }
+  const shards = new Map<string, ShardMeta>()
+  const orderedBrowserScriptShards: string[] = []
+  const orderedBrowserStyleShards: string[] = []
 
   const entryKeys = Object.keys(manifest.entries)
 
@@ -111,13 +144,13 @@ export async function MakeAppStructureContextFromManifest(
       shard.IsPublicShard = true
 
       if (/\.css$/.test(chunk.shardPath)) {
-        webapp.OrderedBrowserStyleShards.push(chunk.shardPath)
+        orderedBrowserStyleShards.push(chunk.shardPath)
       } else if (/\.js$/.test(chunk.shardPath)) {
-        webapp.OrderedBrowserScriptShards.push(chunk.shardPath)
+        orderedBrowserScriptShards.push(chunk.shardPath)
       }
     }
 
-    webapp.shards.set(shard.ShardPath, shard)
+    shards.set(shard.ShardPath, shard)
   })
 
   Object.keys(manifest.entries).forEach((entryKey) => {
@@ -136,16 +169,20 @@ export async function MakeAppStructureContextFromManifest(
       shard.IsPublicShard = true
 
       if (/\.css$/.test(entry.shardPath)) {
-        webapp.OrderedBrowserStyleShards.push(entry.shardPath)
+        orderedBrowserStyleShards.push(entry.shardPath)
       } else if (/\.js$/.test(entry.shardPath)) {
-        webapp.OrderedBrowserScriptShards.push(entry.shardPath)
+        orderedBrowserScriptShards.push(entry.shardPath)
       }
     }
 
-    webapp.shards.set(shard.ShardPath, shard)
+    shards.set(shard.ShardPath, shard)
   })
 
-  webapp.LoadedEntryModuleMap = loadedModuleMap
-
-  return webapp
+  return new AppStructureContext(
+    manifest,
+    loadedModuleMap,
+    shards,
+    orderedBrowserScriptShards,
+    orderedBrowserStyleShards
+  )
 }

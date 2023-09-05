@@ -51,7 +51,7 @@ export class LunarServer {
    * @param webApp
    */
   updateWebApp(structure: AppStructureContext, updatedShardPaths: ShardPath[]) {
-    this.#router = BuildRoutes(structure.Manifest.routeInfoNodes, structure)
+    this.#router = BuildRoutes(structure.manifest.routeInfoNodes, structure)
     console.log(this.#router.prettyPrint({ commonPrefix: false }))
 
     for (const ws of this.wsConnectionPool) {

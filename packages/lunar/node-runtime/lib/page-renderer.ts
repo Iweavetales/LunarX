@@ -58,8 +58,8 @@ export function RenderPage(
     routeNodeMap[routeNode.routePattern] = routeNode
   }
 
-  const entriesArray = Object.keys(appStructureContext.Manifest.entries).map(
-    (key) => appStructureContext.Manifest.entries[key]
+  const entriesArray = Object.keys(appStructureContext.manifest.entries).map(
+    (key) => appStructureContext.manifest.entries[key]
   )
 
   const entryServerEntrySource: BuiltShardInfo | undefined = entriesArray.find(
@@ -89,19 +89,19 @@ export function RenderPage(
         )
 
         const entryServerHandler: EntryServerHandler =
-          appStructureContext.LoadedEntryModuleMap[
-            entryServerEntrySource!.shardPath
-          ].default
+          appStructureContext.getModuleByAbsEntryName(
+            INTERNAL_SERVER_ABS_ENTRY_NAME
+          ).default
 
         try {
           /**
            * _init.server.tsx 파일이 존재 한다면 먼저 처리 한다.
            */
-          if (appStructureContext.Manifest.initServerShardPath) {
+          if (appStructureContext.hasEntryByAbsEntryName("/_init.server")) {
             const initServerScript: any =
-              appStructureContext.LoadedEntryModuleMap[
-                appStructureContext.Manifest.initServerShardPath
-              ].default
+              appStructureContext.getModuleByAbsEntryName(
+                "/_init.server"
+              ).default
 
             const ret: boolean = await initServerScript(context)
             if (!ret) {
@@ -126,19 +126,19 @@ export function RenderPage(
           console.log(
             "getRouteModule",
             pattern,
-            appStructureContext.LoadedEntryModuleMap
+            appStructureContext.loadedEntryModuleMap
           )
 
-          return appStructureContext.LoadedEntryModuleMap[
-            appStructureContext.Manifest.entries[
-              appStructureContext.Manifest.routeInfoNodes[pattern].entryPath ??
+          return appStructureContext.loadedEntryModuleMap[
+            appStructureContext.manifest.entries[
+              appStructureContext.manifest.routeInfoNodes[pattern].entryPath ??
                 "??"
             ].shardPath
           ].default
         }
 
         function requireFunction(shardPath: string): any {
-          return appStructureContext.LoadedEntryModuleMap[shardPath].default
+          return appStructureContext.loadedEntryModuleMap[shardPath].default
         }
 
         /**
@@ -195,13 +195,10 @@ export function RenderPage(
          * _app.server.tsx 파일이 있다면 해당 파일에 대한 처리
          */
         try {
-          const serverSideAppEntryShardInfo =
-            appStructureContext.Manifest.entries["app/routes/_app.server.tsx"]
-          if (serverSideAppEntryShardInfo) {
+          if (appStructureContext.hasEntryByAbsEntryName("/_app.server")) {
             const appServerSideModule: any =
-              appStructureContext.LoadedEntryModuleMap[
-                serverSideAppEntryShardInfo.shardPath
-              ]
+              appStructureContext.getModuleByAbsEntryName("/_app.server")
+
             const appServerFetchFunction = appServerSideModule.serverFetches
 
             const appServerSideFetchResult = await appServerFetchFunction(
@@ -227,25 +224,25 @@ export function RenderPage(
          * entry.server.ts 를 호출 해 페이지 데이터를 생성
          */
         const result = await entryServerHandler(context, {
-          scripts: appStructureContext.OrderedBrowserScriptShards.map(
+          scripts: appStructureContext.orderedBrowserScriptShards.map(
             (shardPath: string) => {
               return {
                 url:
                   "/_/s/" +
                   shardPath +
                   "?v=" +
-                  appStructureContext.Manifest.builtVersion,
+                  appStructureContext.manifest.builtVersion,
               }
             }
           ),
-          styles: appStructureContext.OrderedBrowserStyleShards.map(
+          styles: appStructureContext.orderedBrowserStyleShards.map(
             (shardPath: string) => {
               return {
                 url:
                   "/_/s/" +
                   shardPath +
                   "?v=" +
-                  appStructureContext.Manifest.builtVersion,
+                  appStructureContext.manifest.builtVersion,
               }
             }
           ),
@@ -253,17 +250,17 @@ export function RenderPage(
           loaderScriptUrl:
             "/_/s/loader.js" +
             "?v=" +
-            appStructureContext.Manifest.builtVersion,
+            appStructureContext.manifest.builtVersion,
           browserEntryModulePath:
-            appStructureContext.Manifest.browserEntryShardPath,
+            appStructureContext.manifest.browserEntryShardPath,
           customAppModuleShardPath:
-            appStructureContext.Manifest.customizeAppShardPath,
+            appStructureContext.manifest.customizeAppShardPath,
           custom404ShardPath:
-            appStructureContext.Manifest.customize404ShardPath,
+            appStructureContext.manifest.customize404ShardPath,
           customErrorShardPath:
-            appStructureContext.Manifest.customizeErrorShardPath,
+            appStructureContext.manifest.customizeErrorShardPath,
           customDocumentModuleShardPath:
-            appStructureContext.Manifest.customizeServerDocumentShardPath,
+            appStructureContext.manifest.customizeServerDocumentShardPath,
 
           // server side fetched 데이터 맵
           routeServerFetchesResultMap: routeServerFetchesResultMap,

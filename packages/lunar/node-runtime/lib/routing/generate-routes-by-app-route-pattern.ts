@@ -38,7 +38,7 @@ export const GenerateRoutesByAppRoutePattern = (
   const universalRouteInfoNodeList: UniversalRouteInfoNode[] =
     convertRawRouteInfoNodeListToUniversal(
       rawRouteInfoNodeListRootToLeaf,
-      appStructureContext.Manifest
+      appStructureContext.manifest
     )
 
   const appRouteInstanceContext = new AppRouteInstanceContext(
