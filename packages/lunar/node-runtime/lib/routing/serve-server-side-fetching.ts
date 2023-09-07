@@ -1,15 +1,12 @@
 import { IncomingMessage, ServerResponse } from "http"
-import { PageParams } from "~/core/lunar-context"
+import { PageParams, ServerSideFetchReturn } from "~/core/server-context"
 import { AppRouteInstanceContext } from "./app-route-instance-context"
 import { GetUrlPath } from "../url-utils"
 import { rawHeaderStringArrayToMutableHTTPHeaders } from "../http-header"
 import { MutableHTTPHeaders } from "~/core/http-headers.server"
 import { makeServerContext } from "../make-server-context"
-import {
-  FetchingServerSideRouteData,
-  ServerSideFetchResult,
-  ServerSideRouteFetchResult,
-} from "../fetch-server-side-route-data"
+import { initServer } from "./init-server"
+import { preProcessPipelineForSsr } from "./pre-process-pipeline-for-ssr"
 
 export const serveServerSideFetching = async (
   req: IncomingMessage,
@@ -30,74 +27,24 @@ export const serveServerSideFetching = async (
     req,
     urlPath,
     params,
+    appRouteInstanceContext.universalRouteInfoNodeList,
     requestHeaders,
     responseHeaders
   )
 
-  /**
-   * _init.server.tsx 파일이 존재 한다면 먼저 처리 한다.
-   */
-  if (
-    appRouteInstanceContext.appStructureContext.hasEntryByAbsEntryName(
-      "/_init.server"
-    )
-  ) {
-    const initServerScript: any =
-      appRouteInstanceContext.appStructureContext.getModuleByAbsEntryName(
-        "/_init.server"
-      ).default
-
-    const ret: boolean = await initServerScript(context)
-    //@Todo change response method
-    if (!ret) {
-      return res.writeHead(404, {}).end("error")
-    }
-  }
-
-  const fetchedDataList: ServerSideFetchResult[] = []
-  await Promise.all(
-    appRouteInstanceContext.rawRouteInfoNodeListRootToLeaf.map((routeNode) => {
-      return new Promise((resolve, reject) => {
-        ;(async function () {
-          const result = await FetchingServerSideRouteData(
-            routeNode,
-            appRouteInstanceContext.appStructureContext,
-            context
-          )
-          fetchedDataList.push(result)
-          resolve(true)
-        })()
-      })
-    })
+  const initServerResult = await initServer(
+    context,
+    appRouteInstanceContext.appStructureContext
   )
-
-  const routeServerFetchesResultMap: {
-    [pattern: string]: ServerSideRouteFetchResult | undefined
-  } = {}
-
-  if (
-    appRouteInstanceContext.appStructureContext.hasEntryByAbsEntryName(
-      "/_app.server"
-    )
-  ) {
-    const appServerSideModule: any =
-      appRouteInstanceContext.appStructureContext.getModuleByAbsEntryName(
-        "/_app.server"
-      )
-    const appServerFetchFunction = appServerSideModule.serverFetches
-
-    const appServerSideFetchResult = await appServerFetchFunction(context)
-    routeServerFetchesResultMap["_app"] = appServerSideFetchResult
+  if (initServerResult !== true && initServerResult.error) {
+    //
   }
 
-  fetchedDataList.forEach((fetchedData) => {
-    if (fetchedData) {
-      const pattern = fetchedData.routerPattern
-      const result = fetchedData.result
-
-      routeServerFetchesResultMap[pattern] = result
-    }
-  })
+  const routeServerFetchesResultMap = await preProcessPipelineForSsr(
+    context,
+    appRouteInstanceContext.appStructureContext,
+    appRouteInstanceContext.rawRouteInfoNodeListRootToLeaf
+  )
 
   //@Todo change response method
   /**

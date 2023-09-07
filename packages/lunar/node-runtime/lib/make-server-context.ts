@@ -1,12 +1,14 @@
-import { ServerContext, PageParams } from "~/core/lunar-context"
+import { ServerContext, PageParams } from "~/core/server-context"
 
 import { IncomingMessage } from "http"
 import { MutableHTTPHeaders } from "~/core/http-headers.server"
+import { UniversalRouteInfoNode } from "~/core/document-types"
 
 export function makeServerContext(
   req: IncomingMessage,
   urlPath: string,
   params: PageParams,
+  matchedRoutes: UniversalRouteInfoNode[],
   requestHeaders: MutableHTTPHeaders,
   responseHeaders: MutableHTTPHeaders
 ): ServerContext {
@@ -21,6 +23,9 @@ export function makeServerContext(
     responseHeaders: responseHeaders,
     path: urlPath,
     params: params,
+    matchedRoutes: matchedRoutes,
+    routeFetchDataMap: {},
+    userStore: {},
     location: {
       pathname: urlPath.substring(
         0,

@@ -14,7 +14,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "paths": {},
+    "typeRoots": ["lunarx"],
     "plugins": [{
       "transform": "@lunargate/lunar-ts-plugin"
     }],

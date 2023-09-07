@@ -1,24 +1,26 @@
 import { AppStructureContext } from "../client-app-structure"
 import { GetUrlPath } from "../url-utils"
 import { GenerateRandomBytes } from "../random"
-import { DocumentSheet, UniversalRouteInfoNode } from "~/core/document-types"
 import {
-  BuiltShardInfo,
-  RawRouteInfoNode,
-  RawRouteInfoNodeMap,
-} from "~/core/manifest"
-import {
-  FetchingServerSideRouteData,
-  ServerSideFetchResult,
-  ServerSideRouteFetchResult,
-} from "../fetch-server-side-route-data"
+  DocumentPublicServerFetchesByPatternMap,
+  UniversalRouteInfoNode,
+} from "~/core/document-types"
+import { RawRouteInfoNode, RawRouteInfoNodeMap } from "~/core/manifest"
 import { makeServerContext } from "../make-server-context"
 import { IncomingMessage } from "http"
 import { EntryServerHandler } from "~/core/types.server"
 import { MutableHTTPHeaders } from "~/core/http-headers.server"
-import { PageParams } from "~/core/lunar-context"
+import {
+  PageParams,
+  ServerErrorHandler,
+  ServerSideFetchReturn,
+} from "~/core/server-context"
 import { rawHeaderStringArrayToMutableHTTPHeaders } from "../http-header"
 import { executeServerEntry } from "./execute-server-entry"
+import { preProcessPipelineForSsr } from "./pre-process-pipeline-for-ssr"
+import { initServer } from "./init-server"
+import { PublicServerSideFetchResult } from "~/core/context"
+import { preProcessPipelineErrorHandleOfFetches } from "./pre-process-pipeline-error-handle-of-fetches"
 
 const INTERNAL_SERVER_ABS_ENTRY_NAME = "@entry/entry.server"
 
@@ -71,6 +73,7 @@ export async function renderPage(
       req,
       urlPath,
       params,
+      universalRouteInfoNodeList,
       requestHeaders,
       responseHeaders
     )
@@ -80,103 +83,52 @@ export async function renderPage(
         INTERNAL_SERVER_ABS_ENTRY_NAME
       ).default
 
-    try {
-      /**
-       * _init.server.tsx 파일이 존재 한다면 먼저 처리 한다.
-       */
-      if (appStructureContext.hasEntryByAbsEntryName("/_init.server")) {
-        const initServerScript: any =
-          appStructureContext.getModuleByAbsEntryName("/_init.server").default
+    const passOrThrownError = await initServer(context, appStructureContext)
+    let errorHandleResult: PublicServerSideFetchResult<unknown> | null = null
+    if (passOrThrownError !== true && passOrThrownError.error) {
+      const initServerThrownError = passOrThrownError
 
-        const ret: boolean = await initServerScript(context)
-        if (!ret) {
-          return {
-            data: "error",
-            status: 404,
-            responseHeaders: context.responseHeaders,
-          }
+      /**
+       * If `_error.server` exists for handling thrownError, it will process or filter the thrown error.
+       * If _error.server does not exist, a temporary errorHandleResult will be made public.
+       */
+      if (appStructureContext.hasEntryByAbsEntryName("/_error.server")) {
+        const errorServerHandler: ServerErrorHandler<unknown> =
+          appStructureContext.getModuleByAbsEntryName(
+            "/_error.server"
+          ).errorHandler
+
+        errorHandleResult = await errorServerHandler(
+          context,
+          initServerThrownError
+        )
+      } else {
+        errorHandleResult = {
+          error: {
+            msg: "Unexpected server error",
+          },
         }
       }
-    } catch (e) {
-      console.error("Failed to server side fetch data from _init.server")
-      console.error(e)
-      return {
-        data: "",
-        status: 500,
-        responseHeaders: context.responseHeaders,
-      }
     }
 
-    /**
-     * 라우트 노드별 serverFetches 를 실행 하여  데이터를 각각 로딩
-     * execute serial
-     */
-    const fetchedDataList: ServerSideFetchResult[] = []
+    const routeServerFetchesResultMap = await preProcessPipelineForSsr(
+      context,
+      appStructureContext,
+      rawRouteInfoNodeListRootToLeaf
+    )
 
-    try {
-      await Promise.all(
-        rawRouteInfoNodeListRootToLeaf.map((routeNode) => {
-          return new Promise((resolve, reject) => {
-            ;(async function () {
-              const result = await FetchingServerSideRouteData(
-                routeNode,
-                appStructureContext,
-                context
-              )
-
-              fetchedDataList.push(result)
-              resolve(true)
-            })()
-          })
-        })
+    const documentPublicServerFetchesByPatternMap: DocumentPublicServerFetchesByPatternMap =
+      await preProcessPipelineErrorHandleOfFetches(
+        context,
+        appStructureContext,
+        rawRouteInfoNodeListRootToLeaf,
+        routeServerFetchesResultMap
       )
-    } catch (e) {
-      console.error("Failed to server side fetch data")
-      console.error(e)
-      return {
-        data: "",
-        status: 500,
-        responseHeaders: context.responseHeaders,
-      }
-    }
 
-    const routeServerFetchesResultMap: {
-      [pattern: string]: ServerSideRouteFetchResult | undefined
-    } = {}
-
-    /**
-     * 위에서 로드 한 데이터를 결과 맵에 바인딩 한다
-     */
-    fetchedDataList.forEach((fetchedData) => {
-      if (fetchedData) {
-        const pattern = fetchedData.routerPattern
-        const result = fetchedData.result
-
-        routeServerFetchesResultMap[pattern] = result
-      }
-    })
-
-    /**
-     * _app.server.tsx 파일이 있다면 해당 파일에 대한 처리
-     */
-    try {
-      if (appStructureContext.hasEntryByAbsEntryName("/_app.server")) {
-        const appServerSideModule: any =
-          appStructureContext.getModuleByAbsEntryName("/_app.server")
-
-        const appServerFetchFunction = appServerSideModule.serverFetches
-
-        const appServerSideFetchResult = await appServerFetchFunction(context)
-        routeServerFetchesResultMap["_app"] = appServerSideFetchResult
-      }
-    } catch (e) {
-      console.error("Failed to server side fetch _app.server data", e)
-      return {
-        data: "",
-        status: 500,
-        responseHeaders: context.responseHeaders,
-      }
-    }
+    console.log(
+      "documentPublicServerFetchesByPatternMap",
+      documentPublicServerFetchesByPatternMap
+    )
 
     return {
       /**
@@ -184,6 +136,7 @@ export async function renderPage(
        */
       data: await executeServerEntry(
         entryServerHandler,
+        errorHandleResult,
         context,
         appStructureContext,
         routeServerFetchesResultMap,
@@ -197,7 +150,7 @@ export async function renderPage(
       responseHeaders: responseHeaders,
     }
   } catch (e) {
-    console.log("failed to load base libs", e)
+    console.log("Unexpected error during render page", e)
   }
 
   return {

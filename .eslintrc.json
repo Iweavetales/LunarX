@@ -23,6 +23,7 @@
     {
       "files": ["**/*.tsx"],
       "rules": {
+
         "react-hooks/exhaustive-deps": "warn",
         "react/forbid-foreign-prop-types": [
           "warn",
@@ -139,12 +140,13 @@
     ],
     "no-unused-labels": "warn",
     "no-unused-vars": [
-      "warn",
+      "error",
       {
-        "args": "none",
+        "args": "all",
         "ignoreRestSiblings": true
       }
     ],
+
     "no-use-before-define": [
       "warn",
       {

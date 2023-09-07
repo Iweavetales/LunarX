@@ -1,4 +1,5 @@
 import { ShardPath } from "./manifest"
+import { PublicServerSideFetchResult } from "~/core/context"
 
 export type BrowserRouteNode = {
   path: string
@@ -6,11 +7,12 @@ export type BrowserRouteNode = {
   upperPath: string
 }
 
+export type MatchPattern = string
 /**
  * server 와 browser 둘 다에서 통용되는 RawRouteInfoNode
  */
 export interface UniversalRouteInfoNode {
-  matchPattern: string
+  matchPattern: MatchPattern
   childNodes?: UniversalRouteInfoNode[]
   upperRouteMatchPattern?: string
   shardPath: string
@@ -27,7 +29,9 @@ export type DocumentStyle = { styleId: string; url: string }
 export type DocumentStyles = DocumentStyle[]
 export type DocumentScript = { scriptId: string; url: string }
 export type DocumentScripts = DocumentScript[]
-
+export type DocumentPublicServerFetchesByPatternMap = {
+  [routePattern: string]: PublicServerSideFetchResult<any>
+}
 export type DocumentSheet = {
   scripts: DocumentScripts
   styles: DocumentStyles
@@ -45,9 +49,7 @@ export type DocumentSheet = {
 
   // 최상위 라우트에서 최종 매치된 라우트까지 거쳐진 모든 라우트 배열
   routeStem: BrowserRouteNode[]
-  routeServerFetchesResultMap: {
-    [routePattern: string]: any
-  }
+  routeServerFetchesResultMap: DocumentPublicServerFetchesByPatternMap
 
   /**
    * 오름차순 라우트 노드 리스트

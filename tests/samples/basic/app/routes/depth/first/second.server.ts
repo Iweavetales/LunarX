@@ -1,13 +1,14 @@
 import { ServerContext } from "lunarx/server"
-export async function serverFetches(ctx: ServerContext) {
-  // /client-session/info
 
+export async function serverFetches(ctx: ServerContext) {
+  await new Promise((resolve) => {
+    setTimeout(() => resolve(true), 1000)
+  })
+
+  throw new Error("Errorsss")
   return {
     data: {
-      ENV: {
-        NODE_ENV: "development",
-      },
-      userAgent: ctx.requestHeaders.get("user-agent"),
+      depth: "second",
     },
   }
 }

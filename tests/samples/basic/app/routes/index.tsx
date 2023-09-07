@@ -41,7 +41,18 @@ export default function IndexPage() {
         </div>
 
         <div style={{ marginTop: 30 }}>
-          <Link href={"/about"}>To Abouts</Link>
+          <div>
+            <Link href={"/about"}>To Abouts</Link>
+          </div>
+          <div>
+            <Link href={"/depth/first"}>To First</Link>
+          </div>
+          <div>
+            <Link href={"/depth/first/second"}>To Second</Link>
+          </div>
+          <div>
+            <Link href={"/depth/first/second/third"}>To Third</Link>
+          </div>
         </div>
 
         <h1 style={{ textAlign: "left" }}>Posts</h1>

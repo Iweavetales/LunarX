@@ -1,4 +1,4 @@
-import { ServerContext } from "lunarx/context"
+import { ServerContext } from "lunarx/server"
 
 export default async function (ctx: ServerContext) {
   return true

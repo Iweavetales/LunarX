@@ -1,4 +1,4 @@
-import { ServerContext } from "lunarx/context"
+import { ServerContext } from "lunarx/server"
 import React from "react"
 import { DocumentLinks, DocumentScripts } from "lunarx/document"
 

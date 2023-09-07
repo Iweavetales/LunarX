@@ -4,7 +4,7 @@ import { ProductionMode } from "../constants"
 import { writeFileToResponse } from "../write-file-with-response"
 import { PathHelper } from "../helper/path"
 import { AppStructureContext } from "../client-app-structure"
-import { PageParams } from "~/core/lunar-context"
+import { PageParams } from "~/core/server-context"
 
 export const serveShards = async (
   req: IncomingMessage,

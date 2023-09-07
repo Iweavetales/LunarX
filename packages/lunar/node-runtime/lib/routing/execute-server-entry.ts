@@ -1,16 +1,20 @@
-import { DocumentSheet, UniversalRouteInfoNode } from "~/core/document-types"
-import ServerContext from "~/core/lunar-context"
+import {
+  DocumentPublicServerFetchesByPatternMap,
+  DocumentSheet,
+  UniversalRouteInfoNode,
+} from "~/core/document-types"
+import ServerContext from "~/core/server-context"
 import { EntryServerHandler } from "~/core/types.server"
 import { AppStructureContext } from "../client-app-structure"
-import { ServerSideRouteFetchResult } from "../fetch-server-side-route-data"
+import { PublicServerSideFetchResult } from "~/core/context"
 
 export async function executeServerEntry(
   entryServerHandler: EntryServerHandler,
+  // if init.server has an error This parameter is set
+  initErrorHandleResult: PublicServerSideFetchResult<any> | null,
   context: ServerContext,
   appStructureContext: AppStructureContext,
-  serverFetchesResultMap: {
-    [pattern: string]: ServerSideRouteFetchResult | undefined
-  },
+  publicServerFetchesResultMap: DocumentPublicServerFetchesByPatternMap,
   universalRouteInfoNodeList: UniversalRouteInfoNode[],
   nonce: string
 ) {
@@ -41,7 +45,7 @@ export async function executeServerEntry(
       appStructureContext.manifest.customizeServerDocumentShardPath,
 
     // server side fetched 데이터 맵
-    routeServerFetchesResultMap: serverFetchesResultMap,
+    routeServerFetchesResultMap: publicServerFetchesResultMap,
     // 오름차순 정렬 라우트 노드 정보
     universalRINListRootToLeaf: universalRouteInfoNodeList,
     // 모듈 로드 함수

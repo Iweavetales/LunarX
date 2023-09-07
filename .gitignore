@@ -5,8 +5,16 @@
 dist/
 node_modules/
 
-# Environment
-.idea/
+
+# Editors
+**/.idea
+**/.#*
+.nvmrc
 
 # debug
 *.log
+
+# Cache
+*.tsbuildinfo
+.swc/
+.turbo

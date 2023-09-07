@@ -1,4 +1,4 @@
-import { ServerContext } from "~/core/lunar-context"
+import { ServerContext } from "~/core/server-context"
 import React, { StrictMode } from "react"
 import { DocumentLinks, DocumentScripts } from "../document"
 

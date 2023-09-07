@@ -3,7 +3,7 @@ import { GetUrlPath } from "../url-utils"
 import { join, resolve } from "path"
 import { PathHelper } from "../helper/path"
 import { writeFileToResponse } from "../write-file-with-response"
-import { PageParams } from "~/core/lunar-context"
+import { PageParams } from "~/core/server-context"
 import { AppStructureContext } from "../client-app-structure"
 
 export const serveStatic = async (

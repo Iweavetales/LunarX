@@ -2,7 +2,7 @@ import { IncomingMessage, ServerResponse } from "http"
 import { writeFileToResponse } from "../write-file-with-response"
 import { PathHelper } from "../helper/path"
 import { AppStructureContext } from "../client-app-structure"
-import { PageParams } from "~/core/lunar-context"
+import { PageParams } from "~/core/server-context"
 
 export const serveLoader = async (
   req: IncomingMessage,

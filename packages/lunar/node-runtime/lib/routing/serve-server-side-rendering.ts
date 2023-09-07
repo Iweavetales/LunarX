@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from "http"
-import { PageParams } from "~/core/lunar-context"
+import { PageParams } from "~/core/server-context"
 import { renderPage } from "./render-page"
 import { PathHelper } from "../helper/path"
 import { AppRouteInstanceContext } from "./app-route-instance-context"

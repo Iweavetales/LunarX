@@ -1,4 +1,4 @@
-import { ServerContext } from "./lunar-context"
+import { ServerContext } from "./server-context"
 import { DocumentSheet } from "./document-types"
 
 export type EntryServerHandler = (
