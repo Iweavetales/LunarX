@@ -1,9 +1,7 @@
 const esbuild = require("esbuild")
 const ts = require("typescript")
+const resolveTsPaths = require("resolve-tspaths")
 
-// export async function bin(task, opts){
-//
-// }
 module.exports = {
   *builder(task, opts) {
     yield esbuild.build({
@@ -92,6 +90,15 @@ module.exports = {
           ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
         )
       }
+    })
+
+    /**
+     * Resolve resolved path like ~/@core to ../../../..
+     */
+    yield resolveTsPaths.resolveTsPaths({
+      out: parsedCommandLine.options.out,
+      src: parsedCommandLine.options.baseUrl,
+      project: "./tsconfig.json",
     })
 
     const exitCode = emitResult.emitSkipped ? 1 : 0
