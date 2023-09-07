@@ -7,6 +7,10 @@ import { MutableHTTPHeaders } from "~/core/http-headers.server"
 import { makeServerContext } from "../make-server-context"
 import { initServer } from "./init-server"
 import { preProcessPipelineForSsr } from "./pre-process-pipeline-for-ssr"
+import { DocumentPublicServerFetchesByPatternMap } from "~/core/document-types"
+import { preProcessPipelineErrorHandleOfFetches } from "./pre-process-pipeline-error-handle-of-fetches"
+import { PublicServerSideFetchResult } from "~/core/context"
+import { rootErrorHandler } from "./root-error-handler"
 
 export const serveServerSideFetching = async (
   req: IncomingMessage,
@@ -32,12 +36,27 @@ export const serveServerSideFetching = async (
     responseHeaders
   )
 
-  const initServerResult = await initServer(
+  const passOrThrownError = await initServer(
     context,
     appRouteInstanceContext.appStructureContext
   )
-  if (initServerResult !== true && initServerResult.error) {
-    //
+
+  let errorHandleResult: PublicServerSideFetchResult<unknown> | null = null
+  if (passOrThrownError !== true) {
+    if (passOrThrownError.error) {
+      errorHandleResult = await rootErrorHandler(
+        context,
+        appRouteInstanceContext.appStructureContext,
+        passOrThrownError
+      )
+    } else {
+      console.error(
+        "Error occurs from `init.server` but It wasn't handle.",
+        passOrThrownError
+      )
+
+      return res.writeHead(500, {}).end("Unexpected error")
+    }
   }
 
   const routeServerFetchesResultMap = await preProcessPipelineForSsr(
@@ -46,14 +65,17 @@ export const serveServerSideFetching = async (
     appRouteInstanceContext.rawRouteInfoNodeListRootToLeaf
   )
 
-  //@Todo change response method
-  /**
-   * 존재하는 라우트 경로로 정상적인 접근 시도를 했다면
-   * 라우트 SSR 데이터와 라우트 정보를 응답한다.
-   */
+  // handle(filter) error from preProcessPipelineForSsr
+  const documentPublicServerFetchesByPatternMap: DocumentPublicServerFetchesByPatternMap =
+    await preProcessPipelineErrorHandleOfFetches(
+      context,
+      appRouteInstanceContext.appStructureContext,
+      routeServerFetchesResultMap
+    )
+
   return res.writeHead(200, responseHeaders.asObject()).end(
     JSON.stringify({
-      data: routeServerFetchesResultMap,
+      data: documentPublicServerFetchesByPatternMap,
       r: appRouteInstanceContext.universalRouteInfoNodeList,
     })
   )

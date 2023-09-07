@@ -1,6 +1,7 @@
 import React, { useContext } from "react"
 import { AppRouterContext } from "./router-context"
 import { ServerFetchesContext } from "./server-fetches-context"
+import { PublicServerSideFetchResult } from "~/core/context"
 
 export const ServerFetchesProvider = function (props: {
   // result: RouteFetchResult;
@@ -8,10 +9,11 @@ export const ServerFetchesProvider = function (props: {
   dataKey: string
 }) {
   const routeCtx = useContext(AppRouterContext)
-  const serverFetchesResult = routeCtx.routeDataMap[props.dataKey]
+  const serverFetchesResult: PublicServerSideFetchResult<any> =
+    routeCtx.routeDataMap[props.dataKey]
 
   if (serverFetchesResult?.error) {
-    return <div> Data Error : {serverFetchesResult.id}</div>
+    throw serverFetchesResult.error
   }
 
   return (

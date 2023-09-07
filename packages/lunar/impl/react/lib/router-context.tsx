@@ -1,6 +1,7 @@
 import { createContext } from "react"
 import { Location } from "~/core/location"
 import { RouteTreeNode } from "../router"
+import { PublicServerSideFetchResult } from "~/core/context"
 
 export type pushMethod = (
   href: string,
@@ -14,7 +15,7 @@ type SwiftRouterProvides = {
     auto: boolean
   } & Location
   routeTree: RouteTreeNode[]
-  routeDataMap: { [pattern: string]: any }
+  routeDataMap: { [pattern: string]: PublicServerSideFetchResult<any> }
   softReload: () => Promise<void>
 }
 

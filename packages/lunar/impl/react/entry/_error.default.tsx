@@ -1,4 +1,4 @@
 import React from "react"
-export default function ErrorPage() {
-  return <div>Error page</div>
+export default function DefaultErrorComponent() {
+  return <div>Error</div>
 }

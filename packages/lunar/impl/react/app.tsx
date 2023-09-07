@@ -1,6 +1,5 @@
 import React, { useContext } from "react"
 import { RootAppContext } from "./lib/root-app-context"
-import { Route404 } from "./router"
 import { Route, Routes } from "react-router"
 import { AppRouterContext } from "./lib/router-context"
 import { GenerateRouteNode } from "./lib/generate-route-node"
@@ -23,6 +22,8 @@ export const SwiftRenderer = () => {
     loc = appRouterContext.currentLocation
   }
 
+  const NotFoundComponent = rootAppContext.notFoundComponent
+
   return (
     <>
       <Routes location={loc ?? undefined}>
@@ -35,7 +36,7 @@ export const SwiftRenderer = () => {
 
           return routeNode
         })}
-        <Route path="*" element={<Route404 />} />
+        <Route path="*" element={<NotFoundComponent />} />
       </Routes>
 
       {appRouterContext.browsing && (

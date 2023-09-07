@@ -1,7 +1,7 @@
 import { createContext } from "react"
-import { RouteFetchResult } from "../ssfetch"
+import { PublicServerSideFetchResult } from "~/core/context"
 
 type RouteDataValues = {
-  result?: RouteFetchResult
+  result?: PublicServerSideFetchResult<any>
 }
 export const ServerFetchesContext = createContext<RouteDataValues>({})

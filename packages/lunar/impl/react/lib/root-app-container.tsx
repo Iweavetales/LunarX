@@ -14,6 +14,8 @@ export default function LunarAppContainer(props: {
   routeShardPrepareTrigger: (shardPaths: string[]) => Promise<void>
   dataMatchMap: RouteServerFetchDataMap
   children?: React.ReactNode
+  errorComponent: React.FunctionComponent
+  notFoundComponent: React.FunctionComponent
   enterLocation: {
     pathname: string
     search: string
@@ -30,6 +32,8 @@ export default function LunarAppContainer(props: {
         loader: props.loader,
         routeShardPrepareTrigger: props.routeShardPrepareTrigger,
         components: loadedComponents,
+        errorComponent: props.errorComponent,
+        notFoundComponent: props.notFoundComponent,
         registerComponentByShardPath: (shardPath, shard) => {
           setLoadedComponents((state) => {
             return {

@@ -8,6 +8,8 @@ import { RootElementID } from "~/core/constants"
 import { SwiftRenderer } from "../app"
 import { ServerFetchesProvider } from "../lib/server-fetches-provider"
 import { TAppData } from "../lib/app-data"
+import DefaultNotFoundPage from "./_404.default"
+import DefaultErrorComponent from "./_error.default"
 
 type ReactRouteNode = {
   element: React.ReactElement
@@ -37,14 +39,13 @@ export default function (
   ascRouteNodes: UniversalRouteInfoNode[],
   customAppEntryModulePath: string,
   browserEntryModulePath: string,
-  customNotFoundRouteShardPath?: string,
+  custom404RouteShardPath?: string,
   customErrorRouteShardPath?: string
 ) {
   async function Startup() {
     let App: () => React.ReactElement
 
     if (customAppEntryModulePath) {
-      console.log("Used customized App module")
       const customAppModule: any = await PromiseRequire(
         require,
         customAppEntryModulePath
@@ -103,6 +104,24 @@ export default function (
       ascRouteNodes.map((routeNode) => routeNode.shardPath)
     )
 
+    let notFoundComponent: React.FunctionComponent
+    if (custom404RouteShardPath) {
+      notFoundComponent = (
+        await PromiseRequire(require, custom404RouteShardPath)
+      ).default
+    } else {
+      notFoundComponent = DefaultNotFoundPage
+    }
+
+    let errorComponent: React.FunctionComponent
+    if (customErrorRouteShardPath) {
+      errorComponent = (
+        await PromiseRequire(require, customErrorRouteShardPath)
+      ).default
+    } else {
+      errorComponent = DefaultErrorComponent
+    }
+
     const preloadedComponents = await Promise.all(
       /**
        * Resolves [shardPath, React.FunctionComponent]
@@ -136,18 +155,13 @@ export default function (
               routeShardPrepareTrigger={prepareRouteShards}
               // 브라우저 사이드 샤드 로더 전달
               loader={(shardPath: string) => {
-                console.log(
-                  "call loader",
-                  routeComponents,
-                  shardPath,
-                  routeComponents[shardPath]
-                )
                 return PromiseRequire(require, shardPath)
-                // return routeComponents[shardPath]
               }}
               ascendRouteNodeList={ascRouteNodes}
               dataMatchMap={appDataFromServer.rd}
               preloadedComponents={preloadedComponents}
+              notFoundComponent={notFoundComponent}
+              errorComponent={errorComponent}
             >
               <ServerFetchesProvider dataKey={"_app"}>
                 <App />

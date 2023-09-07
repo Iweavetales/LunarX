@@ -1,5 +1,6 @@
 import { AbstractEntryName, LunarJSManifest, ShardPath } from "~/core/manifest"
 import { LoadBuiltShardEntryModule } from "./module-loader"
+import { ServerErrorHandler } from "~/core/server-context"
 
 export enum ShardType {
   Chunk,
@@ -67,19 +68,24 @@ export class AppStructureContext {
     return Boolean(this.#manifest.entryDictionaryByAbstractEntryName[name])
   }
 
-  getShardPathByAbsEntryName(name: AbstractEntryName): ShardPath {
+  getShardPathByAbsEntryName(name: AbstractEntryName): ShardPath | null {
     const realEntryPath =
       this.#manifest.entryDictionaryByAbstractEntryName[name]
 
-    if (!realEntryPath) {
-      throw new Error(`Not found entry for ${name}`)
+    const entry = this.#manifest.entries[realEntryPath]
+    if (entry) {
+      return entry.shardPath
     }
 
-    return this.#manifest.entries[realEntryPath].shardPath
+    return null
   }
 
   getModuleByAbsEntryName(name: AbstractEntryName): any {
     const shardPath = this.getShardPathByAbsEntryName(name)
+
+    if (!shardPath) {
+      throw new Error(`Not found shard for ${name}`)
+    }
 
     return this.getModuleByShardPath(shardPath)
   }
@@ -93,6 +99,32 @@ export class AppStructureContext {
       return "/_/s/" + shardPath + "?v=" + version
     }
     return "/_/s/" + shardPath
+  }
+
+  getErrorHandlerAtRoute(routePattern: string): ServerErrorHandler<any> | null {
+    //
+    const patternTokens = routePattern.split("/")
+    const lastToken = patternTokens.pop()
+    if (lastToken) {
+      const errorHandlerAbsEntryName = `${patternTokens.join(
+        "/"
+      )}/_${lastToken}.error.server`
+      console.log("errorHandlerAbsEntryName", errorHandlerAbsEntryName)
+      const entryPath =
+        this.#manifest.entryDictionaryByAbstractEntryName[
+          errorHandlerAbsEntryName
+        ]
+
+      const entry = this.#manifest.entries[entryPath]
+
+      const module = this.#loadedEntryModuleMap[entry.shardPath]
+
+      if (module) {
+        return module.errorHandler as ServerErrorHandler<any>
+      }
+    }
+
+    return null
   }
 }
 

@@ -1,5 +1,6 @@
 import React, { useContext } from "react"
 import { ServerFetchesContext } from "./lib/server-fetches-context"
+import { PublicServerSideFetchResult } from "~/core/context"
 
 export type RouteFetchResult = {
   data?: any
@@ -8,23 +9,9 @@ export type RouteFetchResult = {
   }
 }
 
-export const useServerFetches = function (): RouteFetchResult | null {
-  const ctx = useContext(ServerFetchesContext)
+export const useServerFetches =
+  function (): PublicServerSideFetchResult<any> | null {
+    const ctx = useContext(ServerFetchesContext)
 
-  return ctx.result || null
-}
-
-export function NewServerFetchError(
-  internalError: Error,
-  loggingData: { [key: string]: any },
-  publicMessage?: string,
-  errorCode?: number
-) {
-  return {
-    serverFetchCustomError: true,
-    publicMessage: publicMessage,
-    errorCode: errorCode,
-    internalError: internalError,
-    internalData: loggingData,
+    return ctx.result || null
   }
-}

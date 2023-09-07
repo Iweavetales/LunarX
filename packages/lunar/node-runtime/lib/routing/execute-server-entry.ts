@@ -18,6 +18,15 @@ export async function executeServerEntry(
   universalRouteInfoNodeList: UniversalRouteInfoNode[],
   nonce: string
 ) {
+  const customAppShardPath =
+    appStructureContext.getShardPathByAbsEntryName("/_app")
+  const customErrorPageShardPath =
+    appStructureContext.getShardPathByAbsEntryName("/_error")
+  const custom404PageShardPath =
+    appStructureContext.getShardPathByAbsEntryName("/_404")
+  const customServerDocumentShardPath =
+    appStructureContext.getShardPathByAbsEntryName("/_document.server")
+
   return await entryServerHandler(context, {
     scripts: appStructureContext.orderedBrowserScriptShards.map(
       (shardPath: string) => {
@@ -37,12 +46,10 @@ export async function executeServerEntry(
     loaderScriptUrl:
       "/_/s/loader.js?v=" + appStructureContext.manifest.builtVersion,
     browserEntryModulePath: appStructureContext.manifest.browserEntryShardPath,
-    customAppModuleShardPath:
-      appStructureContext.manifest.customizeAppShardPath,
-    custom404ShardPath: appStructureContext.manifest.customize404ShardPath,
-    customErrorShardPath: appStructureContext.manifest.customizeErrorShardPath,
-    customDocumentModuleShardPath:
-      appStructureContext.manifest.customizeServerDocumentShardPath,
+    customAppModuleShardPath: customAppShardPath,
+    custom404ShardPath: custom404PageShardPath,
+    customErrorShardPath: customErrorPageShardPath,
+    customDocumentModuleShardPath: customServerDocumentShardPath,
 
     // server side fetched 데이터 맵
     routeServerFetchesResultMap: publicServerFetchesResultMap,
@@ -50,7 +57,7 @@ export async function executeServerEntry(
     universalRINListRootToLeaf: universalRouteInfoNodeList,
     // 모듈 로드 함수
     requireFunction: (shardPath: string): any => {
-      return appStructureContext.getModuleByShardPath(shardPath).default
+      return appStructureContext.getModuleByShardPath(shardPath)
     },
   } as DocumentSheet)
 }

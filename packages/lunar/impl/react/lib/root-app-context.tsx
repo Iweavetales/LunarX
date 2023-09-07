@@ -11,6 +11,8 @@ export const RootAppContext = createContext<{
   routeShardPrepareTrigger: (shardPaths: string[]) => Promise<void>
   components: { [shardPath: string]: React.FunctionComponent }
   registerComponentByShardPath: (shardPath: string, shard: any) => void
+  errorComponent: React.FunctionComponent
+  notFoundComponent: React.FunctionComponent
   //
   // // client side browsing 에 긴밀하게 사용되는 속성들
   // fetchingRoute: boolean; // 현재 라우트 정보와 라우트 데이터를 가져오고 있는 중일때 true 로 세팅됨
@@ -26,6 +28,8 @@ export const RootAppContext = createContext<{
   registerComponentByShardPath: () => {
     return
   },
+  errorComponent: () => <div></div>,
+  notFoundComponent: () => <div></div>,
 })
 
 export function useRouteShardPreparing() {

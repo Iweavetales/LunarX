@@ -8,7 +8,7 @@ export const errorHandler: ServerErrorHandler<any> = async (
   return {
     data: {},
     error: {
-      msg: "processed error",
+      msg: "handled error by root error handler",
     },
   }
 }

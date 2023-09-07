@@ -1,55 +1,20 @@
 import { RouteTreeNode, ShardLoader } from "../router"
 import { RouteServerFetchDataMap } from "~/core/document-types"
 import { Route } from "react-router"
-import React, { Suspense } from "react"
+import React, { Suspense, useContext } from "react"
 import { ComponentShardWrapper } from "./component-shard-wrapper"
 import { ServerFetchesProvider } from "./server-fetches-provider"
+import { ErrorBoundary } from "./error-boundary"
+import { RootAppContext } from "./root-app-context"
 
 const Loading = () => {
   return <span>Loading...</span>
 }
 
-const Error = () => {
-  return <span>Something went wrong</span>
-}
-
-type ErrorBoundaryProps = {
-  fallback: React.ReactNode
-  children: React.ReactNode
-}
-class ErrorBoundary extends React.Component<
-  ErrorBoundaryProps,
-  { hasError: boolean }
-> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props)
-    this.state = { hasError: false }
-  }
-
-  static getDerivedStateFromError(error: any) {
-    // Update state so the next render will show the fallback UI.
-    return { hasError: true }
-  }
-
-  componentDidCatch(error: any, info: any) {
-    // Example "componentStack":
-    //   in ComponentThatThrows (created by App)
-    //   in ErrorBoundary (created by App)
-    //   in div (created by App)
-    //   in App
-    // logErrorToMyService(error, info.componentStack);
-    console.error(error)
-    console.log(info)
-  }
-
-  render() {
-    if (this.state.hasError) {
-      // You can render any custom fallback UI
-      return this.props.fallback
-    }
-
-    return this.props.children
-  }
+const Error = (props: { matchPattern: string }) => {
+  const rootAppContext = useContext(RootAppContext)
+  const RootErrorComponent = rootAppContext.errorComponent
+  return <RootErrorComponent />
 }
 
 export const GenerateRouteNode = (options: {
@@ -66,7 +31,9 @@ export const GenerateRouteNode = (options: {
     <Route
       key={options.routeNode.matchPattern}
       element={
-        <ErrorBoundary fallback={<Error />}>
+        <ErrorBoundary
+          fallback={<Error matchPattern={options.routeNode.matchPattern} />}
+        >
           <Suspense fallback={<Loading />}>
             <ServerFetchesProvider dataKey={options.routeNode.matchPattern}>
               <ComponentShardWrapper

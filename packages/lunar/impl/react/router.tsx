@@ -13,15 +13,6 @@ export type RouteTreeNode = UniversalRouteInfoNode & {
   children: RouteTreeNode[]
 }
 
-export const Route404 = (props: {}) => {
-  const routeCtx = useContext(AppRouterContext)
-
-  useEffect(() => {
-    console.log("empty route")
-  })
-  return <div>404 Not found</div>
-}
-
 export function Link(props: {
   href: string
   children?: React.ReactNode

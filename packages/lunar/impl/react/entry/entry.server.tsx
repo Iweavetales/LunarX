@@ -10,6 +10,8 @@ import { RootElementID } from "~/core/constants"
 import { SwiftRenderer } from "../app"
 import { ServerFetchesProvider } from "../lib/server-fetches-provider"
 import { TAppData } from "../lib/app-data"
+import DefaultNotFoundPage from "./_404.default"
+import DefaultErrorComponent from "./_error.default"
 // import App from '../routes/_app';
 
 export default async function handleRequest(
@@ -23,9 +25,6 @@ export default async function handleRequest(
   React.useLayoutEffect = React.useEffect
 
   // Render Document
-  const enteredRouteDataArgument = JSON.stringify(
-    documentSheet.routeServerFetchesResultMap
-  )
   const ascRouteNodeArgument = JSON.stringify(
     documentSheet.universalRINListRootToLeaf
   )
@@ -50,7 +49,9 @@ export default async function handleRequest(
                 ${JSON.stringify(appData)}, 
                 ${ascRouteNodeArgument}, 
                 ${customAppModuleShardPathArgument}, 
-                ${browserEntryModulePathArgument}
+                ${browserEntryModulePathArgument},
+                ${JSON.stringify(documentSheet.custom404ShardPath)},
+                ${JSON.stringify(documentSheet.customErrorShardPath)}
               )
             })
           })()`
@@ -63,7 +64,9 @@ export default async function handleRequest(
    * 정의 한 모듈이 없다면 기본 App 형태인 SwiftRenderer 컴포넌트만 가진 컴포넌트를 사용 한다
    */
   if (documentSheet.customAppModuleShardPath) {
-    App = documentSheet.requireFunction(documentSheet.customAppModuleShardPath)
+    App = documentSheet.requireFunction(
+      documentSheet.customAppModuleShardPath
+    ).default
   } else {
     App = () => <SwiftRenderer />
   }
@@ -75,9 +78,27 @@ export default async function handleRequest(
   if (documentSheet.customDocumentModuleShardPath) {
     DocumentFactory = documentSheet.requireFunction(
       documentSheet.customDocumentModuleShardPath
-    )
+    ).default
   } else {
     DocumentFactory = DefaultDocumentFactory
+  }
+
+  let NotFoundComponent: React.FunctionComponent
+  if (documentSheet.custom404ShardPath) {
+    NotFoundComponent = documentSheet.requireFunction(
+      documentSheet.custom404ShardPath
+    ).default
+  } else {
+    NotFoundComponent = DefaultNotFoundPage
+  }
+
+  let ErrorComponent: React.FunctionComponent
+  if (documentSheet.customErrorShardPath) {
+    ErrorComponent = documentSheet.requireFunction(
+      documentSheet.customErrorShardPath
+    ).default
+  } else {
+    ErrorComponent = DefaultErrorComponent
   }
 
   /**
@@ -93,7 +114,7 @@ export default async function handleRequest(
      */
     documentSheet.universalRINListRootToLeaf.map(async (routeNode) => [
       routeNode.shardPath,
-      documentSheet.requireFunction(routeNode.shardPath),
+      documentSheet.requireFunction(routeNode.shardPath).default,
     ])
   ).then((pairs) =>
     /**
@@ -141,6 +162,8 @@ export default async function handleRequest(
                 enterLocation={context.location}
                 loader={documentSheet.requireFunction}
                 preloadedComponents={preloadedComponents}
+                errorComponent={ErrorComponent}
+                notFoundComponent={NotFoundComponent}
                 routeShardPrepareTrigger={async () => {
                   // Only used in client
                   return

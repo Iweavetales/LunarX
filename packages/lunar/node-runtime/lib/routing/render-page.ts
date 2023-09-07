@@ -21,6 +21,7 @@ import { preProcessPipelineForSsr } from "./pre-process-pipeline-for-ssr"
 import { initServer } from "./init-server"
 import { PublicServerSideFetchResult } from "~/core/context"
 import { preProcessPipelineErrorHandleOfFetches } from "./pre-process-pipeline-error-handle-of-fetches"
+import { rootErrorHandler } from "./root-error-handler"
 
 const INTERNAL_SERVER_ABS_ENTRY_NAME = "@entry/entry.server"
 
@@ -84,29 +85,24 @@ export async function renderPage(
       ).default
 
     const passOrThrownError = await initServer(context, appStructureContext)
+
     let errorHandleResult: PublicServerSideFetchResult<unknown> | null = null
-    if (passOrThrownError !== true && passOrThrownError.error) {
-      const initServerThrownError = passOrThrownError
-
-      /**
-       * If `_error.server` exists for handling thrownError, it will process or filter the thrown error.
-       * If _error.server does not exist, a temporary errorHandleResult will be made public.
-       */
-      if (appStructureContext.hasEntryByAbsEntryName("/_error.server")) {
-        const errorServerHandler: ServerErrorHandler<unknown> =
-          appStructureContext.getModuleByAbsEntryName(
-            "/_error.server"
-          ).errorHandler
-
-        errorHandleResult = await errorServerHandler(
+    if (passOrThrownError !== true) {
+      if (passOrThrownError.error) {
+        errorHandleResult = await rootErrorHandler(
           context,
-          initServerThrownError
+          appStructureContext,
+          passOrThrownError
         )
       } else {
-        errorHandleResult = {
-          error: {
-            msg: "Unexpected server error",
-          },
+        console.error(
+          "Error occurs from `init.server` but It wasn't handle.",
+          passOrThrownError
+        )
+        return {
+          data: "Unexpected error",
+          status: 500,
+          responseHeaders: new MutableHTTPHeaders(),
         }
       }
     }
@@ -117,18 +113,13 @@ export async function renderPage(
       rawRouteInfoNodeListRootToLeaf
     )
 
+    // handle(filter) error from preProcessPipelineForSsr
     const documentPublicServerFetchesByPatternMap: DocumentPublicServerFetchesByPatternMap =
       await preProcessPipelineErrorHandleOfFetches(
         context,
         appStructureContext,
-        rawRouteInfoNodeListRootToLeaf,
         routeServerFetchesResultMap
       )
-
-    console.log(
-      "documentPublicServerFetchesByPatternMap",
-      documentPublicServerFetchesByPatternMap
-    )
 
     return {
       /**
@@ -139,7 +130,7 @@ export async function renderPage(
         errorHandleResult,
         context,
         appStructureContext,
-        routeServerFetchesResultMap,
+        documentPublicServerFetchesByPatternMap,
         universalRouteInfoNodeList,
         /**
          * 랜덤 바이트 16개를 base64 로 인코딩 해서 nonce 생성
@@ -154,7 +145,7 @@ export async function renderPage(
   }
 
   return {
-    data: "",
+    data: "Unexpected error",
     status: 500,
     responseHeaders: new MutableHTTPHeaders(),
   }
