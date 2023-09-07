@@ -104,8 +104,8 @@ module.exports = {
 
   *bin(task) {
     yield esbuild.build({
-      entryPoints: ["bin/lunar.ts"],
-      outfile: "dist/bin/lunar",
+      entryPoints: ["bin/lunarx.ts"],
+      outfile: "dist/bin/lunarx",
       bundle: true,
       platform: "node",
       external: ["@swc", "esbuild"],
