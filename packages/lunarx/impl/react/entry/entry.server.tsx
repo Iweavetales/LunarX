@@ -193,7 +193,6 @@ export default async function handleRequest(
     </DocumentWrapper>
   )
 
-  console.log("context._internal.runtime ", context._internal.runtime)
   if (context._internal.runtime === "node" && renderToPipeableStream) {
     const stream = renderToPipeableStream(Document, {})
 

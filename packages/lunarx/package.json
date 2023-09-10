@@ -1,6 +1,6 @@
 {
   "name": "lunarx",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "The Lunar that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
   "main": "dist/node-runtime/node-server.js",
   "keywords": [
