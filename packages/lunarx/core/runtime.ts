@@ -1,4 +1,4 @@
-export type SupportingRuntime = "deno" | "node"
+export type SupportingRuntime = "deno" | "node" | "bun"
 
 export type RuntimeOptions = {
   js: {

@@ -86,6 +86,16 @@ export function DocumentLinks() {
 
   return null
 }
+export const Head = (props: { children: React.ReactNode }) => {
+  return (
+    <head>
+      {props.children}
+      <DocumentScripts />
+      <DocumentLinks />
+    </head>
+  )
+}
+
 //
 // export function App() {
 //   const ctx = useContext(DocumentInjectionContext);

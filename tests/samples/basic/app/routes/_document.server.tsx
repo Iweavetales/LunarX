@@ -1,6 +1,6 @@
+import React, { StrictMode } from "react"
 import { ServerContext } from "lunarx/server"
-import React from "react"
-import { DocumentLinks, DocumentScripts } from "lunarx/document"
+import { Head } from "lunarx/document"
 
 export default async function (
   context: ServerContext,
@@ -8,23 +8,10 @@ export default async function (
 ) {
   return (
     <html>
-      <head>
-        <title>LunarX-React</title>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no"
-        />
-        <meta name="charset" content="utf-8" />
+      <Head>
+        <title>LunarJS</title>
+      </Head>
 
-        <DocumentScripts />
-        <DocumentLinks />
-
-        <script
-          src="https://accounts.google.com/gsi/client"
-          async
-          defer
-        ></script>
-      </head>
       <body>
         <Main />
       </body>

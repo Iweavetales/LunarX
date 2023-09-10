@@ -3,6 +3,7 @@ import {
   BuildOptions,
   context as esbuildContext,
   build as esbuildBuild,
+  Platform,
 } from "esbuild"
 import { join, relative, resolve } from "path"
 import { existsSync, mkdirSync, writeFileSync } from "fs"
@@ -113,6 +114,10 @@ async function CreateBuildOptions(
         process.env.NODE_ENV === "production" || buildType === "build"
           ? "false"
           : "true",
+
+      process: JSON.stringify({
+        env: { NODE_ENV: process.env.NODE_ENV },
+      }),
     },
     minify: process.env.NODE_ENV === "production" ? true : false,
     entryNames:
@@ -123,7 +128,17 @@ async function CreateBuildOptions(
     sourcemap: process.env.NODE_ENV === "production" ? false : true,
     bundle: true,
     outdir: absoluteESMDistDirectory,
-    //❗ platform: "node", // ❗️Do not comment out this option. There's an issue with this option in the Deno runtime.
+    platform: ((): Platform => {
+      // platform will set depend on runtime target
+      switch (config.runtime.target) {
+        case "node":
+          return "node"
+        case "deno":
+          return "browser"
+        case "bun":
+          return "browser"
+      }
+    })(),
     format: "esm",
     target: [],
     splitting: true,

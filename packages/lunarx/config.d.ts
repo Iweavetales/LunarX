@@ -1,1 +1,1 @@
-export * from "./dist/lib/lunar-config"
+export * from "./dist/core/lunar-config"

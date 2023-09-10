@@ -1,7 +1,6 @@
-import { createRoot, hydrateRoot } from "react-dom/client"
+import { hydrateRoot } from "react-dom/client"
 import React from "react"
 import { BrowserRouter } from "react-router-dom"
-import { RouteFetchResult } from "../ssfetch"
 import { UniversalRouteInfoNode } from "~/core/document-types"
 import LunarAppContainer from "../lib/root-app-container"
 import { RootElementID } from "~/core/constants"

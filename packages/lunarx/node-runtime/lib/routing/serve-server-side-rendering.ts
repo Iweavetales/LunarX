@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from "http"
 import { PageParams } from "~/core/server-context"
-import { renderPage } from "./render-page"
+import { AutoResponse, renderPage } from "./render-page"
 import { PathHelper } from "../helper/path"
 import { AppRouteInstanceContext } from "./app-route-instance-context"
 
@@ -19,13 +19,21 @@ export const serveServerSideRendering = async (
     PathHelper.cwd,
     appRouteInstanceContext.appStructureContext,
     req,
+    res,
     params,
     appRouteInstanceContext.rawRouteInfoNodeListRootToLeaf,
     appRouteInstanceContext.universalRouteInfoNodeList
   )
 
-  res
-    .writeHead(renderResult.status, renderResult.responseHeaders?.asObject())
-    .end(renderResult.data)
+  const typeOfResult = typeof renderResult
+  if (typeOfResult === "boolean") {
+    return res
+  } else if (typeOfResult === "object") {
+    const autoResponse = renderResult as AutoResponse
+    res
+      .writeHead(autoResponse.status, autoResponse.responseHeaders?.asObject())
+      .end(autoResponse.data)
+  }
+
   return res
 }

@@ -8,6 +8,6 @@ export function extractRuntimeOptionsFromConfig(
 
   return {
     js: config.js,
-    type: config.runtime.type,
+    type: config.runtime.target,
   }
 }

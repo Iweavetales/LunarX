@@ -2,12 +2,17 @@ import { IncomingMessage } from "http"
 import { MutableHTTPHeaders } from "./http-headers.server"
 import { UniversalRouteInfoNode, MatchPattern } from "~/core/document-types"
 import { PublicServerSideFetchResult } from "~/core/context"
+import { SupportingRuntime } from "~/core/runtime"
 
 export type PageParams = {
   [name: string]: undefined | string | string[]
 }
 
 export interface ServerContext {
+  _internal: {
+    runtime: SupportingRuntime
+  }
+
   req: IncomingMessage
   requestHeaders: MutableHTTPHeaders // req 객체에서 복사해온 헤더
   responseHeaders: MutableHTTPHeaders // req 객체에서 복사해온 헤더

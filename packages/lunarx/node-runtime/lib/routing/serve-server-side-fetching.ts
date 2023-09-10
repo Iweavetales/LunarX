@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from "http"
-import { PageParams, ServerSideFetchReturn } from "~/core/server-context"
+import { PageParams } from "~/core/server-context"
 import { AppRouteInstanceContext } from "./app-route-instance-context"
 import { GetUrlPath } from "../url-utils"
 import { rawHeaderStringArrayToMutableHTTPHeaders } from "../http-header"

@@ -21,7 +21,7 @@ export type LunarConfig = {
   frontFramework: "solid" | "react"
 
   runtime: {
-    type: SupportingRuntime
+    target: SupportingRuntime
   }
 
   etc: {
@@ -51,7 +51,7 @@ export const baseConfig: LunarConfig = {
   },
 
   runtime: {
-    type: "node",
+    target: "node",
   },
 
   etc: {

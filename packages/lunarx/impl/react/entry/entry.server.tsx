@@ -1,4 +1,5 @@
-import reactDomServer from "react-dom/server"
+import ReactDomServer from "react-dom/server"
+const { renderToPipeableStream, renderToReadableStream } = ReactDomServer
 import React, { StrictMode } from "react"
 import { ServerContext } from "~/core/server-context"
 import { StaticRouter } from "react-router-dom/server"
@@ -12,12 +13,16 @@ import { ServerFetchesProvider } from "../lib/server-fetches-provider"
 import { TAppData } from "../lib/app-data"
 import DefaultNotFoundPage from "./_404.default"
 import DefaultErrorComponent from "./_error.default"
+import { ServerResponse } from "http"
+// import { Response } from "node-fetch"
+
 // import App from '../routes/_app';
 
 export default async function handleRequest(
   context: ServerContext,
-  documentSheet: DocumentSheet
-): Promise<string> {
+  documentSheet: DocumentSheet,
+  res: ServerResponse
+): Promise<string | boolean> {
   /**
    * Server Side 랜더링 중에는 useLayoutEffect 를 호출 하여도 useEffect 로 호출 되도록 수정한다
    * styledComponents 의 createGlobalStyle 를 사용했을 때 경고 발생 방지를 위함
@@ -123,10 +128,42 @@ export default async function handleRequest(
     pairs.reduce((acc, cur) => ({ ...acc, [cur[0]]: cur[1] }), {})
   )
 
+  const documentContents = await DocumentFactory(context, () => (
+    <>
+      <div id={RootElementID}>
+        <StaticRouter location={context.req.url!}>
+          <LunarAppContainer
+            ascendRouteNodeList={documentSheet.universalRINListRootToLeaf}
+            dataMatchMap={documentSheet.routeServerFetchesResultMap}
+            enterLocation={context.location}
+            loader={documentSheet.requireFunction}
+            preloadedComponents={preloadedComponents}
+            errorComponent={ErrorComponent}
+            notFoundComponent={NotFoundComponent}
+            routeShardPrepareTrigger={async () => {
+              // Only used in client
+              return
+            }}
+          >
+            {/*_app.server.tsx 에 로드 한 데이터를 _app.tsx 에 공급 하기 위해 ServerFetchesProvider 사용*/}
+            <ServerFetchesProvider dataKey={"_app"}>
+              <App />
+            </ServerFetchesProvider>
+          </LunarAppContainer>
+        </StaticRouter>
+      </div>
+
+      <Bootstrap
+        script={bootstrapScript}
+        scriptId={"s_" + Math.floor(Math.random() * 100000)}
+        nonce={documentSheet.nonce}
+      />
+    </>
+  ))
   /**
    * Document Element 를 DocumentWrapper 로 감싸 실제 데이터가 전달 되도록 한다
    */
-  const DocumentElement = (
+  const Document = (
     <DocumentWrapper
       nonce={documentSheet.nonce}
       scripts={[
@@ -152,42 +189,25 @@ export default async function handleRequest(
       bootstrapScript={bootstrapScript}
       bootstrapScriptId={"s_" + Math.floor(Math.random() * 100000)}
     >
-      {await DocumentFactory(context, () => (
-        <>
-          <div id={RootElementID}>
-            <StaticRouter location={context.req.url!}>
-              <LunarAppContainer
-                ascendRouteNodeList={documentSheet.universalRINListRootToLeaf}
-                dataMatchMap={documentSheet.routeServerFetchesResultMap}
-                enterLocation={context.location}
-                loader={documentSheet.requireFunction}
-                preloadedComponents={preloadedComponents}
-                errorComponent={ErrorComponent}
-                notFoundComponent={NotFoundComponent}
-                routeShardPrepareTrigger={async () => {
-                  // Only used in client
-                  return
-                }}
-              >
-                {/*_app.server.tsx 에 로드 한 데이터를 _app.tsx 에 공급 하기 위해 ServerFetchesProvider 사용*/}
-                <ServerFetchesProvider dataKey={"_app"}>
-                  <App />
-                </ServerFetchesProvider>
-              </LunarAppContainer>
-            </StaticRouter>
-          </div>
-          <Bootstrap
-            script={bootstrapScript}
-            scriptId={"s_" + Math.floor(Math.random() * 100000)}
-            nonce={documentSheet.nonce}
-          />
-        </>
-      ))}
+      {documentContents}
     </DocumentWrapper>
   )
 
+  console.log("context._internal.runtime ", context._internal.runtime)
+  if (context._internal.runtime === "node" && renderToPipeableStream) {
+    const stream = renderToPipeableStream(Document, {})
+
+    res.writeHead(200, context.responseHeaders.asObject())
+    res.write("<!DOCTYPE html>")
+    stream.pipe(res)
+    return true
+  } else if (context._internal.runtime === "deno" && renderToReadableStream) {
+    // eslint-disable-next-line no-unused-expressions
+    renderToReadableStream // @Todo implement
+  }
+
   return `
     <!DOCTYPE html>
-    ${reactDomServer.renderToString(DocumentElement)}
+    ${ReactDomServer.renderToString(Document)}
   `
 }

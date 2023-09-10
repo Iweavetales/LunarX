@@ -3,6 +3,15 @@ import { ServerContext, PageParams } from "~/core/server-context"
 import { IncomingMessage } from "http"
 import { MutableHTTPHeaders } from "~/core/http-headers.server"
 import { UniversalRouteInfoNode } from "~/core/document-types"
+import { SupportingRuntime } from "~/core/runtime"
+
+const checkRuntime = (): SupportingRuntime => {
+  if (typeof Deno !== "undefined") {
+    return "deno"
+  }
+
+  return "node"
+}
 
 export function makeServerContext(
   req: IncomingMessage,
@@ -18,6 +27,9 @@ export function makeServerContext(
   const urlPathLength = urlPath.length
 
   return {
+    _internal: {
+      runtime: checkRuntime(),
+    },
     req: req,
     requestHeaders: requestHeaders,
     responseHeaders: responseHeaders,

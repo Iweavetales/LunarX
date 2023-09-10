@@ -7,14 +7,10 @@ import {
 } from "~/core/document-types"
 import { RawRouteInfoNode, RawRouteInfoNodeMap } from "~/core/manifest"
 import { makeServerContext } from "../make-server-context"
-import { IncomingMessage } from "http"
+import { IncomingMessage, ServerResponse } from "http"
 import { EntryServerHandler } from "~/core/types.server"
 import { MutableHTTPHeaders } from "~/core/http-headers.server"
-import {
-  PageParams,
-  ServerErrorHandler,
-  ServerSideFetchReturn,
-} from "~/core/server-context"
+import { PageParams } from "~/core/server-context"
 import { rawHeaderStringArrayToMutableHTTPHeaders } from "../http-header"
 import { executeServerEntry } from "./execute-server-entry"
 import { preProcessPipelineForSsr } from "./pre-process-pipeline-for-ssr"
@@ -25,10 +21,16 @@ import { rootErrorHandler } from "./root-error-handler"
 
 const INTERNAL_SERVER_ABS_ENTRY_NAME = "@entry/entry.server"
 
+export type AutoResponse = {
+  data?: string
+  status: number
+  responseHeaders?: MutableHTTPHeaders
+}
 export async function renderPage(
   currentWorkDirectory: string,
   appStructureContext: AppStructureContext,
   req: IncomingMessage,
+  res: ServerResponse,
   params: PageParams,
   /**
    * rawRouteInfoNodeListRootToLeaf
@@ -43,11 +45,7 @@ export async function renderPage(
    */
   rawRouteInfoNodeListRootToLeaf: RawRouteInfoNode[],
   universalRouteInfoNodeList: UniversalRouteInfoNode[]
-): Promise<{
-  data?: string
-  status: number
-  responseHeaders?: MutableHTTPHeaders
-}> {
+): Promise<AutoResponse | boolean> {
   /**
    * 모든 라우트 노드들을 조회 하며
    * 모든 라우터가 포함된 라우트 맵이 아닌
@@ -121,24 +119,32 @@ export async function renderPage(
         routeServerFetchesResultMap
       )
 
-    return {
+    const response = await executeServerEntry(
+      entryServerHandler,
+      res,
+      errorHandleResult,
+      context,
+      appStructureContext,
+      documentPublicServerFetchesByPatternMap,
+      universalRouteInfoNodeList,
       /**
-       * entry.server 를 호출 해 페이지 데이터를 생성
+       * 랜덤 바이트 16개를 base64 로 인코딩 해서 nonce 생성
        */
-      data: await executeServerEntry(
-        entryServerHandler,
-        errorHandleResult,
-        context,
-        appStructureContext,
-        documentPublicServerFetchesByPatternMap,
-        universalRouteInfoNodeList,
+      btoa(GenerateRandomBytes(16))
+    )
+
+    const typeOfResponse = typeof response
+    if (typeOfResponse === "boolean") {
+      return response as boolean
+    } else if (typeOfResponse === "string") {
+      return {
         /**
-         * 랜덤 바이트 16개를 base64 로 인코딩 해서 nonce 생성
+         * entry.server 를 호출 해 페이지 데이터를 생성
          */
-        btoa(GenerateRandomBytes(16))
-      ),
-      status: 200,
-      responseHeaders: responseHeaders,
+        data: response,
+        status: 200,
+        responseHeaders: responseHeaders,
+      }
     }
   } catch (e) {
     console.log("Unexpected error during render page", e)
