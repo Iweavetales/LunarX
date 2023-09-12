@@ -114,7 +114,7 @@ export class PostProcessor {
     copyFileSync(from, to)
 
     // map 파일도 복사
-    if (process.env.NODE_ENV === "development") {
+    if (this.config.build.sourceMap) {
       const from = outputPath + ".map"
       const to = from.replace(/^dist\/esm/, "dist/client/")
 
@@ -151,7 +151,8 @@ export class PostProcessor {
     } = await TransformEsModuleToCjs(
       outputPath,
       normalizedRelativePath,
-      esmSourceMapFile
+      esmSourceMapFile,
+      this.config
     )
 
     processResultRecord.push({
@@ -263,6 +264,7 @@ export class PostProcessor {
 
     /**
      * esbuild 로 출력된 파일 샤드에 서버사이드 모듈이 일부 포함 된 경우에 해당 할 떄
+     * esbuild 로 출력된 파일 샤드에 서버사이드 모듈이 일부 포함 된 경우에 해당 할 떄
      */
     this.warnIfAmbiguousServerSideShard(
       serverSideShardInfo,
@@ -277,10 +279,9 @@ export class PostProcessor {
       console.log(chalk.greenBright(`ADDED ESM shard ${outputPath}`))
 
       if (moduleType === "javascript") {
-        const esmSourceMapFile =
-          process.env.NODE_ENV === "production"
-            ? null
-            : readFileSync(outputPath + ".map")
+        const esmSourceMapFile = this.config.build.sourceMap
+          ? readFileSync(outputPath + ".map")
+          : null
 
         processResultRecords = await this.processJavascript(
           outputPath,
@@ -382,7 +383,7 @@ export class PostProcessor {
     const clientDirectory = join(this.options.distDirectoryPath, "client")
     ensureDirectoryExists(clientDirectory)
 
-    const browserModuleLoaderScript = GetBrowserModuleLoaderScript()
+    const browserModuleLoaderScript = GetBrowserModuleLoaderScript(this.config)
 
     const browserModuleLoaderFilepath = join(clientDirectory, "loader.js")
     const browserModuleLoaderMapFilepath = join(
@@ -394,27 +395,19 @@ export class PostProcessor {
       return
     }
 
-    if (process.env.NODE_ENV === "production") {
-      writeFileSync(
-        browserModuleLoaderFilepath,
-        this.config.build.obfuscate
-          ? obfuscate(
-              browserModuleLoaderScript.code,
-              defaultObfuscateOptions
-            ).getObfuscatedCode()
-          : browserModuleLoaderScript.code
-      )
-      writeFileSync(
-        browserModuleLoaderMapFilepath,
-        JSON.stringify(browserModuleLoaderScript.map)
-      )
-    } else {
-      writeFileSync(browserModuleLoaderFilepath, browserModuleLoaderScript.code)
-      writeFileSync(
-        browserModuleLoaderMapFilepath,
-        JSON.stringify(browserModuleLoaderScript.map)
-      )
-    }
+    writeFileSync(
+      browserModuleLoaderFilepath,
+      this.config.build.obfuscate
+        ? obfuscate(
+            browserModuleLoaderScript.code,
+            defaultObfuscateOptions
+          ).getObfuscatedCode()
+        : browserModuleLoaderScript.code
+    )
+    writeFileSync(
+      browserModuleLoaderMapFilepath,
+      JSON.stringify(browserModuleLoaderScript.map)
+    )
 
     // set ClientModuleLoader path to manifest
     this.manifest.browserModuleLoaderFilePath =

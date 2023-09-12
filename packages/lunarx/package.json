@@ -1,6 +1,6 @@
 {
   "name": "lunarx",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "The Lunar that is flexible & improved SSR Framework more than Next.JS and Remix.Run.",
   "main": "dist/node-runtime/node-server.js",
   "keywords": [
@@ -21,8 +21,10 @@
     "deno-runtime-fmt": "deno fmt ./packages/LunarGate/deno-runtime/",
     "deno-runtime-lint": "deno lint ./packages/LunarGate/deno-runtime/",
     "build:deno-runtime": "mkdir -p ./dist/deno-runtime/ && deno bundle ./deno-runtime/index.ts ./dist/deno-runtime/deno-server.js",
-    "preversion": "npm test",
-    "version": "npm run prepublishOnly"
+    "preversion": "jest",
+    "version-canary": "npm version prerelease --preid canary",
+    "publish-canary": "npm publish --tag canary",
+    "publish": "npm publish"
   },
   "author": "Iweavetales",
   "license": "MIT",
@@ -97,6 +99,7 @@
     "esbuild": "^0.19.1",
     "express": "^4.18.2",
     "find-my-way": "^7.6.2",
+    "husky": "^8.0.3",
     "inquirer": "^9.2.10",
     "javascript-obfuscator": "^4.0.0",
     "lodash": "^4.17.21",

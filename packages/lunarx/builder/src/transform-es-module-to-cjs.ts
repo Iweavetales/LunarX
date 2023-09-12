@@ -1,11 +1,13 @@
 import { transformFileSync as swcTransformFileSync } from "@swc/core"
 import { dirname } from "path"
 import { existsSync, mkdirSync, writeFileSync } from "fs"
+import { LunarConfig } from "~/core/lunar-config"
 
 export async function TransformEsModuleToCjs(
   outputShardPath: string,
   normalizedRelativePath: string,
-  esmSourceMapFile: Buffer | null
+  esmSourceMapFile: Buffer | null,
+  config: LunarConfig
 ) {
   const result = await swcTransformFileSync(outputShardPath, {
     module: {
@@ -13,11 +15,11 @@ export async function TransformEsModuleToCjs(
     },
     isModule: true,
     filename: normalizedRelativePath,
-    sourceMaps: process.env.NODE_ENV === "production" ? false : true,
-    inputSourceMap:
-      process.env.NODE_ENV === "production"
-        ? false
-        : (esmSourceMapFile || "{}").toString(),
+    sourceMaps: config.build.sourceMap,
+
+    inputSourceMap: config.build.sourceMap
+      ? (esmSourceMapFile || "{}").toString()
+      : false,
   })
 
   const cjsFileName = outputShardPath.replace(/^dist\/esm/, "dist/cjs")

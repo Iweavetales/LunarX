@@ -17,6 +17,7 @@ export type LunarConfig = {
     loaders?: Record<any, any>
     obfuscate?: boolean // Note: Obfuscation will impact decrease slight to performance.
     minify?: boolean
+    sourceMap?: boolean
   }
   frontFramework: "solid" | "react"
 
@@ -48,6 +49,7 @@ export const baseConfig: LunarConfig = {
     loaders: {},
     obfuscate: false,
     minify: false,
+    sourceMap: true,
   },
 
   runtime: {

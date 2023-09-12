@@ -82,6 +82,13 @@ async function CreateBuildOptions(
     targetFrontFrameworkImplementEntryDirectoryPath
   )
 
+  const isBuild = buildType === "build"
+  /**
+   * If process.env.NODE_ENV is not set, `$ lunarx build` will build in `production` mode to prevent deployer mistakes
+   */
+  const NODE_ENV =
+    process.env.NODE_ENV || (isBuild ? "production" : "development")
+
   const esbuildOptions: BuildOptions = {
     entryPoints: [
       ...targetFrameworkEntryFiles,
@@ -94,38 +101,26 @@ async function CreateBuildOptions(
      * React JSX 파일의 React 전역 참조를 해결
      */
     // inject: [join(libDirectory, 'react-shim.js')],
-    // entryPoints: {
-    //   react: 'react',
-    //   'react-dom': 'react-dom',
-    //   'react-dom-server': 'react-dom/server',
-    //   'react-router-dom-server': 'react-router-dom/server',
-    //
-    //   'styled-components': 'styled-components',
-    // },
-    // jsx: 'transform',
-    // jsxFactory: 'h',
     define: {
       DEFINE_DELETE_BOOTSTRAP_BLOCK_AFTER_BOOT: config.etc
         .deleteBootstrapScriptAfterBoot
         ? "true"
         : "false",
       // If the application is in production mode or if the buildType is set to 'build', fast refresh (also known as HMR) will be disabled.
-      DEFINE_ENABLE_FAST_REFRESH:
-        process.env.NODE_ENV === "production" || buildType === "build"
-          ? "false"
-          : "true",
+      DEFINE_ENABLE_FAST_REFRESH: NODE_ENV === "production" ? "false" : "true",
 
-      process: JSON.stringify({
-        env: { NODE_ENV: process.env.NODE_ENV },
-      }),
+      /**
+       * Set for avoid crash React-based code at browser
+       * refer: https://esbuild.github.io/api/#platform
+       */
+      "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
     },
-    minify: process.env.NODE_ENV === "production" ? true : false,
-    entryNames:
-      process.env.NODE_ENV === "production" ? "[hash]" : "[dir]/[name]-[hash]",
-    chunkNames:
-      process.env.NODE_ENV === "production" ? "[hash]" : "[name]-[hash]",
+    minify: config.build.minify,
+    minifyWhitespace: config.build.minify,
+    entryNames: NODE_ENV === "production" ? "[hash]" : "[dir]/[name]-[hash]",
+    chunkNames: NODE_ENV === "production" ? "[hash]" : "[name]-[hash]",
     // minifySyntax: true,
-    sourcemap: process.env.NODE_ENV === "production" ? false : true,
+    sourcemap: config.build.sourceMap,
     bundle: true,
     outdir: absoluteESMDistDirectory,
     platform: ((): Platform => {
@@ -140,7 +135,7 @@ async function CreateBuildOptions(
       }
     })(),
     format: "esm",
-    target: [],
+    target: ["es6"],
     splitting: true,
     metafile: true,
     treeShaking: true,

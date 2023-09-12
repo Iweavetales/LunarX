@@ -19,6 +19,7 @@
     "react", "react-hooks"
   ],
 
+
   "overrides": [
     {
       "files": ["**/*.tsx"],
@@ -142,7 +143,7 @@
     "no-unused-vars": [
       "error",
       {
-        "args": "all",
+        "args": "none",
         "ignoreRestSiblings": true
       }
     ],

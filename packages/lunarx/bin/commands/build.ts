@@ -1,4 +1,4 @@
-import { copyFileSync, readFileSync } from "fs"
+import { copyFileSync } from "fs"
 import { join } from "path"
 
 export default async function Build(options: Record<any, any>) {

@@ -20,17 +20,6 @@ React SSR Framework with NodeJS and Deno
 The simplified & light SSR front framework, offering greater flexibility than Next.js and Remix.Run, empower to build powerful front-end applications.
 
 
-# Why LunarX?
-* Flexibility in Business Logic Collaboration
-* Unrestricted Manipulation and Persistence of Headers in Server-Side Render Pipeline
-* Clear Separation Between Backend API and Front-End Components
-* Secure Backend Processing Concealment When Using `.server` Extension at second from last 
-* Extensive User Customization Options
-* Minimal Dependencies on Core Framework
-* Loose Coupling with the Framework
-* Full Support for Server-Side Processing in All Route Files
-* Configurable Front-End App Architecture
-
 ## Features
 
 [//]: # (* Supports Deno runtime &#40; in progress &#41;)

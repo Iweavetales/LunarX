@@ -1,4 +1,4 @@
-import React, { StrictMode } from "react"
+import React from "react"
 import { ServerContext } from "lunarx/server"
 import { Head } from "lunarx/document"
 

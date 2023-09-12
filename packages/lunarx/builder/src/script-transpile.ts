@@ -1,11 +1,13 @@
 import { BabelFileResult, transformSync } from "@babel/core"
-import { join, resolve } from "path"
+import { resolve } from "path"
 import { readFileSync } from "fs"
 import chalk from "chalk"
+import { LunarConfig } from "~/core/lunar-config"
 
 export function TranspileScript(
   script: string,
-  filename: string
+  filename: string,
+  config: LunarConfig
 ): BabelFileResult {
   const compiled = transformSync(script, {
     // https://npmdoc.github.io/node-npmdoc-babel-core/build/apidoc.html#apidoc.element.babel-core.File.prototype.getModuleName
@@ -23,8 +25,8 @@ export function TranspileScript(
       ],
       "@babel/preset-typescript",
     ],
-    minified: process.env.NODE_ENV === "production",
-    sourceMaps: process.env.NODE_ENV === "production" ? false : true,
+    minified: config.build.minify,
+    sourceMaps: config.build.sourceMap,
   })
 
   if (compiled) {
@@ -34,7 +36,9 @@ export function TranspileScript(
   throw new Error(`Failed to transpile script ${filename}`)
 }
 
-export function GetBrowserModuleLoaderScript(): BabelFileResult {
+export function GetBrowserModuleLoaderScript(
+  config: LunarConfig
+): BabelFileResult {
   // dist/builder 디렉토리 기준
   const scriptPath = resolve(
     __dirname,
@@ -44,7 +48,7 @@ export function GetBrowserModuleLoaderScript(): BabelFileResult {
   try {
     const file = readFileSync(scriptPath)
 
-    const babelRet = TranspileScript(file.toString(), "serve-loader.ts")
+    const babelRet = TranspileScript(file.toString(), "serve-loader.ts", config)
     return babelRet
   } catch (e) {
     console.error(

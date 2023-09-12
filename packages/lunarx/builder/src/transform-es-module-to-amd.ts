@@ -2,8 +2,8 @@ import { transformFileSync as babelTransformFileSync } from "@babel/core"
 
 const pluginTransformModulesAmd = require("@babel/plugin-transform-modules-amd")
 import chalk from "chalk"
-import { LunarConfig } from "../../lib/lunar-config"
 import { transformFileSync as swcTransformFileSync } from "@swc/core"
+import { LunarConfig } from "~/core/lunar-config"
 
 export async function TransformEsModuleToAmd(
   transpiler: "babel" | "swc",
@@ -19,11 +19,10 @@ export async function TransformEsModuleToAmd(
     const result = await swcTransformFileSync(outputShardPath, {
       // Some options cannot be specified in .swcrc
       filename: normalizedRelativePath,
-      sourceMaps: process.env.NODE_ENV === "production" ? false : true,
-      inputSourceMap:
-        process.env.NODE_ENV === "production"
-          ? false
-          : (esmSourceMapFile || "{}").toString(),
+      sourceMaps: config.build.sourceMap,
+      inputSourceMap: config.build.sourceMap
+        ? (esmSourceMapFile || "{}").toString()
+        : false,
       // Input files are treated as module by default.
       isModule: true,
       minify: config.build.minify,
@@ -80,7 +79,7 @@ export async function TransformEsModuleToAmd(
       ],
 
       minified: config.build.minify,
-      sourceMaps: process.env.NODE_ENV === "production" ? false : true,
+      sourceMaps: config.build.sourceMap,
       inputSourceMap: JSON.parse((esmSourceMapFile || "{}").toString()),
     })
 

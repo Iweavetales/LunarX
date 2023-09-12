@@ -3,7 +3,7 @@
  *
  * 브라우저 상에서 샤드 스크립트를 로드하고 제공 하는 스크립트
  */
-type RequireFunction = (deps: string[]) => any
+// type RequireFunction = (deps: string[]) => any
 type ModuleFactory = (...deps: string[]) => any
 type ModuleContent = {
   name: string

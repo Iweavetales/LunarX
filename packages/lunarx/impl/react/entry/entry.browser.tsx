@@ -9,7 +9,6 @@ import { ServerFetchesProvider } from "../lib/server-fetches-provider"
 import { TAppData } from "../lib/app-data"
 import DefaultNotFoundPage from "./_404.default"
 import DefaultErrorComponent from "./_error.default"
-
 type ReactRouteNode = {
   element: React.ReactElement
   path: string
