@@ -1,5 +1,5 @@
 import React, { useContext } from "react"
-import { AppRouterContext } from "./router-context"
+import { AppRoutingContext } from "./router-context"
 import { ServerFetchesContext } from "./server-fetches-context"
 import { PublicServerSideFetchResult } from "~/core/context"
 
@@ -8,7 +8,7 @@ export const ServerFetchesProvider = function (props: {
   children?: React.ReactNode
   dataKey: string
 }) {
-  const routeCtx = useContext(AppRouterContext)
+  const routeCtx = useContext(AppRoutingContext)
   const serverFetchesResult: PublicServerSideFetchResult<any> =
     routeCtx.routeDataMap[props.dataKey]
 

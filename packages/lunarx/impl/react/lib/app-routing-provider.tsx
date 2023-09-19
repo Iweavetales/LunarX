@@ -1,28 +1,27 @@
 import React, { useEffect, useRef, useState } from "react"
 import { UniversalRouteInfoNode } from "~/core/document-types"
 import { Location, UrlToLocation } from "~/core/location"
-import { useNavigate } from "react-router"
 import { useRouteShardPreparing } from "./root-app-context"
-import { AppRouterContext, pushMethod } from "./router-context"
-import { RouteTreeNode } from "../router"
+import { AppRoutingContext, PrepareForNavigate } from "./router-context"
 import { graftRouteNodesToRouteTree } from "./graft-route-nodes-to-route-tree"
 
-export function AppRouterProvider(props: {
+export function AppRoutingProvider(props: {
   children: React.ReactNode
   // onFetchedRoute: (newRoutes: UniversalRouteInfoNode[], dataMap: { [pattern: string]: any }) => void;
   enterRouteNodeList: UniversalRouteInfoNode[]
   enterLocation: Location
   enterRouteData: { [pattern: string]: any }
 }) {
-  const navigate = useNavigate()
   const prepareRouteShards = useRouteShardPreparing()
   const [browsing, setBrowsing] = useState(false)
+
   const [routeTree, setRouteTree] = useState(
     graftRouteNodesToRouteTree(props.enterRouteNodeList, [])[0]
   )
   const [currentRouteDataMap, setCurrentRouteDataMap] = useState(
     props.enterRouteData
   )
+  console.log("routeTree", routeTree)
 
   /**
    * 스크롤이 되는 동안은 스크롤 기억(replaceState) 를 지연시키기 위해 사용되는 timeout ID ref
@@ -143,8 +142,9 @@ export function AppRouterProvider(props: {
     }
   })
 
-  const push: pushMethod = async (
+  const prepareNavigate: PrepareForNavigate = async (
     href: string,
+    navigateFunction: () => void,
     options?: { query?: { [key: string]: string | string[] } }
   ) => {
     // navigate 하기 전에 현재 페이지에 대한 정보를 history state 에 저장 한다
@@ -199,12 +199,7 @@ export function AppRouterProvider(props: {
       setCurrentRouteDataMap({ ...currentRouteDataMap, ...ret.data })
 
       // 실제 URL 이동
-      navigate(href, {
-        state: {
-          id: `${Date.now()}-${Math.random() * 1000}`,
-        },
-        preventScrollReset: true,
-      })
+      navigateFunction()
 
       // 실제 라우터에 반영할 로케이션
       setCurrentLocation({ auto: false, ...UrlToLocation(href) })
@@ -214,7 +209,6 @@ export function AppRouterProvider(props: {
     }
     setBrowsing(false)
   }
-
   /**
    * url 새로고침을 하지 않고 현재 페이지의 내용을 새로 로드하여 UI에 반영하는 함수
    * location.reload() 와 비슷 하지만,
@@ -233,18 +227,20 @@ export function AppRouterProvider(props: {
   }
 
   return (
-    <AppRouterContext.Provider
+    <AppRoutingContext.Provider
       value={{
-        push: push,
+        prepareNavigate: prepareNavigate,
         browsing: browsing,
         routeTree: routeTree,
         routeDataMap: currentRouteDataMap,
         currentLocation: currentLocation,
         softReload: softReload,
+        setRouteTree: setRouteTree,
+        setCurrentLocation: setCurrentLocation,
       }}
     >
       {props.children}
-    </AppRouterContext.Provider>
+    </AppRoutingContext.Provider>
   )
 }
 

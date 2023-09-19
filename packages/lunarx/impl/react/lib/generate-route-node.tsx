@@ -1,6 +1,6 @@
 import { RouteTreeNode, ShardLoader } from "../router"
 import { RouteServerFetchDataMap } from "~/core/document-types"
-import { Route } from "react-router"
+import { Route, RouteObject } from "react-router"
 import React, { Suspense, useContext } from "react"
 import { ComponentShardWrapper } from "./component-shard-wrapper"
 import { ServerFetchesProvider } from "./server-fetches-provider"
@@ -17,6 +17,51 @@ const Error = (props: { matchPattern: string }) => {
   return <RootErrorComponent />
 }
 
+export const RouteElement = (props: {
+  routeNode: RouteTreeNode
+  loader?: ShardLoader
+  routeDataMap: RouteServerFetchDataMap
+}) => {
+  return (
+    <ErrorBoundary
+      fallback={<Error matchPattern={props.routeNode.matchPattern} />}
+    >
+      <Suspense fallback={<Loading />}>
+        <ServerFetchesProvider dataKey={props.routeNode.matchPattern}>
+          <ComponentShardWrapper
+            key={props.routeNode.shardPath}
+            shardPath={props.routeNode.shardPath}
+          />
+        </ServerFetchesProvider>
+      </Suspense>
+    </ErrorBoundary>
+  )
+}
+
+export const GenerateRouteNodeTree = (options: {
+  routeNode: RouteTreeNode
+  loader?: ShardLoader
+  routeDataMap: RouteServerFetchDataMap
+}): RouteObject => {
+  return {
+    path: options.routeNode.matchPattern,
+    element: (
+      <RouteElement
+        routeNode={options.routeNode}
+        loader={options.loader}
+        routeDataMap={options.routeDataMap}
+      />
+    ),
+    // loader: rootLoader,
+    children: options.routeNode.children.map((routeNode) =>
+      GenerateRouteNodeTree({
+        routeNode: routeNode,
+        loader: options.loader,
+        routeDataMap: options.routeDataMap,
+      })
+    ),
+  }
+}
 export const GenerateRouteNode = (options: {
   routeNode: RouteTreeNode
   loader?: ShardLoader
@@ -31,18 +76,11 @@ export const GenerateRouteNode = (options: {
     <Route
       key={options.routeNode.matchPattern}
       element={
-        <ErrorBoundary
-          fallback={<Error matchPattern={options.routeNode.matchPattern} />}
-        >
-          <Suspense fallback={<Loading />}>
-            <ServerFetchesProvider dataKey={options.routeNode.matchPattern}>
-              <ComponentShardWrapper
-                key={options.routeNode.shardPath}
-                shardPath={options.routeNode.shardPath}
-              />
-            </ServerFetchesProvider>
-          </Suspense>
-        </ErrorBoundary>
+        <RouteElement
+          routeNode={options.routeNode}
+          routeDataMap={options.routeDataMap}
+          loader={options.loader}
+        />
       }
       path={options.routeNode.matchPattern}
       // path={props.routeNode.matchPattern.replace(props.routeNode.upperRouteMatchPattern, '').replace(/^\/?/, '/')}

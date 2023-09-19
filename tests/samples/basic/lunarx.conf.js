@@ -1,7 +1,7 @@
 /** @type {import('lunarx/config').LunarConfig} */
 const lunarConfig = {
   build: {
-    minify: true,
+    minify: false,
   },
   etc: {
     deleteBootstrapScriptAfterBoot: false,

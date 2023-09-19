@@ -1,7 +1,7 @@
-import React, { useContext, useEffect } from "react"
+import React, { useContext } from "react"
 import { UniversalRouteInfoNode } from "~/core/document-types"
-import { AppRouterContext } from "./lib/router-context"
-
+import { AppRoutingContext } from "./lib/router-context"
+import { useNavigate } from "react-router"
 export type ComponentModule = any
 /**
  * shard 로더
@@ -18,7 +18,7 @@ export function Link(props: {
   children?: React.ReactNode
   className?: string
 }) {
-  const ctx = useContext(AppRouterContext)
+  const router = useRouter()
 
   return (
     <a
@@ -26,7 +26,7 @@ export function Link(props: {
         // route 체크 후 라우터 반영
 
         // location.href = props.href;
-        ctx.push(props.href, {})
+        router.push(props.href, {})
 
         e.preventDefault()
       }}
@@ -44,9 +44,33 @@ export function Link(props: {
  * 현재 페이지 상태를 어느정도 유지 하면서 서버측 데이터를 다시 로딩하는 목적으로 사용 할 수 있다.
  */
 export const useSoftReload = () => {
-  return useContext(AppRouterContext).softReload
+  return useContext(AppRoutingContext).softReload
 }
 
-export const useSwiftRouter = () => {
-  return useContext(AppRouterContext)
+export type pushMethod = (
+  href: string,
+  options?: { query?: { [name: string]: string | string[] } }
+) => void
+
+export const useRouter = (): { push: pushMethod } => {
+  const routerContext = useContext(AppRoutingContext)
+  const navigate = useNavigate()
+
+  return {
+    push: (href, options) => {
+      routerContext.prepareNavigate(
+        href,
+        () => {
+          // 실제 URL 이동
+          navigate(href, {
+            state: {
+              id: `${Date.now()}-${Math.random() * 1000}`,
+            },
+            preventScrollReset: true,
+          })
+        },
+        options
+      )
+    },
+  }
 }

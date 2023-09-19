@@ -4,8 +4,7 @@ import {
   UniversalRouteInfoNode,
 } from "~/core/document-types"
 import { ShardLoader } from "../router"
-import { RootAppContext } from "./root-app-context"
-import { AppRouterProvider } from "./app-router-provider"
+import { RootAppContext, RootAppContextValue } from "./root-app-context"
 
 export default function LunarAppContainer(props: {
   ascendRouteNodeList: UniversalRouteInfoNode[]
@@ -21,6 +20,7 @@ export default function LunarAppContainer(props: {
     search: string
     hash: string
   }
+  staticHandler?: RootAppContextValue["staticHandler"]
 }) {
   const [loadedComponents, setLoadedComponents] = useState({
     ...props.preloadedComponents,
@@ -34,6 +34,9 @@ export default function LunarAppContainer(props: {
         components: loadedComponents,
         errorComponent: props.errorComponent,
         notFoundComponent: props.notFoundComponent,
+        ascendRouteNodeList: props.ascendRouteNodeList,
+        dataMatchMap: props.dataMatchMap,
+        enterLocation: props.enterLocation,
         registerComponentByShardPath: (shardPath, shard) => {
           setLoadedComponents((state) => {
             return {
@@ -42,15 +45,10 @@ export default function LunarAppContainer(props: {
             }
           })
         },
+        staticHandler: props.staticHandler,
       }}
     >
-      <AppRouterProvider
-        enterLocation={props.enterLocation}
-        enterRouteNodeList={props.ascendRouteNodeList}
-        enterRouteData={props.dataMatchMap}
-      >
-        {props.children}
-      </AppRouterProvider>
+      {props.children}
     </RootAppContext.Provider>
   )
 }

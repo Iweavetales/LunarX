@@ -1,13 +1,13 @@
 import React from "react"
 //
-import { Outlet } from "react-router"
+import { Outlet, useMatches } from "react-router"
 import { Link } from "lunarx/router"
 import { useServerFetches } from "lunarx/ssfetch"
 
 export default function IndexPage() {
   const serverFetches = useServerFetches()
   const posts = serverFetches?.data?.posts || []
-  console.log("posts", posts)
+
   return (
     <div>
       <div style={{ textAlign: "center" }}>
