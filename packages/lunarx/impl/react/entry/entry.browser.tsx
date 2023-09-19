@@ -161,7 +161,10 @@ export default function (
               notFoundComponent={notFoundComponent}
               errorComponent={errorComponent}
             >
-              <ServerFetchesProvider dataKey={"_app"}>
+              <ServerFetchesProvider
+                dataKey={"_app"}
+                directProvidedFetchResult={appDataFromServer.rd["_app"]}
+              >
                 <App />
               </ServerFetchesProvider>
             </LunarAppContainer>

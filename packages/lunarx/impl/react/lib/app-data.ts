@@ -1,7 +1,7 @@
-import { RouteFetchResult } from "../ssfetch"
+import { PublicServerSideFetchResult } from "~/core/context"
 
 export type TAppData = {
   rd: {
-    [routePattern: string]: RouteFetchResult
+    [routePattern: string]: PublicServerSideFetchResult<any>
   }
 }

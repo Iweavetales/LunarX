@@ -7,11 +7,21 @@ export const ServerFetchesProvider = function (props: {
   // result: RouteFetchResult;
   children?: React.ReactNode
   dataKey: string
+
+  /**
+   * Provided fetch result without AppRoutingContext
+   */
+  directProvidedFetchResult?: PublicServerSideFetchResult<any>
 }) {
   const routeCtx = useContext(AppRoutingContext)
   const serverFetchesResult: PublicServerSideFetchResult<any> =
-    routeCtx.routeDataMap[props.dataKey]
+    props.directProvidedFetchResult ?? routeCtx.routeDataMap[props.dataKey]
 
+  console.log(
+    "ServerFetchesProvider:dataKey",
+    props.dataKey,
+    routeCtx.routeDataMap
+  )
   if (serverFetchesResult?.error) {
     throw serverFetchesResult.error
   }

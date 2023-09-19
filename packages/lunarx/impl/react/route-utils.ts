@@ -11,7 +11,6 @@ export function FindRouteNodeByPattern(
   //
   const patternToken = matchPattern.split("/")
 
-  console.log("Find", matchPattern)
   const patternTokenCount = patternToken.length
   for (let i = 0; i < patternTokenCount; i++) {
     //
@@ -22,7 +21,6 @@ export function FindRouteNodeByPattern(
       ? lastTraced.childNodes
       : topUniversalRouteInfoNodes
 
-    console.log(patternThatJoinedTokens, lastTraced, testTargets)
     if (testTargets) {
       const bridgeNode = testTargets.find((node) => {
         return node.matchPattern === patternThatJoinedTokens
@@ -34,6 +32,5 @@ export function FindRouteNodeByPattern(
     }
   }
 
-  console.log(tracedNodes)
   return tracedNodes
 }

@@ -84,19 +84,15 @@ const AppRouter = () => {
   //   [appRoutingContext.routeTree]
   // )
 
-  const routeElementList = useMemo(
-    () =>
-      appRoutingContext.routeTree.map((node) => {
-        const routeNode = GenerateRouteNode({
-          routeNode: node,
-          loader: rootAppContext.loader,
-          routeDataMap: appRoutingContext.routeDataMap,
-        })
+  const routeElementList = appRoutingContext.routeTree.map((node) => {
+    const routeNode = GenerateRouteNode({
+      routeNode: node,
+      loader: rootAppContext.loader,
+      routeDataMap: appRoutingContext.routeDataMap,
+    })
 
-        return routeNode
-      }),
-    [appRoutingContext.routeTree]
-  )
+    return routeNode
+  })
 
   // Defer implement data router
   const dataRouter = null

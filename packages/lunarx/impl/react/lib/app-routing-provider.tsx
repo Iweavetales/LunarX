@@ -21,7 +21,6 @@ export function AppRoutingProvider(props: {
   const [currentRouteDataMap, setCurrentRouteDataMap] = useState(
     props.enterRouteData
   )
-  console.log("routeTree", routeTree)
 
   /**
    * 스크롤이 되는 동안은 스크롤 기억(replaceState) 를 지연시키기 위해 사용되는 timeout ID ref
@@ -70,7 +69,6 @@ export function AppRoutingProvider(props: {
 
     const onPopState = async (event: PopStateEvent) => {
       setBrowsing(true)
-      console.log("pop state", event)
       const locationObj = {
         pathname: location.pathname,
         search: location.search,
@@ -89,7 +87,6 @@ export function AppRoutingProvider(props: {
           }
         } = await res.json()
 
-        console.log("back ", ret)
         // 라우트 컴포넌트 미리 로드
         await prepareRouteShards(ret.r.map((routeNode) => routeNode.shardPath))
 
@@ -109,10 +106,8 @@ export function AppRoutingProvider(props: {
       setBrowsing(false)
 
       requestAnimationFrame(() => {
-        console.log("requestAnimationFrame")
         // debugger;
         if (history.state.scrollY) {
-          console.log("## scroll restore", history.state.scrollY, window.scroll)
           window.scroll(0, history.state.scrollY)
         }
       })

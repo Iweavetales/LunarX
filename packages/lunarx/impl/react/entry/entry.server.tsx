@@ -148,7 +148,12 @@ export default async function handleRequest(
             staticHandler={undefined} // Defer implement data router
           >
             {/*_app.server.tsx 에 로드 한 데이터를 _app.tsx 에 공급 하기 위해 ServerFetchesProvider 사용*/}
-            <ServerFetchesProvider dataKey={"_app"}>
+            <ServerFetchesProvider
+              dataKey={"_app"}
+              directProvidedFetchResult={
+                documentSheet.routeServerFetchesResultMap["_app"]
+              }
+            >
               <App />
             </ServerFetchesProvider>
           </LunarAppContainer>
