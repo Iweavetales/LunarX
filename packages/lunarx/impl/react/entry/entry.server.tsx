@@ -57,7 +57,8 @@ export default async function handleRequest(
                 ${customAppModuleShardPathArgument}, 
                 ${browserEntryModulePathArgument},
                 ${JSON.stringify(documentSheet.custom404ShardPath)},
-                ${JSON.stringify(documentSheet.customErrorShardPath)}
+                ${JSON.stringify(documentSheet.customErrorShardPath)},
+                ${JSON.stringify(documentSheet.initError)}
               )
             })
           })()`
@@ -134,6 +135,7 @@ export default async function handleRequest(
       <div id={RootElementID}>
         <StaticRouter location={context.req.url!}>
           <LunarAppContainer
+            initError={documentSheet.initError}
             ascendRouteNodeList={documentSheet.universalRINListRootToLeaf}
             dataMatchMap={documentSheet.routeServerFetchesResultMap}
             enterLocation={context.location}

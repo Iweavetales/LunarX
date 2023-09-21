@@ -1,6 +1,6 @@
 import {
+  ErrorHandlerFunction,
   ServerContext,
-  ServerErrorHandler,
   ThrownErrorResult,
 } from "~/core/server-context"
 import { AppStructureContext } from "../client-app-structure"
@@ -16,15 +16,21 @@ export const rootErrorHandler = async (
    * If _error.server does not exist, a temporary errorHandleResult will be made public.
    */
   if (appStructureContext.hasEntryByAbsEntryName("/_error.server")) {
-    const errorServerHandler: ServerErrorHandler<unknown> =
+    const errorServerHandler: ErrorHandlerFunction<unknown, unknown> =
       appStructureContext.getModuleByAbsEntryName("/_error.server").errorHandler
 
     return await errorServerHandler(context, thrownError)
   }
 
+  console.error(
+    `Thrown error from _init.server hasn't handled. This error will make unexpected error.`,
+    thrownError.error
+  )
   return {
     error: {
       msg: "Unexpected server error",
+      statusCode: thrownError.statusCode,
+      redirect: thrownError.redirect,
     },
   }
 }

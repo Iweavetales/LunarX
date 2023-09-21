@@ -9,6 +9,7 @@ import { ServerFetchesProvider } from "../lib/server-fetches-provider"
 import { TAppData } from "../lib/app-data"
 import DefaultNotFoundPage from "./_404.default"
 import DefaultErrorComponent from "./_error.default"
+import { PublicErrorInfo } from "~/core/context"
 type ReactRouteNode = {
   element: React.ReactElement
   path: string
@@ -38,7 +39,8 @@ export default function (
   customAppEntryModulePath: string,
   browserEntryModulePath: string,
   custom404RouteShardPath?: string,
-  customErrorRouteShardPath?: string
+  customErrorRouteShardPath?: string,
+  initError?: PublicErrorInfo | null
 ) {
   async function Startup() {
     let App: () => React.ReactElement
@@ -145,6 +147,7 @@ export default function (
         <React.StrictMode>
           <BrowserRouter>
             <LunarAppContainer
+              initError={initError}
               enterLocation={{
                 pathname: location.pathname,
                 search: location.search,

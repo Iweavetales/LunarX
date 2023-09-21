@@ -16,6 +16,28 @@ export async function preProcessPipelineForSsr(
   const routeServerFetchesResultMap: ServerSideFetchesReturnMap = {}
 
   /**
+   * _app.server.tsx 파일이 있다면 해당 파일에 대한 처리
+   */
+  try {
+    if (appStructureContext.hasEntryByAbsEntryName("/_app.server")) {
+      const appServerSideModule: any =
+        appStructureContext.getModuleByAbsEntryName("/_app.server")
+
+      const appServerFetchFunction: ServerFetches<any> =
+        appServerSideModule.serverFetches
+
+      const appServerSideFetchResult = await appServerFetchFunction(context)
+      routeServerFetchesResultMap["_app"] = appServerSideFetchResult
+
+      // set fetch result to context for next serverFetches handler
+      context.routeFetchDataMap["_app"] = appServerSideFetchResult
+    }
+  } catch (e) {
+    console.error("Failed to server side fetch _app.server data", e)
+    return routeServerFetchesResultMap
+  }
+
+  /**
    * 라우트 노드별 serverFetches 를 실행 하여  데이터를 각각 로딩
    * execute serial
    */
@@ -42,6 +64,10 @@ export async function preProcessPipelineForSsr(
     })
 
     routeServerFetchesResultMap[routeNode.routePattern] = result
+
+    // set fetch result to context for next serverFetches handler
+    context.routeFetchDataMap[routeNode.routePattern] = result
+
     /**
      * If serverSideFetch throw an error don't process serverFetches for child route
      */
@@ -49,24 +75,6 @@ export async function preProcessPipelineForSsr(
       console.error("fetch error", routeNode.routePattern, result?.throwError)
       break
     }
-  }
-
-  /**
-   * _app.server.tsx 파일이 있다면 해당 파일에 대한 처리
-   */
-  try {
-    if (appStructureContext.hasEntryByAbsEntryName("/_app.server")) {
-      const appServerSideModule: any =
-        appStructureContext.getModuleByAbsEntryName("/_app.server")
-
-      const appServerFetchFunction: ServerFetches<any> =
-        appServerSideModule.serverFetches
-
-      const appServerSideFetchResult = await appServerFetchFunction(context)
-      routeServerFetchesResultMap["_app"] = appServerSideFetchResult
-    }
-  } catch (e) {
-    console.error("Failed to server side fetch _app.server data", e)
   }
 
   return routeServerFetchesResultMap

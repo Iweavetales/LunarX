@@ -9,7 +9,7 @@ import { RawRouteInfoNode, RawRouteInfoNodeMap } from "~/core/manifest"
 import { makeServerContext } from "../make-server-context"
 import { IncomingMessage, ServerResponse } from "http"
 import { EntryServerHandler } from "~/core/types.server"
-import { MutableHTTPHeaders } from "~/core/http-headers.server"
+import { HeaderObject, MutableHTTPHeaders } from "~/core/http-headers.server"
 import { PageParams } from "~/core/server-context"
 import { rawHeaderStringArrayToMutableHTTPHeaders } from "../http-header"
 import { executeServerEntry } from "./execute-server-entry"
@@ -18,6 +18,7 @@ import { initServer } from "./init-server"
 import { PublicServerSideFetchResult } from "~/core/context"
 import { preProcessPipelineErrorHandleOfFetches } from "./pre-process-pipeline-error-handle-of-fetches"
 import { rootErrorHandler } from "./root-error-handler"
+import { join } from "lodash"
 
 const INTERNAL_SERVER_ABS_ENTRY_NAME = "@entry/entry.server"
 
@@ -25,6 +26,32 @@ export type AutoResponse = {
   data?: string
   status: number
   responseHeaders?: MutableHTTPHeaders
+}
+
+function RawResponse(
+  res: ServerResponse,
+  status: number,
+  responseHeader: MutableHTTPHeaders | null,
+  data: string
+) {
+  return res.writeHead(status, responseHeader?.asObject()).end(data)
+}
+
+function Redirect(
+  req: IncomingMessage,
+  res: ServerResponse,
+  redirectDestination: string
+) {
+  let destination = "/"
+  // destination = `http://${req.headers.host}${join("/", redirectDestination)}`
+  if (/^\//.test(redirectDestination)) {
+    destination = redirectDestination
+  }
+  return res
+    .writeHead(301, {
+      Location: destination,
+    })
+    .end()
 }
 export async function renderPage(
   currentWorkDirectory: string,
@@ -92,16 +119,17 @@ export async function renderPage(
           appStructureContext,
           passOrThrownError
         )
+      } else if (passOrThrownError.redirect) {
+        Redirect(req, res, passOrThrownError.redirect)
+        return true
       } else {
         console.error(
-          "Error occurs from `init.server` but It wasn't handle.",
+          "Error occurs from `init.server` but It wasn't handled.",
           passOrThrownError
         )
-        return {
-          data: "Unexpected error",
-          status: 500,
-          responseHeaders: new MutableHTTPHeaders(),
-        }
+
+        RawResponse(res, 500, null, "Unexpected error")
+        return true
       }
     }
 
@@ -111,6 +139,15 @@ export async function renderPage(
       rawRouteInfoNodeListRootToLeaf
     )
 
+    const keys = Object.keys(routeServerFetchesResultMap)
+    for (const key of keys) {
+      const result = routeServerFetchesResultMap[key]
+      if (result && result.redirect) {
+        Redirect(req, res, result.redirect)
+        return true
+      }
+    }
+
     // handle(filter) error from preProcessPipelineForSsr
     const documentPublicServerFetchesByPatternMap: DocumentPublicServerFetchesByPatternMap =
       await preProcessPipelineErrorHandleOfFetches(
@@ -118,6 +155,17 @@ export async function renderPage(
         appStructureContext,
         routeServerFetchesResultMap
       )
+
+    const filteredDataKeys = Object.keys(
+      documentPublicServerFetchesByPatternMap
+    )
+    for (const key of filteredDataKeys) {
+      const result = documentPublicServerFetchesByPatternMap[key]
+      if (result && result.error?.redirect) {
+        Redirect(req, res, result.error?.redirect)
+        return true
+      }
+    }
 
     const response = await executeServerEntry(
       entryServerHandler,
@@ -137,22 +185,13 @@ export async function renderPage(
     if (typeOfResponse === "boolean") {
       return response as boolean
     } else if (typeOfResponse === "string") {
-      return {
-        /**
-         * entry.server 를 호출 해 페이지 데이터를 생성
-         */
-        data: response,
-        status: 200,
-        responseHeaders: responseHeaders,
-      }
+      RawResponse(res, 200, responseHeaders, response as string)
+      return true
     }
   } catch (e) {
     console.log("Unexpected error during render page", e)
   }
 
-  return {
-    data: "Unexpected error",
-    status: 500,
-    responseHeaders: new MutableHTTPHeaders(),
-  }
+  RawResponse(res, 500, null, "Unexpected error")
+  return true
 }

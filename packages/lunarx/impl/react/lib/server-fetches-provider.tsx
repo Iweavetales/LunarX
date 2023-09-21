@@ -11,18 +11,23 @@ export const ServerFetchesProvider = function (props: {
   /**
    * Provided fetch result without AppRoutingContext
    */
-  directProvidedFetchResult?: PublicServerSideFetchResult<any>
+  directProvidedFetchResult?: PublicServerSideFetchResult<any, any>
 }) {
   const routeCtx = useContext(AppRoutingContext)
-  const serverFetchesResult: PublicServerSideFetchResult<any> =
+  const serverFetchesResult: PublicServerSideFetchResult<any, any> =
     props.directProvidedFetchResult ?? routeCtx.routeDataMap[props.dataKey]
 
-  console.log(
-    "ServerFetchesProvider:dataKey",
-    props.dataKey,
-    routeCtx.routeDataMap
-  )
   if (serverFetchesResult?.error) {
+    if (serverFetchesResult.error.redirect) {
+      if (typeof location !== "undefined") {
+        console.info(
+          `Will redirect to ${serverFetchesResult.error.redirect} by server result`
+        )
+        location.href = serverFetchesResult.error.redirect
+      }
+      return
+    }
+
     throw serverFetchesResult.error
   }
 

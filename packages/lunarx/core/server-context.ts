@@ -44,8 +44,9 @@ export type ThrownErrorResult = {
   msg?: string
   statusCode?: number
   error: any
+  redirect?: string
 }
-export type ServerSideFetchReturn<DataResultType> = {
+export type ServerSideFetchReturn<DataResultType = unknown> = {
   /**
    * if throwError is exists
    * throwError will be passed to `/error.server` and try to render error route
@@ -66,14 +67,17 @@ export declare type initServerFunction = (
 ) => Promise<InitServerFunctionReturn>
 
 // for /[route].server
-export declare type ServerFetches<DataResultType> = (
+export type ServerFetchesFunction<DataResultType = unknown> = (
   context: ServerContext
 ) => Promise<ServerSideFetchReturn<DataResultType>>
 
 /**
  * ServerErrorHandler must return processed error as Public for security❗️
  */
-export declare type ServerErrorHandler<DataResultType> = (
+export type ErrorHandlerFunction<
+  DataResultType = unknown,
+  ErrorData = unknown
+> = (
   context: ServerContext,
   thrownError: ThrownErrorResult
-) => Promise<PublicServerSideFetchResult<DataResultType>>
+) => Promise<PublicServerSideFetchResult<DataResultType, ErrorData>>

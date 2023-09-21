@@ -6,12 +6,16 @@ import { ComponentShardWrapper } from "./component-shard-wrapper"
 import { ServerFetchesProvider } from "./server-fetches-provider"
 import { ErrorBoundary } from "./error-boundary"
 import { RootAppContext } from "./root-app-context"
+import { SSRErrorContextProvider } from "./ssr-error-provider"
 
 const Loading = () => {
   return <span>Loading...</span>
 }
 
-const Error = (props: { matchPattern: string }) => {
+export const ErrorDisplay = (props: {
+  matchPattern: string
+  loader?: ShardLoader
+}) => {
   const rootAppContext = useContext(RootAppContext)
   const RootErrorComponent = rootAppContext.errorComponent
   return <RootErrorComponent />
@@ -24,7 +28,14 @@ export const RouteElement = (props: {
 }) => {
   return (
     <ErrorBoundary
-      fallback={<Error matchPattern={props.routeNode.matchPattern} />}
+      fallback={
+        <SSRErrorContextProvider dataKey={props.routeNode.matchPattern}>
+          <ErrorDisplay
+            matchPattern={props.routeNode.matchPattern}
+            loader={props.loader}
+          />
+        </SSRErrorContextProvider>
+      }
     >
       <Suspense fallback={<Loading />}>
         <ServerFetchesProvider dataKey={props.routeNode.matchPattern}>

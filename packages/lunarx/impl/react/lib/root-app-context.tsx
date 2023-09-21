@@ -4,8 +4,10 @@ import {
   RouteServerFetchDataMap,
   UniversalRouteInfoNode,
 } from "~/core/document-types"
+import { PublicErrorInfo } from "~/core/context"
 
 export type RootAppContextValue = {
+  initError?: PublicErrorInfo | null
   loader: ShardLoader
   routeShardPrepareTrigger: (shardPaths: string[]) => Promise<void>
   components: { [shardPath: string]: React.FunctionComponent }
@@ -33,6 +35,7 @@ export type RootAppContextValue = {
  * SwiftRouter 등에게 데이터를 전달 한다.
  */
 export const RootAppContext = createContext<RootAppContextValue>({
+  initError: null,
   loader: async (shardPath: string) => {
     return true
   },

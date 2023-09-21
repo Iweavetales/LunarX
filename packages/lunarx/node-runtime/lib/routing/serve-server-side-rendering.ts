@@ -27,7 +27,7 @@ export const serveServerSideRendering = async (
 
   const typeOfResult = typeof renderResult
   if (typeOfResult === "boolean") {
-    return res
+    return
   } else if (typeOfResult === "object") {
     const autoResponse = renderResult as AutoResponse
     res

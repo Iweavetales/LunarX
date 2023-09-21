@@ -109,13 +109,22 @@ export class AppStructureContext {
       const errorHandlerAbsEntryName = `${patternTokens.join(
         "/"
       )}/_${lastToken}.error.server`
-      console.log("errorHandlerAbsEntryName", errorHandlerAbsEntryName)
       const entryPath =
         this.#manifest.entryDictionaryByAbstractEntryName[
           errorHandlerAbsEntryName
         ]
 
+      if (!entryPath) {
+        return null
+      }
+
       const entry = this.#manifest.entries[entryPath]
+      if (!entry) {
+        console.warn(
+          `Error handler entry[${entryPath}] for route[${routePattern}] was not found.`
+        )
+        return null
+      }
 
       const module = this.#loadedEntryModuleMap[entry.shardPath]
 

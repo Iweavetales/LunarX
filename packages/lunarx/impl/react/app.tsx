@@ -3,12 +3,13 @@ import { RootAppContext } from "./lib/root-app-context"
 import { Route, RouterProvider, Routes } from "react-router"
 import { AppRoutingContext } from "./lib/router-context"
 import {
+  ErrorDisplay,
   GenerateRouteNode,
   GenerateRouteNodeTree,
 } from "./lib/generate-route-node"
 import { createBrowserRouter } from "react-router-dom"
 import { AppRoutingProvider } from "./lib/app-routing-provider"
-import { createStaticRouter } from "react-router-dom/server"
+import { SSRErrorContextProvider } from "./lib/ssr-error-provider"
 // import type { StaticHandlerContext } from "react-router"
 
 /**
@@ -127,11 +128,29 @@ const AppRouter = () => {
      */
     return <RouterProvider router={dataRouter} />
   } else {
-    return (
-      <Routes location={loc ?? undefined}>
-        {routeElementList}
-        <Route path="*" element={<NotFoundComponent />} />
-      </Routes>
-    )
+    if (rootAppContext.initError) {
+      return (
+        <Routes location={loc ?? undefined}>
+          <Route
+            path="*"
+            element={
+              <SSRErrorContextProvider
+                dataKey={""}
+                directProvidedFetchResult={{ error: rootAppContext.initError }}
+              >
+                <ErrorDisplay matchPattern={"*"} />
+              </SSRErrorContextProvider>
+            }
+          />
+        </Routes>
+      )
+    } else {
+      return (
+        <Routes location={loc ?? undefined}>
+          {routeElementList}
+          <Route path="*" element={<NotFoundComponent />} />
+        </Routes>
+      )
+    }
   }
 }

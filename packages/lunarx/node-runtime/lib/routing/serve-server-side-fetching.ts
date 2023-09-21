@@ -49,6 +49,12 @@ export const serveServerSideFetching = async (
         appRouteInstanceContext.appStructureContext,
         passOrThrownError
       )
+
+      return res.writeHead(200, responseHeaders.asObject()).end(
+        JSON.stringify({
+          initError: errorHandleResult.error,
+        })
+      )
     } else {
       console.error(
         "Error occurs from `init.server` but It wasn't handle.",

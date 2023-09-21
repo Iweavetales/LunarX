@@ -5,8 +5,10 @@ import {
 } from "~/core/document-types"
 import { ShardLoader } from "../router"
 import { RootAppContext, RootAppContextValue } from "./root-app-context"
+import { PublicErrorInfo } from "~/core/context"
 
 export default function LunarAppContainer(props: {
+  initError?: PublicErrorInfo | null
   ascendRouteNodeList: UniversalRouteInfoNode[]
   loader: ShardLoader
   preloadedComponents: { [shardPath: string]: React.FunctionComponent }
@@ -29,6 +31,7 @@ export default function LunarAppContainer(props: {
   return (
     <RootAppContext.Provider
       value={{
+        initError: props.initError,
         loader: props.loader,
         routeShardPrepareTrigger: props.routeShardPrepareTrigger,
         components: loadedComponents,

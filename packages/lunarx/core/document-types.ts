@@ -1,5 +1,5 @@
 import { ShardPath } from "./manifest"
-import { PublicServerSideFetchResult } from "~/core/context"
+import { PublicErrorInfo, PublicServerSideFetchResult } from "~/core/context"
 
 export type BrowserRouteNode = {
   path: string
@@ -50,7 +50,7 @@ export type DocumentSheet = {
   // 최상위 라우트에서 최종 매치된 라우트까지 거쳐진 모든 라우트 배열
   routeStem: BrowserRouteNode[]
   routeServerFetchesResultMap: DocumentPublicServerFetchesByPatternMap
-
+  initError: PublicErrorInfo<any> | null
   /**
    * 오름차순 라우트 노드 리스트
    * 주의: 트리 형식이 아닌 최종 매치 라우트 까지의 계층이 오름차순으로 나열 된 리스트이다

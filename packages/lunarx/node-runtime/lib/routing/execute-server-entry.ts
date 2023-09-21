@@ -56,6 +56,7 @@ export async function executeServerEntry(
       customErrorShardPath: customErrorPageShardPath,
       customDocumentModuleShardPath: customServerDocumentShardPath,
 
+      err: initErrorHandleResult?.error ?? null,
       // server side fetched 데이터 맵
       routeServerFetchesResultMap: publicServerFetchesResultMap,
       // 오름차순 정렬 라우트 노드 정보
