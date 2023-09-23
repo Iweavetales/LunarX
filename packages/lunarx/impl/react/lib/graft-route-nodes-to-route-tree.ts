@@ -1,6 +1,6 @@
 import { UniversalRouteInfoNode } from "~/core/document-types"
-import { RouteTreeNode } from "../router"
 import { findRefTreeRouteNode } from "./find-ref-tree-route-node"
+import { RouteTreeNode } from "./router-context"
 
 /**
  * graftRouteNodesToRouteTree

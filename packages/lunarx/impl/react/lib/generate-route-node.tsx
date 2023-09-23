@@ -1,12 +1,12 @@
-import { RouteTreeNode, ShardLoader } from "../router"
 import { RouteServerFetchDataMap } from "~/core/document-types"
 import { Route, RouteObject } from "react-router"
 import React, { Suspense, useContext } from "react"
 import { ComponentShardWrapper } from "./component-shard-wrapper"
 import { ServerFetchesProvider } from "./server-fetches-provider"
 import { ErrorBoundary } from "./error-boundary"
-import { RootAppContext } from "./root-app-context"
+import { RootAppContext, ShardLoader } from "./root-app-context"
 import { SSRErrorContextProvider } from "./ssr-error-provider"
+import { RouteTreeNode } from "./router-context"
 
 const Loading = () => {
   return <span>Loading...</span>

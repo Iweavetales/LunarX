@@ -2,8 +2,22 @@ import React, { useEffect, useRef, useState } from "react"
 import { UniversalRouteInfoNode } from "~/core/document-types"
 import { Location, UrlToLocation } from "~/core/location"
 import { useRouteShardPreparing } from "./root-app-context"
-import { AppRoutingContext, PrepareForNavigate } from "./router-context"
+import {
+  AppRoutingContext,
+  BeforeRoutingHandler,
+  PrepareForNavigate,
+} from "./router-context"
 import { graftRouteNodesToRouteTree } from "./graft-route-nodes-to-route-tree"
+
+// Options type for navigate functions like push
+export type NavigateOptions = {
+  query?: { [key: string]: string | string[] }
+  /**
+   * resetScroll option (default:false)
+   *  The page will reset the scroll position to 0,0 after transitioning routes.
+   */
+  resetScroll?: boolean
+}
 
 export function AppRoutingProvider(props: {
   children: React.ReactNode
@@ -14,6 +28,9 @@ export function AppRoutingProvider(props: {
 }) {
   const prepareRouteShards = useRouteShardPreparing()
   const [browsing, setBrowsing] = useState(false)
+  const [beforeRoutingListeners, setBeforeRoutingListeners] = useState<{
+    [id: string]: BeforeRoutingHandler | null
+  }>({})
 
   const [routeTree, setRouteTree] = useState(
     graftRouteNodesToRouteTree(props.enterRouteNodeList, [])[0]
@@ -140,8 +157,27 @@ export function AppRoutingProvider(props: {
   const prepareNavigate: PrepareForNavigate = async (
     href: string,
     navigateFunction: () => void,
-    options?: { query?: { [key: string]: string | string[] } }
+    options?: NavigateOptions
   ) => {
+    /**
+     * process for registered onBeforeRouting handlers
+     */
+    const beforeRoutingHandlerIds = Object.keys(beforeRoutingListeners)
+    if (beforeRoutingHandlerIds.length > 0) {
+      for (const beforeRoutingHandlerId of beforeRoutingHandlerIds) {
+        const handler = beforeRoutingListeners[beforeRoutingHandlerId]
+        if (handler === null) {
+          continue
+        }
+        /**
+         * If returned `false` from handler of handlers even one
+         * Will not process navigate to destination
+         */
+        if (handler() === false) {
+          return
+        }
+      }
+    }
     // navigate 하기 전에 현재 페이지에 대한 정보를 history state 에 저장 한다
     scrollMemorize()
 
@@ -198,7 +234,14 @@ export function AppRoutingProvider(props: {
 
       // 실제 라우터에 반영할 로케이션
       setCurrentLocation({ auto: false, ...UrlToLocation(href) })
-      window.scrollTo(0, 0)
+
+      /**
+       * Scroll reset after done navigating routine if resetScroll option is true
+       */
+      if (options?.resetScroll ?? false) {
+        window.scrollTo(0, 0)
+        scrollMemorize()
+      }
     } catch (e) {
       console.error("route error :", e)
     }
@@ -232,6 +275,12 @@ export function AppRoutingProvider(props: {
         softReload: softReload,
         setRouteTree: setRouteTree,
         setCurrentLocation: setCurrentLocation,
+        offBeforeRouting: (id, handler) => {
+          setBeforeRoutingListeners((state) => ({ ...state, [id]: null }))
+        },
+        onBeforeRouting: (id, handler) => {
+          setBeforeRoutingListeners((state) => ({ ...state, [id]: handler }))
+        },
       }}
     >
       {props.children}

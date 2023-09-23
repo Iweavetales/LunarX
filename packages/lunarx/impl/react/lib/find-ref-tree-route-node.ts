@@ -1,4 +1,4 @@
-import { RouteTreeNode } from "../router"
+import { RouteTreeNode } from "./router-context"
 
 export function findRefTreeRouteNode(
   tree: RouteTreeNode[],

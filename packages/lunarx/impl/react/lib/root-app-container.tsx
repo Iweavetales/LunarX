@@ -3,8 +3,11 @@ import {
   RouteServerFetchDataMap,
   UniversalRouteInfoNode,
 } from "~/core/document-types"
-import { ShardLoader } from "../router"
-import { RootAppContext, RootAppContextValue } from "./root-app-context"
+import {
+  RootAppContext,
+  RootAppContextValue,
+  ShardLoader,
+} from "./root-app-context"
 import { PublicErrorInfo } from "~/core/context"
 
 export default function LunarAppContainer(props: {

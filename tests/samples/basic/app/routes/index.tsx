@@ -1,12 +1,13 @@
 import React from "react"
 //
-import { Outlet, useMatches } from "react-router"
-import { Link } from "lunarx/router"
+import { Outlet } from "react-router"
+import { Link, useBlockRouting } from "lunarx/router"
 import { useServerFetches } from "lunarx/ssfetch"
 
 export default function IndexPage() {
   const serverFetches = useServerFetches()
   const posts = serverFetches?.data?.posts || []
+  useBlockRouting(true, () => confirm("move?"))
 
   return (
     <div>
@@ -42,7 +43,9 @@ export default function IndexPage() {
 
         <div style={{ marginTop: 30 }}>
           <div>
-            <Link href={"/about"}>To Abouts</Link>
+            <Link href={"/about"} options={{ resetScroll: false }}>
+              To Abouts
+            </Link>
           </div>
           <div>
             <Link href={"/depth/first"}>To First</Link>

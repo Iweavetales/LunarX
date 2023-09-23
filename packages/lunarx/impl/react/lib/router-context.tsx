@@ -1,7 +1,8 @@
 import { createContext } from "react"
 import { Location } from "~/core/location"
-import { RouteTreeNode } from "../router"
 import { PublicServerSideFetchResult } from "~/core/context"
+import { AsyncEmptyFunction, EmptyFunction } from "./constants"
+import { UniversalRouteInfoNode } from "~/core/document-types"
 
 export type PrepareForNavigate = (
   href: string,
@@ -9,6 +10,10 @@ export type PrepareForNavigate = (
   options?: { query?: { [name: string]: string | string[] } }
 ) => void
 
+export type BeforeRoutingHandler = () => boolean
+export type RouteTreeNode = UniversalRouteInfoNode & {
+  children: RouteTreeNode[]
+}
 type SwiftRouterProvides = {
   prepareNavigate: PrepareForNavigate
   browsing: boolean
@@ -20,24 +25,21 @@ type SwiftRouterProvides = {
   softReload: () => Promise<void>
   setRouteTree: (tree: RouteTreeNode[]) => void
   setCurrentLocation: (location: { auto: boolean } & Location) => void
+
+  onBeforeRouting: (id: string, handler: BeforeRoutingHandler) => void
+  offBeforeRouting: (id: string, handler: BeforeRoutingHandler) => void
 }
 
 export const AppRoutingContext = createContext<SwiftRouterProvides>({
-  prepareNavigate: () => {
-    return
-  },
+  prepareNavigate: EmptyFunction,
 
   currentLocation: { auto: false, hash: "", pathname: "", search: "" },
   browsing: false,
   routeTree: [],
   routeDataMap: {},
-  softReload: async () => {
-    /**/
-  },
-  setRouteTree: () => {
-    return
-  },
-  setCurrentLocation: () => {
-    return
-  },
+  softReload: AsyncEmptyFunction,
+  setRouteTree: EmptyFunction,
+  setCurrentLocation: EmptyFunction,
+  onBeforeRouting: EmptyFunction,
+  offBeforeRouting: EmptyFunction,
 })

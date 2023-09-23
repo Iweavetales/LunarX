@@ -1,11 +1,16 @@
 import React, { createContext, useContext } from "react"
-import { ShardLoader } from "../router"
 import {
   RouteServerFetchDataMap,
   UniversalRouteInfoNode,
 } from "~/core/document-types"
 import { PublicErrorInfo } from "~/core/context"
 
+export type ComponentModule = any
+/**
+ * shard 로더
+ * 실제 함수 형식의 컴포넌트를 반환 해야 한다
+ */
+export type ShardLoader = (shardPath: string) => Promise<ComponentModule>
 export type RootAppContextValue = {
   initError?: PublicErrorInfo | null
   loader: ShardLoader
@@ -46,8 +51,8 @@ export const RootAppContext = createContext<RootAppContextValue>({
   registerComponentByShardPath: () => {
     return
   },
-  errorComponent: () => <div></div>,
-  notFoundComponent: () => <div></div>,
+  errorComponent: () => null,
+  notFoundComponent: () => null,
   enterLocation: { pathname: "", search: "?", hash: "#" },
   ascendRouteNodeList: [],
   dataMatchMap: {},

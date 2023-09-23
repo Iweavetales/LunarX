@@ -1,34 +1,23 @@
-import React, { useContext } from "react"
-import { UniversalRouteInfoNode } from "~/core/document-types"
+import React, { useContext, useEffect, useId } from "react"
 import { AppRoutingContext } from "./lib/router-context"
 import { useNavigate } from "react-router"
-export type ComponentModule = any
-/**
- * shard 로더
- * 실제 함수 형식의 컴포넌트를 반환 해야 한다
- */
-
-export type ShardLoader = (shardPath: string) => Promise<ComponentModule>
-export type RouteTreeNode = UniversalRouteInfoNode & {
-  children: RouteTreeNode[]
-}
+import { NavigateOptions } from "./lib/app-routing-provider"
 
 export function Link(props: {
   href: string
   children?: React.ReactNode
   className?: string
+  options?: NavigateOptions
 }) {
   const router = useRouter()
 
   return (
     <a
       onClick={(e) => {
-        // route 체크 후 라우터 반영
+        e.preventDefault()
 
         // location.href = props.href;
-        router.push(props.href, {})
-
-        e.preventDefault()
+        router.push(props.href, props.options)
       }}
       href={props.href}
       className={props.className}
@@ -47,11 +36,8 @@ export const useSoftReload = () => {
   return useContext(AppRoutingContext).softReload
 }
 
-export type pushMethod = (
-  href: string,
-  options?: { query?: { [name: string]: string | string[] } }
-) => void
-
+export type pushMethod = (href: string, options?: NavigateOptions) => void
+export { NavigateOptions }
 export const useRouter = (): { push: pushMethod } => {
   const routerContext = useContext(AppRoutingContext)
   const navigate = useNavigate()
@@ -73,4 +59,50 @@ export const useRouter = (): { push: pushMethod } => {
       )
     },
   }
+}
+
+/**
+ * useBlockRouting
+ * If you use this Hook
+ * You could block route navigating
+ * @param active
+ * @param blockingCallback?
+ *  If blockingCallback return true, Will not block to navigate route
+ */
+export const useBlockRouting = (
+  active = true,
+  blockingCallback?: () => boolean
+) => {
+  const routerContext = useContext(AppRoutingContext)
+  const id = useId()
+
+  const unloadListener = (event: any) => {
+    if (blockingCallback && blockingCallback() === true) {
+      return true
+    }
+
+    event.preventDefault()
+    return (event.returnValue = "")
+  }
+
+  const onBeforeRoutingHandler = () => {
+    if (blockingCallback) {
+      return blockingCallback()
+    }
+
+    return false
+  }
+
+  useEffect(() => {
+    if (active) {
+      window.addEventListener("beforeunload", unloadListener)
+      routerContext.onBeforeRouting(id, onBeforeRoutingHandler)
+      return () => {
+        routerContext.offBeforeRouting(id, onBeforeRoutingHandler)
+        window.removeEventListener("beforeunload", unloadListener)
+      }
+    }
+  }, [active])
+
+  return null
 }
