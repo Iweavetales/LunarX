@@ -15,6 +15,7 @@
     "paths": {
       "~/core/*": ["./core/*"]
     },
+    "types": ["./types.d.ts"]
   },
 
   "exclude": [

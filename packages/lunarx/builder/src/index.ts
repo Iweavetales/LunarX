@@ -114,6 +114,10 @@ async function CreateBuildOptions(
        * refer: https://esbuild.github.io/api/#platform
        */
       "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
+
+      COMPRESSING_SSR_DATA: JSON.stringify(
+        config.runtime.compressSSRData ?? false
+      ),
     },
     minify: config.build.minify,
     minifyWhitespace: config.build.minify,

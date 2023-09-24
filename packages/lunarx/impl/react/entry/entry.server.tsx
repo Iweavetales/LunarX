@@ -14,6 +14,7 @@ import { TAppData } from "../lib/app-data"
 import DefaultNotFoundPage from "./_404.default"
 import DefaultErrorComponent from "./_error.default"
 import { ServerResponse } from "http"
+import lz from "lz-string"
 // import { Response } from "node-fetch"
 
 // import App from '../routes/_app';
@@ -48,11 +49,41 @@ export default async function handleRequest(
     rd: documentSheet.routeServerFetchesResultMap,
   }
 
+  const stringifiedAppData = JSON.stringify(appData)
+  process.env.NODE_ENV !== "production" &&
+    console.log("Raw app data size", stringifiedAppData.length)
+
+  let appDataStringArgument = ""
+  // eslint-disable-next-line no-undef
+  if (COMPRESSING_SSR_DATA) {
+    process.env.NODE_ENV !== "production" &&
+      console.time("server data compress time")
+    appDataStringArgument = '"' + lz.compressToBase64(stringifiedAppData) + '"'
+    process.env.NODE_ENV !== "production" &&
+      console.timeEnd("server data compress time")
+    process.env.NODE_ENV !== "production" &&
+      console.log(
+        "compressed size",
+        appDataStringArgument.length,
+        `(reduced ${Math.floor(
+          100 - (appDataStringArgument.length / stringifiedAppData.length) * 100
+        )}%)`
+      )
+  } else {
+    process.env.NODE_ENV !== "production" &&
+      console.time("server data stringify time")
+    appDataStringArgument = '"' + btoa(stringifiedAppData) + '"'
+    process.env.NODE_ENV !== "production" &&
+      console.timeEnd("server data stringify time")
+    process.env.NODE_ENV !== "production" &&
+      console.log("stringify size", appDataStringArgument.length)
+  }
+
   const bootstrapScript = `(function (){ 
             require([${browserEntryModulePathArgument}], function (modules) { 
               modules[0].default( 
                 require,
-                ${JSON.stringify(appData)}, 
+                ${appDataStringArgument}, 
                 ${ascRouteNodeArgument}, 
                 ${customAppModuleShardPathArgument}, 
                 ${browserEntryModulePathArgument},

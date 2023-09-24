@@ -6,6 +6,10 @@ const lunarConfig = {
   etc: {
     deleteBootstrapScriptAfterBoot: false,
   },
+
+  runtime: {
+    compressSSRData: true,
+  },
 }
 
 module.exports = lunarConfig

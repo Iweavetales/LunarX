@@ -1,6 +1,7 @@
 import { hydrateRoot } from "react-dom/client"
 import React from "react"
 import { BrowserRouter } from "react-router-dom"
+import lz from "lz-string"
 import { UniversalRouteInfoNode } from "~/core/document-types"
 import LunarAppContainer from "../lib/root-app-container"
 import { RootElementID } from "~/core/constants"
@@ -34,7 +35,7 @@ function PromiseRequire(
 
 export default function (
   require: RequireFunction,
-  appDataFromServer: TAppData,
+  appDataStringFromServer: string,
   ascRouteNodes: UniversalRouteInfoNode[],
   customAppEntryModulePath: string,
   browserEntryModulePath: string,
@@ -42,6 +43,24 @@ export default function (
   customErrorRouteShardPath?: string,
   initError?: PublicErrorInfo | null
 ) {
+  let appDataFromServer = {}
+  // eslint-disable-next-line no-undef
+  if (COMPRESSING_SSR_DATA) {
+    process.env.NODE_ENV !== "production" &&
+      console.time("server data decompress time")
+    appDataFromServer = JSON.parse(
+      lz.decompressFromBase64(appDataStringFromServer)
+    )
+    process.env.NODE_ENV !== "production" &&
+      console.timeEnd("server data decompress time")
+  } else {
+    process.env.NODE_ENV !== "production" &&
+      console.time("server data parsing time")
+    appDataFromServer = JSON.parse(atob(appDataStringFromServer))
+    process.env.NODE_ENV !== "production" &&
+      console.timeEnd("server data parsing time")
+  }
+
   async function Startup() {
     let App: () => React.ReactElement
 

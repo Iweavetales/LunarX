@@ -23,6 +23,7 @@ export type LunarConfig = {
 
   runtime: {
     target: SupportingRuntime
+    compressSSRData?: boolean // If this is true will compress server-side fetch data with lz-string
   }
 
   etc: {
@@ -54,6 +55,7 @@ export const baseConfig: LunarConfig = {
 
   runtime: {
     target: "node",
+    compressSSRData: false,
   },
 
   etc: {

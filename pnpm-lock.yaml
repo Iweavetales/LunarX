@@ -179,6 +179,9 @@ importers:
       '@types/lodash':
         specifier: ^4.14.197
         version: 4.14.197
+      '@types/lz-string':
+        specifier: ^1.5.0
+        version: 1.5.0
       '@types/mime':
         specifier: ^3.0.1
         version: 3.0.1
@@ -251,6 +254,9 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      lz-string:
+        specifier: ^1.5.0
+        version: 1.5.0
       md5:
         specifier: ^2.3.0
         version: 2.3.0
@@ -3518,6 +3524,13 @@ packages:
 
   /@types/lodash@4.14.197:
     resolution: {integrity: sha512-BMVOiWs0uNxHVlHBgzTIqJYmj+PgCo4euloGF+5m4okL3rEYzM2EEv78mw8zWSMM57dM7kVIgJ2QDvwHSoCI5g==}
+    dev: true
+
+  /@types/lz-string@1.5.0:
+    resolution: {integrity: sha512-s84fKOrzqqNCAPljhVyC5TjAo6BH4jKHw9NRNFNiRUY5QSgZCmVm5XILlWbisiKl+0OcS7eWihmKGS5akc2iQw==}
+    deprecated: This is a stub types definition. lz-string provides its own type definitions, so you do not need this installed.
+    dependencies:
+      lz-string: 1.5.0
     dev: true
 
   /@types/mime@1.3.2:
@@ -9036,6 +9049,11 @@ packages:
   /lru-cache@7.18.3:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
+    dev: true
+
+  /lz-string@1.5.0:
+    resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
+    hasBin: true
     dev: true
 
   /macos-release@3.2.0:
