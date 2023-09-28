@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import { UniversalRouteInfoNode } from "~/core/document-types"
-import { Location, UrlToLocation } from "~/core/location"
+import { Location, UrlStringToURLComponents } from "~/core/location"
 import { useRouteShardPreparing } from "./root-app-context"
 import {
   AppRoutingContext,
@@ -182,15 +182,24 @@ export function AppRoutingProvider(props: {
     scrollMemorize()
 
     /**
-     * '/' 로 시작하는 내부 경로가 아니면 location.href 로 외부 링크로 이동시킨다
+     * preprocessing routing destination
      */
-    if (!/^\//.test(href)) {
+    if (href.startsWith("/")) {
+      // nothing to do in here
+    } else if (href.startsWith("#")) {
+      // will change hash
+      location.href = href
+      return
+    } else if (href.startsWith("?")) {
+      // same destination path routing
+      href = location.pathname + href
+    } else {
+      // outgoing routing
       location.href = href
       return
     }
 
     setBrowsing(true)
-    //
 
     try {
       const res = await fetch("/_/r" + href)
@@ -233,7 +242,7 @@ export function AppRoutingProvider(props: {
       navigateFunction()
 
       // 실제 라우터에 반영할 로케이션
-      setCurrentLocation({ auto: false, ...UrlToLocation(href) })
+      setCurrentLocation({ auto: false, ...UrlStringToURLComponents(href) })
 
       /**
        * Scroll reset after done navigating routine if resetScroll option is true

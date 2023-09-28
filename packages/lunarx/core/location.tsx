@@ -1,4 +1,6 @@
 // from @remix-run/router/history.ts
+import { ensureArray } from "~/core/functions/array"
+
 export type Location = {
   pathname: string
   search: string
@@ -12,32 +14,52 @@ export function GetUrlPath(url: string) {
   return urlPath
 }
 
-export function UrlToLocation(url: string): Location {
-  const path = GetUrlPath(url)
-  const searchMarkIndex = path.indexOf("?")
-  const hashMarkIndex = path.indexOf("#")
+export function UrlStringToURLComponents(url: string): Location {
+  const urlPath = GetUrlPath(url)
+  const searchStartIndex = urlPath.indexOf("?")
+  const hashStartIndex = urlPath.indexOf("#")
 
-  /**
-   * search mark '?' 또는 hash mark '#' 가 시작되는 인덱스
-   * ? 가 # 보다 앞에 오기 때문에 ?가 없을 경우 hash 의 인덱스로 지정 하기 위해 Math.min 을 사용하였음
-   */
-  const markStartIndex = Math.min(searchMarkIndex, hashMarkIndex)
-
-  const urlPathLength = path.length
+  const urlPathLength = urlPath.length
 
   return {
-    pathname: path.substring(
+    pathname: urlPath.substring(
       0,
-      markStartIndex === -1 ? urlPathLength : markStartIndex
+      searchStartIndex === -1 ? urlPathLength : searchStartIndex
     ),
     search:
-      searchMarkIndex !== -1
-        ? path.substring(
-            searchMarkIndex,
-            hashMarkIndex !== -1 ? hashMarkIndex : urlPathLength
+      searchStartIndex !== -1
+        ? urlPath.substring(
+            searchStartIndex,
+            hashStartIndex !== -1 ? hashStartIndex : urlPathLength
           )
         : "",
     hash:
-      hashMarkIndex !== -1 ? path.substring(hashMarkIndex, urlPathLength) : "",
+      hashStartIndex !== -1
+        ? urlPath.substring(hashStartIndex, urlPathLength)
+        : "",
   }
+}
+
+export type QueryMap = { [key: string]: string | string[] }
+export function SearchStringToQueryMap(search: string): QueryMap {
+  const qMarkIndex = search.indexOf("?")
+  const searchContents = search.slice(qMarkIndex + 1)
+  const pairs = searchContents.split("&").map((queryPair) => {
+    const tokens = queryPair.split("=")
+    return [tokens[0], tokens[1]]
+  })
+
+  return pairs.reduce((acc, cur) => ({ ...acc, [cur[0]]: cur[1] }), {})
+}
+
+export function QueryMapToSearchString(queryMap: QueryMap): string {
+  return Object.keys(queryMap)
+    .map((queryKey) =>
+      ensureArray(queryMap[queryKey])
+        .filter(Boolean)
+        .map((queryValue) => `${queryKey}=${queryValue}`)
+        .join("&")
+    )
+    .filter(Boolean)
+    .join("&")
 }

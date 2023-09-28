@@ -1,13 +1,12 @@
 import React from "react"
 //
 import { Outlet } from "react-router"
-import { Link, useBlockRouting } from "lunarx/router"
+import { Link } from "lunarx/router"
 import { useServerFetches } from "lunarx/ssfetch"
 
 export default function IndexPage() {
   const serverFetches = useServerFetches()
   const posts = serverFetches?.data?.posts || []
-  useBlockRouting(true, () => confirm("move?"))
 
   return (
     <div>
@@ -48,13 +47,38 @@ export default function IndexPage() {
             </Link>
           </div>
           <div>
-            <Link href={"/depth/first"}>To First</Link>
+            <Link
+              href={"/depth/first"}
+              options={{
+                query: {
+                  query1: "hello",
+                  query2: ["query2hello", "query2hello2"],
+                },
+              }}
+            >
+              To First
+            </Link>
           </div>
           <div>
             <Link href={"/depth/first/second"}>To Second</Link>
           </div>
           <div>
             <Link href={"/depth/first/second/third"}>To Third</Link>
+          </div>
+          <div>
+            <Link
+              href={""}
+              options={{
+                query: {
+                  test: "123",
+                },
+              }}
+            >
+              Same destination routing with Query
+            </Link>
+          </div>
+          <div>
+            <Link href={"/blockingUnload"}>Blocking Unload Test Page</Link>
           </div>
         </div>
 

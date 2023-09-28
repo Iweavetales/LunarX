@@ -1,7 +1,14 @@
 import React, { useContext, useEffect, useId } from "react"
 import { AppRoutingContext } from "./lib/router-context"
-import { useNavigate } from "react-router"
+import { useLocation, useNavigate } from "react-router"
 import { NavigateOptions } from "./lib/app-routing-provider"
+import {
+  QueryMap,
+  QueryMapToSearchString,
+  SearchStringToQueryMap,
+  UrlStringToURLComponents,
+} from "~/core/location"
+import { ensureArray } from "~/core/functions/array"
 
 export function Link(props: {
   href: string
@@ -38,25 +45,47 @@ export const useSoftReload = () => {
 
 export type pushMethod = (href: string, options?: NavigateOptions) => void
 export { NavigateOptions }
-export const useRouter = (): { push: pushMethod } => {
+export const useRouter = (): {
+  push: pushMethod
+  getQueryMap: () => QueryMap
+} => {
   const routerContext = useContext(AppRoutingContext)
   const navigate = useNavigate()
+  const location = useLocation()
 
   return {
-    push: (href, options) => {
+    push: (href: string, options) => {
+      const query = options?.query ?? {}
+      const newUrl = UrlStringToURLComponents(href)
+      const searchAtHref = SearchStringToQueryMap(newUrl.search)
+      const combinedQueryMap = {
+        ...searchAtHref,
+        ...query,
+      }
+
+      const newSearch = QueryMapToSearchString(combinedQueryMap)
+      const newHref = `${newUrl.pathname}?${newSearch}`
+
       routerContext.prepareNavigate(
-        href,
+        newHref,
         () => {
           // 실제 URL 이동
-          navigate(href, {
-            state: {
-              id: `${Date.now()}-${Math.random() * 1000}`,
-            },
-            preventScrollReset: true,
-          })
+          navigate(
+            { pathname: newUrl.pathname, search: newSearch },
+            {
+              state: {
+                id: `${Date.now()}-${Math.random() * 1000}`,
+              },
+              preventScrollReset: true,
+            }
+          )
         },
         options
       )
+    },
+    getQueryMap: (): QueryMap => {
+      // location.search
+      return SearchStringToQueryMap(location.search)
     },
   }
 }
