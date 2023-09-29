@@ -5,19 +5,10 @@ import { useRouteShardPreparing } from "./root-app-context"
 import {
   AppRoutingContext,
   BeforeRoutingHandler,
+  NavigateOptions,
   PrepareForNavigate,
 } from "./router-context"
 import { graftRouteNodesToRouteTree } from "./graft-route-nodes-to-route-tree"
-
-// Options type for navigate functions like push
-export type NavigateOptions = {
-  query?: { [key: string]: string | string[] }
-  /**
-   * resetScroll option (default:false)
-   *  The page will reset the scroll position to 0,0 after transitioning routes.
-   */
-  resetScroll?: boolean
-}
 
 export function AppRoutingProvider(props: {
   children: React.ReactNode
@@ -156,7 +147,10 @@ export function AppRoutingProvider(props: {
 
   const prepareNavigate: PrepareForNavigate = async (
     href: string,
-    navigateFunction: () => void,
+    navigateFunction: (
+      destination: string,
+      overrideOptions?: NavigateOptions
+    ) => void,
     options?: NavigateOptions
   ) => {
     /**
@@ -214,6 +208,20 @@ export function AppRoutingProvider(props: {
         }
       } = await res.json()
 
+      const loadedRouteDataPaths = Object.keys(ret.data)
+      for (const routePath of loadedRouteDataPaths) {
+        const routeData = ret.data[routePath]
+
+        /**
+         * if Any of routes response redirect instruction
+         * will redirect with re call prepareNavigate
+         */
+        if (routeData && routeData.redirect) {
+          prepareNavigate(routeData.redirect, navigateFunction)
+          return
+        }
+      }
+
       // 라우트 컴포넌트 미리 로드
       try {
         await prepareRouteShards(ret.r.map((routeNode) => routeNode.shardPath))
@@ -239,7 +247,7 @@ export function AppRoutingProvider(props: {
       setCurrentRouteDataMap({ ...currentRouteDataMap, ...ret.data })
 
       // 실제 URL 이동
-      navigateFunction()
+      navigateFunction(href, options)
 
       // 실제 라우터에 반영할 로케이션
       setCurrentLocation({ auto: false, ...UrlStringToURLComponents(href) })

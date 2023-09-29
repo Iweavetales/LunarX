@@ -1,14 +1,12 @@
 import React, { useContext, useEffect, useId } from "react"
-import { AppRoutingContext } from "./lib/router-context"
+import { AppRoutingContext, NavigateOptions } from "./lib/router-context"
 import { useLocation, useNavigate } from "react-router"
-import { NavigateOptions } from "./lib/app-routing-provider"
 import {
   QueryMap,
   QueryMapToSearchString,
   SearchStringToQueryMap,
   UrlStringToURLComponents,
 } from "~/core/location"
-import { ensureArray } from "~/core/functions/array"
 
 export function Link(props: {
   href: string
@@ -68,15 +66,22 @@ export const useRouter = (): {
 
       routerContext.prepareNavigate(
         newHref,
-        () => {
-          // 실제 URL 이동
+        (destination: string, overrideOptions?: NavigateOptions) => {
+          const urlComponents = UrlStringToURLComponents(destination)
+          // Move to url finally
           navigate(
-            { pathname: newUrl.pathname, search: newSearch },
+            { pathname: urlComponents.pathname, search: urlComponents.search },
             {
               state: {
                 id: `${Date.now()}-${Math.random() * 1000}`,
               },
+              /**
+               * Prevent reset scroll by react-router
+               * Scroll will handled by app-routing-provider
+               */
               preventScrollReset: true,
+
+              ...overrideOptions,
             }
           )
         },

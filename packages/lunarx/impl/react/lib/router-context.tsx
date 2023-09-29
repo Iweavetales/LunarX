@@ -4,9 +4,21 @@ import { PublicServerSideFetchResult } from "~/core/context"
 import { AsyncEmptyFunction, EmptyFunction } from "./constants"
 import { UniversalRouteInfoNode } from "~/core/document-types"
 
+// Options type for navigate functions like push
+export type NavigateOptions = {
+  query?: { [key: string]: string | string[] }
+  /**
+   * resetScroll option (default:false)
+   *  The page will reset the scroll position to 0,0 after transitioning routes.
+   */
+  resetScroll?: boolean
+}
 export type PrepareForNavigate = (
   href: string,
-  finishCallback: () => void,
+  finishCallback: (
+    destination: string,
+    overrideOptions?: NavigateOptions
+  ) => void,
   options?: { query?: { [name: string]: string | string[] } }
 ) => void
 
