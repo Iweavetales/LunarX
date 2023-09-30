@@ -6,12 +6,13 @@ import {
 import { BuildRoutes } from "./build-routes"
 
 import Router, { HTTPVersion, Instance as RouterInstance } from "find-my-way"
-import http, { IncomingMessage, ServerResponse } from "http"
+import http from "http"
 import { join } from "path"
 import { ReadJson } from "./json-reader"
 import { LunarJSManifest, ShardPath } from "~/core/manifest"
 import WebSocket, { WebSocketServer } from "ws"
 import { parse } from "url"
+import { ProductionMode } from "./constants"
 
 export type ServerOptions = {
   BuildDir: string
@@ -82,33 +83,40 @@ export class LunarServer {
       this.#router.lookup(req, res)
     })
 
-    server.on("upgrade", function upgrade(req, socket, head) {
-      const { pathname } = parse(req.url!)
-      if (pathname === "/_hmr") {
-        hmrWebsocketServer.handleUpgrade(req, socket, head, function done(ws) {
-          hmrWebsocketServer.emit("connection", ws, req)
+    if (!ProductionMode) {
+      server.on("upgrade", function upgrade(req, socket, head) {
+        const { pathname } = parse(req.url!)
+        if (pathname === "/_hmr") {
+          hmrWebsocketServer.handleUpgrade(
+            req,
+            socket,
+            head,
+            function done(ws) {
+              hmrWebsocketServer.emit("connection", ws, req)
+            }
+          )
+        }
+      })
+
+      const hmrWebsocketServer = new WebSocketServer({ noServer: true })
+      hmrWebsocketServer.on("connection", (ws) => {
+        this.wsConnectionPool.push(ws)
+
+        console.log("Connection for auto refresh")
+        ws.on("error", console.error)
+        ws.on("message", function message(data) {
+          console.log("received: %s", data)
         })
-      }
-    })
+        ws.on("close", () => {
+          this.wsConnectionPool = this.wsConnectionPool.filter(
+            (oldWS) => oldWS === ws
+          )
+          ws.close()
+        })
 
-    const hmrWebsocketServer = new WebSocketServer({ noServer: true })
-    hmrWebsocketServer.on("connection", (ws) => {
-      this.wsConnectionPool.push(ws)
-
-      console.log("Connection for auto refresh")
-      ws.on("error", console.error)
-      ws.on("message", function message(data) {
-        console.log("received: %s", data)
+        ws.send(JSON.stringify({ type: "greeting" }))
       })
-      ws.on("close", () => {
-        this.wsConnectionPool = this.wsConnectionPool.filter(
-          (oldWS) => oldWS === ws
-        )
-        ws.close()
-      })
-
-      ws.send(JSON.stringify({ type: "greeting" }))
-    })
+    }
 
     // server.on("upgrade", (req, socket, head) => {
     //   console.log("Requested upgrade")

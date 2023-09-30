@@ -15,10 +15,10 @@ export default async function Build(options: Record<any, any>) {
   /**
    * Copy the `deno-runtime.js` file from the `lunar` package to the dist directory where the application is built.
    */
-  copyFileSync(
-    join(__dirname, "../deno-runtime/deno-server.js"),
-    join(process.cwd(), "./dist/deno-server.js")
-  )
+  // copyFileSync(
+  //   join(__dirname, "../deno-runtime/deno-server.js"),
+  //   join(process.cwd(), "./dist/deno-server.js")
+  // )
 
   /**
    * Copy the `deno-runtime.js` file from the `lunar` package to the dist directory where the application is built.

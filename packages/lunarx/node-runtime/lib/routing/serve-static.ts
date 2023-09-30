@@ -13,6 +13,8 @@ export const serveStatic = async (
   context: AppStructureContext
 ) => {
   const urlPath = GetUrlPath(req.url!)
+
+  // ⚠️resolve() can protect against Directory Traversal attack
   const resolvedPath = resolve(urlPath.replace(/^\/static/, ""))
 
   const filePath = join(PathHelper.cwd, "/static/", resolvedPath)

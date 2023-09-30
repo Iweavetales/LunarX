@@ -5,6 +5,7 @@ import { writeFileToResponse } from "../write-file-with-response"
 import { PathHelper } from "../helper/path"
 import { AppStructureContext } from "../client-app-structure"
 import { PageParams } from "~/core/server-context"
+import { resolve } from "path"
 
 export const serveShards = async (
   req: IncomingMessage,
@@ -13,7 +14,11 @@ export const serveShards = async (
   appContext: AppStructureContext
 ) => {
   const urlPath = GetUrlPath(req.url!)
-  const shardPath = CutOffQuery(urlPath.replace(/^\/_\/s\//, ""))
+
+  // ⚠️resolve() can protect against Directory Traversal attack
+  const normalizedPath = resolve(urlPath)
+
+  const shardPath = CutOffQuery(normalizedPath.replace(/^\/_\/s\//, ""))
 
   /**
    * Provides .map files in development mode
