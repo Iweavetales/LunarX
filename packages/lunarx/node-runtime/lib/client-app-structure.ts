@@ -1,4 +1,9 @@
-import { AbstractEntryName, LunarJSManifest, ShardPath } from "~/core/manifest"
+import {
+  AbstractEntryName,
+  BuiltShardInfo,
+  LunarJSManifest,
+  ShardPath,
+} from "~/core/manifest"
 import { LoadBuiltShardEntryModule } from "./module-loader"
 import { ServerErrorHandler } from "~/core/server-context"
 
@@ -78,6 +83,19 @@ export class AppStructureContext {
     }
 
     return null
+  }
+
+  getShardInfoByShardPath(shardPath: ShardPath): BuiltShardInfo | null {
+    const entryPath = this.#manifest.shardPathToEntryPathDictionary[shardPath]
+    if (entryPath) {
+      return this.#manifest.entries[entryPath]
+    }
+
+    return null
+  }
+
+  getShardInfoByOutputPath(outputPath: string): BuiltShardInfo | null {
+    return this.#manifest.chunks[outputPath] ?? null
   }
 
   getModuleByAbsEntryName(name: AbstractEntryName): any {

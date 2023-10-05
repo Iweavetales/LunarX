@@ -9,7 +9,7 @@ import { RawRouteInfoNode, RawRouteInfoNodeMap } from "~/core/manifest"
 import { makeServerContext } from "../make-server-context"
 import { IncomingMessage, ServerResponse } from "http"
 import { EntryServerHandler } from "~/core/types.server"
-import { HeaderObject, MutableHTTPHeaders } from "~/core/http-headers.server"
+import { MutableHTTPHeaders } from "~/core/http-headers.server"
 import { PageParams } from "~/core/server-context"
 import { rawHeaderStringArrayToMutableHTTPHeaders } from "../http-header"
 import { executeServerEntry } from "./execute-server-entry"
@@ -18,7 +18,7 @@ import { initServer } from "./init-server"
 import { PublicServerSideFetchResult } from "~/core/context"
 import { preProcessPipelineErrorHandleOfFetches } from "./pre-process-pipeline-error-handle-of-fetches"
 import { rootErrorHandler } from "./root-error-handler"
-import { join } from "lodash"
+import { PageResourceBuilder } from "../helper/page-resource-builder"
 
 const INTERNAL_SERVER_ABS_ENTRY_NAME = "@entry/entry.server"
 
@@ -71,7 +71,8 @@ export async function renderPage(
    * ["/blog", "/blog/post"] 이 순서로 라우트 노드가 들어 있게 됨
    */
   rawRouteInfoNodeListRootToLeaf: RawRouteInfoNode[],
-  universalRouteInfoNodeList: UniversalRouteInfoNode[]
+  universalRouteInfoNodeList: UniversalRouteInfoNode[],
+  pageResourceBuilder: PageResourceBuilder
 ): Promise<AutoResponse | boolean> {
   /**
    * 모든 라우트 노드들을 조회 하며
@@ -83,6 +84,10 @@ export async function renderPage(
     const routeNode = rawRouteInfoNodeListRootToLeaf[i]
     routeNodeMap[routeNode.routePattern] = routeNode
   }
+  /**
+   * Create nonce
+   */
+  const nonce = btoa(GenerateRandomBytes(16))
 
   try {
     /**
@@ -93,7 +98,10 @@ export async function renderPage(
     )
     const responseHeaders = new MutableHTTPHeaders()
     responseHeaders.append("content-type", "text/html; charset=utf-8")
-
+    responseHeaders.append(
+      "Content-Security-Policy",
+      `script-src 'nonce-${nonce}'`
+    )
     const urlPath = GetUrlPath(req.url!)
     const context = makeServerContext(
       req,
@@ -101,7 +109,8 @@ export async function renderPage(
       params,
       universalRouteInfoNodeList,
       requestHeaders,
-      responseHeaders
+      responseHeaders,
+      nonce
     )
 
     const entryServerHandler: EntryServerHandler =
@@ -175,10 +184,8 @@ export async function renderPage(
       appStructureContext,
       documentPublicServerFetchesByPatternMap,
       universalRouteInfoNodeList,
-      /**
-       * 랜덤 바이트 16개를 base64 로 인코딩 해서 nonce 생성
-       */
-      btoa(GenerateRandomBytes(16))
+      pageResourceBuilder,
+      nonce
     )
 
     const typeOfResponse = typeof response

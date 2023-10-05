@@ -84,6 +84,7 @@ type ModuleContent = {
   }
 
   function _define(moduleName: string, deps: string[], factory: ModuleFactory) {
+    // console.log("Define", moduleName, deps)
     moduleMap[moduleName] = {
       name: moduleName,
       deps: deps,

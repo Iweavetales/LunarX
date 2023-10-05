@@ -37,6 +37,7 @@ export interface BuiltShardInfo {
   isEntry: boolean
   isChunk: boolean
   isServerSideShard: boolean
+  outputPath: string
   serverSideOutputPath: string // esm output 경로
   clientSideOutputPath: string | undefined // cjs output 경로
   shardPath: ShardPath
@@ -55,6 +56,9 @@ export interface BuiltShardInfo {
   entryFileRelativeDir?: string
   abstractEntryPath?: AbstractEntryPath
   abstractEntryName?: AbstractEntryName
+
+  requiredShardPaths: ShardPath[]
+  cssBundle?: string
 }
 
 export interface RawRouteInfoNode {
@@ -81,17 +85,37 @@ export interface LunarJSManifest {
   //   [shardPath: string]: BuiltShardInfo;
   // };
   builtVersion: string
+
   entries: {
     [entryPath: EntryPath]: BuiltShardInfo
   }
-
   chunks: {
     [outputPath: string]: BuiltShardInfo
   }
-
   entryDictionaryByAbstractEntryName: {
     [abstractEntryName: AbstractEntryName]: EntryPath
   }
+  shardPathToEntryPathDictionary: {
+    [shardPath: ShardPath]: EntryPath
+  }
+  shardPathToOutputPathDictionary: {
+    [shardPath: ShardPath]: string
+  }
+
+  // @New
+  // appStructure: {
+  //   entries: {
+  //     [entryPath: EntryPath]: BuiltShardInfo
+  //   }
+  //
+  //   chunks: {
+  //     [outputPath: string]: BuiltShardInfo
+  //   }
+  //
+  //   entryDictionaryByAbstractEntryName: {
+  //     [abstractEntryName: AbstractEntryName]: EntryPath
+  //   }
+  // }
 
   routeInfoNodes: RawRouteInfoNodeMap
 

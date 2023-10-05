@@ -15,9 +15,6 @@ import DefaultNotFoundPage from "./_404.default"
 import DefaultErrorComponent from "./_error.default"
 import { ServerResponse } from "http"
 import lz from "lz-string"
-// import { Response } from "node-fetch"
-
-// import App from '../routes/_app';
 
 export default async function handleRequest(
   context: ServerContext,
@@ -79,7 +76,7 @@ export default async function handleRequest(
       console.log("stringify size", appDataStringArgument.length)
   }
 
-  const bootstrapScript = `(function (){ 
+  const bootstrapScript = ` window.addEventListener('DOMContentLoaded', function() {(function (){ 
             require([${browserEntryModulePathArgument}], function (modules) { 
               modules[0].default( 
                 require,
@@ -87,12 +84,22 @@ export default async function handleRequest(
                 ${ascRouteNodeArgument}, 
                 ${customAppModuleShardPathArgument}, 
                 ${browserEntryModulePathArgument},
+                ${JSON.stringify(
+                  new Array(
+                    ...documentSheet.pageResourceBuilder.dependingScripts.values()
+                  )
+                )},
+                ${JSON.stringify(
+                  new Array(
+                    ...documentSheet.pageResourceBuilder.dependingStyles.values()
+                  )
+                )},
                 ${JSON.stringify(documentSheet.custom404ShardPath)},
                 ${JSON.stringify(documentSheet.customErrorShardPath)},
-                ${JSON.stringify(documentSheet.initError)}
+                ${JSON.stringify(documentSheet.err)}
               )
             })
-          })()`
+          })()})`
 
   let App: () => React.ReactElement
   let DocumentFactory: typeof DefaultDocumentFactory
@@ -166,7 +173,7 @@ export default async function handleRequest(
       <div id={RootElementID}>
         <StaticRouter location={context.req.url!}>
           <LunarAppContainer
-            initError={documentSheet.initError}
+            initError={documentSheet.err}
             ascendRouteNodeList={documentSheet.universalRINListRootToLeaf}
             dataMatchMap={documentSheet.routeServerFetchesResultMap}
             enterLocation={context.location}
@@ -197,35 +204,53 @@ export default async function handleRequest(
         script={bootstrapScript}
         scriptId={"s_" + Math.floor(Math.random() * 100000)}
         nonce={documentSheet.nonce}
+        defer
       />
     </>
   ))
+
+  const advanceScripts = [
+    {
+      element: (
+        <script
+          src={documentSheet.loaderScriptUrl}
+          nonce={documentSheet.nonce}
+          defer
+          key={"loader"}
+        ></script>
+      ),
+    },
+    ...documentSheet.advanceScripts.map((script) => ({
+      src: script.url,
+      defer: true,
+      // async: script.async,
+    })),
+  ]
+  const advanceStyles = [
+    ...documentSheet.advanceStyles.map((style) => ({
+      href: style.url,
+      rel: "stylesheet",
+    })),
+  ]
+  const secondScripts = documentSheet.secondScripts.map((script) => ({
+    src: script.url,
+    async: true,
+    // async: script.async,
+  }))
+  const secondStyles = documentSheet.secondStyles.map((style) => ({
+    href: style.url,
+    rel: "stylesheet",
+  }))
   /**
    * Document Element 를 DocumentWrapper 로 감싸 실제 데이터가 전달 되도록 한다
    */
   const Document = (
     <DocumentWrapper
       nonce={documentSheet.nonce}
-      scripts={[
-        {
-          element: (
-            <script
-              src={documentSheet.loaderScriptUrl}
-              nonce={documentSheet.nonce}
-              key={"loader"}
-            ></script>
-          ),
-        },
-        ...documentSheet.scripts.map((script) => ({
-          src: script.url,
-        })),
-      ]}
-      links={[
-        ...documentSheet.styles.map((style) => ({
-          href: style.url,
-          rel: "stylesheet",
-        })),
-      ]}
+      advanceScripts={advanceScripts}
+      advanceLinks={advanceStyles}
+      secondScripts={secondScripts}
+      secondLinks={secondStyles}
       bootstrapScript={bootstrapScript}
       bootstrapScriptId={"s_" + Math.floor(Math.random() * 100000)}
     >

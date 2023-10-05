@@ -101,11 +101,13 @@ export const useRouter = (): {
  * You could block route navigating
  * @param active
  * @param blockingCallback?
+ * @param deps?
  *  If blockingCallback return true, Will not block to navigate route
  */
 export const useBlockRouting = (
   active = true,
-  blockingCallback?: () => boolean
+  blockingCallback?: () => boolean,
+  deps?: any[]
 ) => {
   const routerContext = useContext(AppRoutingContext)
   const id = useId()
@@ -136,7 +138,7 @@ export const useBlockRouting = (
         window.removeEventListener("beforeunload", unloadListener)
       }
     }
-  }, [active])
+  }, deps ?? [null])
 
   return null
 }

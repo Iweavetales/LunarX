@@ -3,13 +3,14 @@ import React from "react"
 import { Outlet } from "react-router"
 import { Link } from "lunarx/router"
 import { useServerFetches } from "lunarx/ssfetch"
+import { RootCss } from "../styles/root.css"
 
 export default function IndexPage() {
   const serverFetches = useServerFetches()
   const posts = serverFetches?.data?.posts || []
 
   return (
-    <div>
+    <div className={RootCss}>
       <div style={{ textAlign: "center" }}>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ padding: 30 }}>

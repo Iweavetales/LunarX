@@ -7,17 +7,16 @@ import {
 } from "esbuild"
 import { join, relative, resolve } from "path"
 import { existsSync, mkdirSync, writeFileSync } from "fs"
-
 import { getAllFiles } from "./files"
 import { baseConfig, ExtendConfig, LunarConfig } from "~/core/lunar-config"
-import esbuildBabelPlugin from "./esbuild-transform-plugin"
+import appBuilderPlugin from "./app-builder-plugin"
 import { collectAllSourcesFromDirectory } from "./collect-all-sources-from-directory"
 import { extractRuntimeOptionsFromConfig } from "./extract-runtime-options-from-config"
 import { ShardPath } from "~/core/manifest"
 import chalk from "chalk"
+import { RESERVED_CONFIG_FILE_NAME } from "./constants"
 
 type BuiltCallback = (updatedShardPaths: string[]) => void
-const RESERVED_CONFIG_FILE_NAME = "lunarx.conf.js"
 
 async function CreateBuildOptions(
   builtCallback: BuiltCallback,
@@ -153,7 +152,7 @@ async function CreateBuildOptions(
     },
     plugins: [
       ...(config.build.plugins ?? []),
-      esbuildBabelPlugin(config, {
+      appBuilderPlugin(config, {
         distDirectoryPath: config.js.distDirectory,
         cjsDirectory: config.js.cjsDirectory,
         esmDirectory: config.js.esmDirectory,

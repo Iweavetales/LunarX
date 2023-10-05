@@ -1,5 +1,6 @@
 import { ShardPath } from "./manifest"
 import { PublicErrorInfo, PublicServerSideFetchResult } from "~/core/context"
+import { PageResourceBuilder } from "../node-runtime/lib/helper/page-resource-builder"
 
 export type BrowserRouteNode = {
   path: string
@@ -33,24 +34,27 @@ export type DocumentPublicServerFetchesByPatternMap = {
   [routePattern: string]: PublicServerSideFetchResult<any>
 }
 export type DocumentSheet = {
-  scripts: DocumentScripts
-  styles: DocumentStyles
+  pageResourceBuilder: PageResourceBuilder
+  advanceScripts: DocumentScripts
+  advanceStyles: DocumentStyles
+  secondScripts: DocumentScripts
+  secondStyles: DocumentStyles
   loaderScriptUrl: string
   browserEntryModulePath: string
 
   /**
    * Swift Platform 사용자가 커스텀 한 앱과 도큐먼트 컴포넌트
    */
-  customAppModuleShardPath?: string // routes/_app.tsx
-  custom404ShardPath?: string // routes/_404.tsx
-  customErrorShardPath?: string // routes/_error.tsx
+  customAppModuleShardPath: string | null // routes/_app.tsx
+  custom404ShardPath: string | null // routes/_404.tsx
+  customErrorShardPath: string | null // routes/_error.tsx
   // customAppModuleServerShardPath?: string; // routes/_app.server.ts
-  customDocumentModuleShardPath?: string // routes/_document.server.tsx
+  customDocumentModuleShardPath: string | null // routes/_document.server.tsx
 
   // 최상위 라우트에서 최종 매치된 라우트까지 거쳐진 모든 라우트 배열
-  routeStem: BrowserRouteNode[]
+  // routeStem: BrowserRouteNode[]
   routeServerFetchesResultMap: DocumentPublicServerFetchesByPatternMap
-  initError: PublicErrorInfo<any> | null
+  err: PublicErrorInfo<any> | null
   /**
    * 오름차순 라우트 노드 리스트
    * 주의: 트리 형식이 아닌 최종 매치 라우트 까지의 계층이 오름차순으로 나열 된 리스트이다

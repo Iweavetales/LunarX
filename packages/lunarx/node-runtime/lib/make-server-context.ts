@@ -4,6 +4,7 @@ import { IncomingMessage } from "http"
 import { MutableHTTPHeaders } from "~/core/http-headers.server"
 import { UniversalRouteInfoNode } from "~/core/document-types"
 import { SupportingRuntime } from "~/core/runtime"
+import { GenerateRandomBytes } from "./random"
 
 const checkRuntime = (): SupportingRuntime => {
   if (typeof Deno !== "undefined") {
@@ -19,7 +20,8 @@ export function makeServerContext(
   params: PageParams,
   matchedRoutes: UniversalRouteInfoNode[],
   requestHeaders: MutableHTTPHeaders,
-  responseHeaders: MutableHTTPHeaders
+  responseHeaders: MutableHTTPHeaders,
+  nonce: string
 ): ServerContext {
   const searchMarkIndex = urlPath.indexOf("?")
   const hashMarkIndex = urlPath.indexOf("#")
@@ -55,5 +57,7 @@ export function makeServerContext(
           ? urlPath.substring(hashMarkIndex, urlPathLength)
           : "",
     },
+
+    nonce: nonce,
   }
 }

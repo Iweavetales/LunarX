@@ -30,6 +30,7 @@ export interface ServerContext {
   matchedRoutes: UniversalRouteInfoNode[]
   params: PageParams
 
+  nonce: string
   // 페이지 빌드용
   // pageBuild: {
   //   scripts: {}; // script urls

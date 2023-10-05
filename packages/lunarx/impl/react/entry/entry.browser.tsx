@@ -39,6 +39,8 @@ export default function (
   ascRouteNodes: UniversalRouteInfoNode[],
   customAppEntryModulePath: string,
   browserEntryModulePath: string,
+  initScriptShardPathDependencies: string[],
+  initStyleShardPathDependencies: string[],
   custom404RouteShardPath?: string,
   customErrorRouteShardPath?: string,
   initError?: PublicErrorInfo | null

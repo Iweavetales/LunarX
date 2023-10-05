@@ -11,6 +11,7 @@ import { DocumentPublicServerFetchesByPatternMap } from "~/core/document-types"
 import { preProcessPipelineErrorHandleOfFetches } from "./pre-process-pipeline-error-handle-of-fetches"
 import { PublicServerSideFetchResult } from "~/core/context"
 import { rootErrorHandler } from "./root-error-handler"
+import { PageResourceBuilder } from "../helper/page-resource-builder"
 
 export const serveServerSideFetching = async (
   req: IncomingMessage,
@@ -71,6 +72,14 @@ export const serveServerSideFetching = async (
     appRouteInstanceContext.rawRouteInfoNodeListRootToLeaf
   )
 
+  const pageResourceBuilder = new PageResourceBuilder(
+    appRouteInstanceContext.appStructureContext
+  )
+  // Extract shard resources from current routes
+  appRouteInstanceContext.universalRouteInfoNodeList.forEach((routeNode) => {
+    pageResourceBuilder.pushShard(routeNode.shardPath)
+  })
+
   // handle(filter) error from preProcessPipelineForSsr
   const documentPublicServerFetchesByPatternMap: DocumentPublicServerFetchesByPatternMap =
     await preProcessPipelineErrorHandleOfFetches(
@@ -83,6 +92,8 @@ export const serveServerSideFetching = async (
     JSON.stringify({
       data: documentPublicServerFetchesByPatternMap,
       r: appRouteInstanceContext.universalRouteInfoNodeList,
+      a: [...pageResourceBuilder.dependingScripts.values()],
+      d: [...pageResourceBuilder.dependingStyles.values()],
     })
   )
 }

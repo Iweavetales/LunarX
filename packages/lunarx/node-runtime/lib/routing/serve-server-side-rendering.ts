@@ -3,6 +3,7 @@ import { PageParams } from "~/core/server-context"
 import { AutoResponse, renderPage } from "./render-page"
 import { PathHelper } from "../helper/path"
 import { AppRouteInstanceContext } from "./app-route-instance-context"
+import { PageResourceBuilder } from "../helper/page-resource-builder"
 
 export const serveServerSideRendering = async (
   req: IncomingMessage,
@@ -10,11 +11,17 @@ export const serveServerSideRendering = async (
   params: PageParams,
   appRouteInstanceContext: AppRouteInstanceContext
 ) => {
-  // req.
   console.log("Enter(URL):", req.url)
-  /**
-   * 나중엔 nested 라우트를 지원하기 위해 라우팅 트리 노드를 모아서 배열로 전달
-   */
+
+  const pageResourceBuilder = new PageResourceBuilder(
+    appRouteInstanceContext.appStructureContext
+  )
+
+  // Extract shard resources from current routes
+  appRouteInstanceContext.universalRouteInfoNodeList.forEach((routeNode) => {
+    pageResourceBuilder.pushShard(routeNode.shardPath)
+  })
+
   const renderResult = await renderPage(
     PathHelper.cwd,
     appRouteInstanceContext.appStructureContext,
@@ -22,7 +29,8 @@ export const serveServerSideRendering = async (
     res,
     params,
     appRouteInstanceContext.rawRouteInfoNodeListRootToLeaf,
-    appRouteInstanceContext.universalRouteInfoNodeList
+    appRouteInstanceContext.universalRouteInfoNodeList,
+    pageResourceBuilder
   )
 
   const typeOfResult = typeof renderResult

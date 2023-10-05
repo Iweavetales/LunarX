@@ -1,6 +1,6 @@
 import { ServerContext } from "~/core/server-context"
 import React from "react"
-import { Head } from "../document"
+import { Body, Head } from "../document"
 
 export default async function (
   context: ServerContext,
@@ -12,9 +12,9 @@ export default async function (
         <title>LunarJS</title>
       </Head>
 
-      <body>
+      <Body>
         <Main />
-      </body>
+      </Body>
     </html>
   )
 }

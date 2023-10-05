@@ -77,6 +77,8 @@ export class PostProcessor {
       entries: {},
       chunks: {},
       entryDictionaryByAbstractEntryName: {},
+      shardPathToEntryPathDictionary: {},
+      shardPathToOutputPathDictionary: {},
       browserEntryShardPath: "",
       routeInfoNodes: {},
       browserModuleLoaderFilePath: "",
@@ -215,14 +217,7 @@ export class PostProcessor {
     return processResultRecord
   }
 
-  private async processingOutputs(
-    diffResult: DiffResult,
-    outputInfo: MetafileOutputInfo,
-    outputPath: string
-  ): Promise<{
-    shardPath: ShardPath
-    processResultRecords: ProcessResultRecord[]
-  }> {
+  outputPathToShardPath(outputPath: string): string {
     /**
      * 빌드된 스크립트의 상대 경로
      *  dist/esm/app/routes/importtest.js -> app\routes\importtest.js
@@ -233,6 +228,21 @@ export class PostProcessor {
     const outputRelativePath = relative(this.options.esmDirectory, outputPath)
 
     const normalizedRelativePath: ShardPath = normalizePath(outputRelativePath)
+    return normalizedRelativePath
+  }
+  private async processingOutputs(
+    diffResult: DiffResult,
+    outputInfo: MetafileOutputInfo,
+    outputPath: string
+  ): Promise<{
+    shardPath: ShardPath
+    processResultRecords: ProcessResultRecord[]
+    shardType?: "entry" | "chunk" | "map"
+    shardInfo?: BuiltShardInfo
+    abstractEntryPathName?: string
+  }> {
+    const normalizedRelativePath: ShardPath =
+      this.outputPathToShardPath(outputPath)
 
     // map 파일 여부
     const isMapFile = checkMapFile(normalizedRelativePath)
@@ -243,6 +253,7 @@ export class PostProcessor {
       return {
         shardPath: normalizedRelativePath,
         processResultRecords: [],
+        shardType: "map",
       }
     }
 
@@ -252,7 +263,9 @@ export class PostProcessor {
     /**
      * 모듈 타입 분류
      */
-    const moduleType: ShardSourceType = determineModuleType(outputRelativePath)
+    const moduleType: ShardSourceType = determineModuleType(
+      normalizedRelativePath
+    )
 
     /**
      * 서버사이드 Shard 분류
@@ -337,46 +350,66 @@ export class PostProcessor {
       const abstractEntryName: AbstractEntryName =
         removeLastExtensionOfFilename(abstractEntryPath)
 
-      // registry into dictionary
-      this.manifest.entryDictionaryByAbstractEntryName[abstractEntryName] =
-        entryPoint
-
-      this.manifest.entries[entryPoint] = {
-        entryPoint: entryPoint, // ex) ... /entry/entry.server.js
-        entryFileName: entryFilename, //ex) entry.server.js
-        entryName: removeLastExtensionOfFilename(entryFilename!), //ex) entry.server
-        entryFileRelativeDir: entryFilepathTokens.join("/"),
-        abstractEntryPath: abstractEntryPath,
-        abstractEntryName: abstractEntryName,
-
+      return {
         shardPath: normalizedRelativePath,
-        isServerSideShard: serverSideShardInfo.isServerSideShard,
-        isEntry: true,
-        isChunk: false,
-        serverSideOutputPath: outputPath,
-        clientSideOutputPath: serverSideShardInfo.isServerSideShard
-          ? undefined
-          : outputPath.replace("esm", "client"),
-      } as BuiltShardInfo
+        processResultRecords: processResultRecords,
+        abstractEntryPathName: abstractEntryName,
+        shardType: "entry",
+        shardInfo: {
+          outputPath: outputPath,
+          entryPoint: entryPoint, // ex) ... /entry/entry.server.js
+          entryFileName: entryFilename, //ex) entry.server.js
+          entryName: removeLastExtensionOfFilename(entryFilename!), //ex) entry.server
+          entryFileRelativeDir: entryFilepathTokens.join("/"),
+          abstractEntryPath: abstractEntryPath,
+          abstractEntryName: abstractEntryName,
+
+          shardPath: normalizedRelativePath,
+          isServerSideShard: serverSideShardInfo.isServerSideShard,
+          isEntry: true,
+          isChunk: false,
+          serverSideOutputPath: outputPath,
+          clientSideOutputPath: serverSideShardInfo.isServerSideShard
+            ? undefined
+            : outputPath.replace("esm", "client"),
+          requiredShardPaths: outputInfo.imports.map((importInfo) =>
+            this.outputPathToShardPath(importInfo.path)
+          ),
+          cssBundle: outputInfo.cssBundle,
+          type: "javascript",
+          fileSize: {
+            amd: 0,
+            esm: 0,
+            cjs: 0,
+          },
+        },
+      }
     } else {
       // chunks
 
-      this.manifest.chunks[outputPath] = {
+      return {
         shardPath: normalizedRelativePath,
-        isServerSideShard: serverSideShardInfo.isServerSideShard,
-        isEntry: true,
-        isChunk: false,
-        type: moduleType,
-        serverSideOutputPath: outputPath,
-        clientSideOutputPath: serverSideShardInfo.isServerSideShard
-          ? undefined
-          : outputPath.replace("esm", "client"),
-
-        fileSize: {},
+        processResultRecords: processResultRecords,
+        shardType: "chunk",
+        shardInfo: {
+          outputPath: outputPath,
+          shardPath: normalizedRelativePath,
+          isServerSideShard: serverSideShardInfo.isServerSideShard,
+          isEntry: true,
+          isChunk: false,
+          type: moduleType,
+          serverSideOutputPath: outputPath,
+          clientSideOutputPath: serverSideShardInfo.isServerSideShard
+            ? undefined
+            : outputPath.replace("esm", "client"),
+          requiredShardPaths: outputInfo.imports.map((importInfo) =>
+            this.outputPathToShardPath(importInfo.path)
+          ),
+          cssBundle: outputInfo.cssBundle,
+          fileSize: {},
+        },
       }
     }
-
-    return { shardPath: normalizedRelativePath, processResultRecords }
   }
 
   async setupClientLoaderScript() {
@@ -472,8 +505,33 @@ export class PostProcessor {
               break
           }
         }
+
+        return result
       })
     )
+
+    processingResults.forEach((result) => {
+      if (!result.shardInfo) {
+        return
+      }
+
+      if (result.shardType === "entry") {
+        // registry into dictionary
+        if (result.abstractEntryPathName) {
+          this.manifest.entryDictionaryByAbstractEntryName[
+            result.abstractEntryPathName
+          ] = result.shardInfo.entryPoint!
+        }
+
+        this.manifest.entries[result.shardInfo.entryPoint!] = result.shardInfo
+        this.manifest.shardPathToEntryPathDictionary[result.shardPath] =
+          result.shardInfo.entryPoint!
+      } else if (result.shardType === "chunk") {
+        this.manifest.chunks[result.shardInfo.outputPath] = result.shardInfo
+        this.manifest.shardPathToOutputPathDictionary[result.shardPath] =
+          result.shardInfo.outputPath
+      }
+    })
 
     this.classifyEntries()
 

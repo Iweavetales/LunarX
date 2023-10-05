@@ -121,6 +121,9 @@ importers:
       esbuild:
         specifier: ^0.19.1
         version: 0.19.1
+      lz-string:
+        specifier: ^1.5.0
+        version: 1.5.0
       swc:
         specifier: ^1.0.11
         version: 1.0.11
@@ -179,9 +182,6 @@ importers:
       '@types/lodash':
         specifier: ^4.14.197
         version: 4.14.197
-      '@types/lz-string':
-        specifier: ^1.5.0
-        version: 1.5.0
       '@types/mime':
         specifier: ^3.0.1
         version: 3.0.1
@@ -242,6 +242,9 @@ importers:
       find-my-way:
         specifier: ^7.6.2
         version: 7.6.2
+      fp-ts:
+        specifier: ^2.16.1
+        version: 2.16.1
       husky:
         specifier: ^8.0.3
         version: 8.0.3
@@ -254,9 +257,6 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
-      lz-string:
-        specifier: ^1.5.0
-        version: 1.5.0
       md5:
         specifier: ^2.3.0
         version: 2.3.0
@@ -3526,13 +3526,6 @@ packages:
     resolution: {integrity: sha512-BMVOiWs0uNxHVlHBgzTIqJYmj+PgCo4euloGF+5m4okL3rEYzM2EEv78mw8zWSMM57dM7kVIgJ2QDvwHSoCI5g==}
     dev: true
 
-  /@types/lz-string@1.5.0:
-    resolution: {integrity: sha512-s84fKOrzqqNCAPljhVyC5TjAo6BH4jKHw9NRNFNiRUY5QSgZCmVm5XILlWbisiKl+0OcS7eWihmKGS5akc2iQw==}
-    deprecated: This is a stub types definition. lz-string provides its own type definitions, so you do not need this installed.
-    dependencies:
-      lz-string: 1.5.0
-    dev: true
-
   /@types/mime@1.3.2:
     resolution: {integrity: sha512-YATxVxgRqNH6nHEIsvg6k2Boc1JHI9ZbH5iWFFv/MTkchz3b1ieGDa5T0a9RznNdI0KhVbdbWSN+KWWrQZRxTw==}
     dev: true
@@ -6632,6 +6625,10 @@ packages:
     engines: {node: '>= 0.6'}
     dev: true
 
+  /fp-ts@2.16.1:
+    resolution: {integrity: sha512-by7U5W8dkIzcvDofUcO42yl9JbnHTEDBrzu3pt5fKT+Z4Oy85I21K80EYJYdjQGC2qum4Vo55Ag57iiIK4FYuA==}
+    dev: true
+
   /fraction.js@4.3.1:
     resolution: {integrity: sha512-nx0cki48JBA6ThPeUpeKCNpdhEl/9bRS+dAEYnRUod+Z1jhFfC3K/mBLorZZntqHM+GTH3/dkkpfoT3QITYe7g==}
     dev: true
@@ -9054,7 +9051,7 @@ packages:
   /lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
-    dev: true
+    dev: false
 
   /macos-release@3.2.0:
     resolution: {integrity: sha512-fSErXALFNsnowREYZ49XCdOHF8wOPWuFOGQrAhP7x5J/BqQv+B02cNsTykGpDgRVx43EKg++6ANmTaGTtW+hUA==}

@@ -1,6 +1,6 @@
 import React from "react"
 import { ServerContext } from "lunarx/server"
-import { Head } from "lunarx/document"
+import { Body, Head } from "lunarx/document"
 
 export default async function (
   context: ServerContext,
@@ -12,9 +12,9 @@ export default async function (
         <title>LunarJS</title>
       </Head>
 
-      <body>
+      <Body>
         <Main />
-      </body>
+      </Body>
     </html>
   )
 }
