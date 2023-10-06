@@ -25,10 +25,11 @@ The simplified & light SSR front framework, offering greater flexibility than Ne
 [//]: # (* Supports Deno runtime &#40; in progress &#41;)
 * File based routing
 * Nested routing
-* Scroll position memory
+* Memorize scroll position
 * Server-side fetching
 * Supports NodeJS runtime
 * Page reload on edit
+* Asynchronous Page module load
 
 [//]: # (* SEO &#40;in progress&#41;)
 [//]: # (* Fast Refresh aka. HMR &#40;in progress&#41;)
