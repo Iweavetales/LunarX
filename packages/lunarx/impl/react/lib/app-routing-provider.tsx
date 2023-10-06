@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import { UniversalRouteInfoNode } from "~/core/document-types"
 import { Location, UrlStringToURLComponents } from "~/core/location"
-import { useRouteShardPreparing } from "./root-app-context"
+import { RootAppContext, useRouteShardPreparing } from "./root-app-context"
 import {
   AppRoutingContext,
   BeforeRoutingHandler,
@@ -9,6 +9,8 @@ import {
   PrepareForNavigate,
 } from "./router-context"
 import { graftRouteNodesToRouteTree } from "./graft-route-nodes-to-route-tree"
+import { ShardPath } from "~/core/manifest"
+import { ProductionMode } from "../../../node-runtime/lib/constants"
 
 export function AppRoutingProvider(props: {
   children: React.ReactNode
@@ -17,6 +19,7 @@ export function AppRoutingProvider(props: {
   enterLocation: Location
   enterRouteData: { [pattern: string]: any }
 }) {
+  const rootCtx = useContext(RootAppContext)
   const prepareRouteShards = useRouteShardPreparing()
   const [browsing, setBrowsing] = useState(false)
   const [beforeRoutingListeners, setBeforeRoutingListeners] = useState<{
@@ -206,7 +209,17 @@ export function AppRoutingProvider(props: {
         data: {
           [pattern: string]: any
         }
+        a: ShardPath[] // script shard paths
+        d: ShardPath[] // style shard paths
       } = await res.json()
+
+      ret.a.forEach((scriptShard) => {
+        rootCtx.preloader(scriptShard, "script")
+      })
+
+      ret.d.forEach((scriptShard) => {
+        rootCtx.preloader(scriptShard, "style")
+      })
 
       const loadedRouteDataPaths = Object.keys(ret.data)
       for (const routePath of loadedRouteDataPaths) {
@@ -223,11 +236,14 @@ export function AppRoutingProvider(props: {
       }
 
       // 라우트 컴포넌트 미리 로드
+      !ProductionMode && console.log("prepare route modules")
       try {
         await prepareRouteShards(ret.r.map((routeNode) => routeNode.shardPath))
       } catch (e) {
         console.error("failed to load route", e)
       }
+      // 라우트 컴포넌트 미리 로드
+      !ProductionMode && console.log("loaded route modules")
 
       /**
        * 상위 컴포넌트에게 라우팅 정보와 데이터를 전달 한 후 React Router 로 네비게이트 한다.

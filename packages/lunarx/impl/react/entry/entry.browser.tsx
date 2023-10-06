@@ -19,18 +19,26 @@ type ReactRouteNode = {
 
 type RequireFunction = (
   moduleNames: string[],
-  callback: (modules: any[]) => void
+  callback: (modules: any[]) => void,
+  from: string | null,
+  nonce: string | null,
+  moduleUrlHint: (name: string) => string
 ) => void
 
 function PromiseRequire(
   require: RequireFunction,
-  modulePath: string
+  modulePath: string,
+  nonce: string | null
 ): Promise<any> {
   return new Promise((resolve) => {
     require([modulePath], ([module]) => {
       resolve(module)
-    })
+    }, null, nonce, (moduleName) => shardPathToResourceUrlPath(moduleName))
   })
+}
+
+function shardPathToResourceUrlPath(shardPath: string): string {
+  return `/_/s/${shardPath}`
 }
 
 export default function (
@@ -41,6 +49,7 @@ export default function (
   browserEntryModulePath: string,
   initScriptShardPathDependencies: string[],
   initStyleShardPathDependencies: string[],
+  nonce: string | null,
   custom404RouteShardPath?: string,
   customErrorRouteShardPath?: string,
   initError?: PublicErrorInfo | null
@@ -69,7 +78,8 @@ export default function (
     if (customAppEntryModulePath) {
       const customAppModule: any = await PromiseRequire(
         require,
-        customAppEntryModulePath
+        customAppEntryModulePath,
+        nonce
       )
       App = customAppModule.default
     } else {
@@ -101,9 +111,10 @@ export default function (
               skip: true,
             }
           }
+          const importedModule = await PromiseRequire(require, shardPath, nonce)
 
           return {
-            module: await PromiseRequire(require, shardPath),
+            module: importedModule,
             shardPath: shardPath,
           }
         })
@@ -128,7 +139,7 @@ export default function (
     let notFoundComponent: React.FunctionComponent
     if (custom404RouteShardPath) {
       notFoundComponent = (
-        await PromiseRequire(require, custom404RouteShardPath)
+        await PromiseRequire(require, custom404RouteShardPath, nonce)
       ).default
     } else {
       notFoundComponent = DefaultNotFoundPage
@@ -137,7 +148,7 @@ export default function (
     let errorComponent: React.FunctionComponent
     if (customErrorRouteShardPath) {
       errorComponent = (
-        await PromiseRequire(require, customErrorRouteShardPath)
+        await PromiseRequire(require, customErrorRouteShardPath, nonce)
       ).default
     } else {
       errorComponent = DefaultErrorComponent
@@ -149,7 +160,7 @@ export default function (
        */
       ascRouteNodes.map(async (routeNode) => [
         routeNode.shardPath,
-        (await PromiseRequire(require, routeNode.shardPath)).default,
+        (await PromiseRequire(require, routeNode.shardPath, nonce)).default,
       ])
     ).then((pairs) =>
       /**
@@ -177,13 +188,62 @@ export default function (
               routeShardPrepareTrigger={prepareRouteShards}
               // 브라우저 사이드 샤드 로더 전달
               loader={(shardPath: string) => {
-                return PromiseRequire(require, shardPath)
+                if (/\.js$/.test(shardPath)) {
+                  return PromiseRequire(require, shardPath, nonce)
+                } else if (/\.css$/.test(shardPath)) {
+                  //
+                }
+              }}
+              preload={(shardPath: string, type: "script" | "style") => {
+                const resourceURL = shardPathToResourceUrlPath(shardPath)
+                if (
+                  !document.head.querySelector(
+                    `link[href='${resourceURL}'][rel='preload']`
+                  )
+                ) {
+                  /**
+                   * If the resource is already present, it won't preload to prevent duplication.
+                   */
+                  if (type === "style") {
+                    if (
+                      document.querySelector(`link[href^='${resourceURL}']`)
+                    ) {
+                      return
+                    }
+                  }
+                  if (type === "script") {
+                    if (
+                      document.querySelector(`script[src^='${resourceURL}']`)
+                    ) {
+                      return
+                    }
+                  }
+
+                  const preloadLink = document.createElement("link")
+                  preloadLink.href = resourceURL
+                  preloadLink.nonce = nonce ?? ""
+                  preloadLink.rel = "preload"
+                  preloadLink.as = type
+                  document.head.appendChild(preloadLink)
+
+                  if (type === "style") {
+                    const preloadLink = document.createElement("link")
+                    preloadLink.href = resourceURL
+                    preloadLink.nonce = nonce ?? ""
+                    preloadLink.rel = "stylesheet"
+                    document.head.appendChild(preloadLink)
+                  }
+                }
+
+                return
               }}
               ascendRouteNodeList={ascRouteNodes}
               dataMatchMap={appDataFromServer.rd}
               preloadedComponents={preloadedComponents}
               notFoundComponent={notFoundComponent}
               errorComponent={errorComponent}
+              initScriptShardPathDependencies={initScriptShardPathDependencies}
+              initStyleShardPathDependencies={initStyleShardPathDependencies}
             >
               <ServerFetchesProvider
                 dataKey={"_app"}

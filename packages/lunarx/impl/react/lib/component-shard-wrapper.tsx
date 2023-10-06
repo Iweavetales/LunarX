@@ -19,6 +19,7 @@ export const ComponentShardWrapper = (props: { shardPath: string }) => {
             module.default
           )
         } catch (e) {
+          console.log("eee", e)
           setError(e)
         }
       })()

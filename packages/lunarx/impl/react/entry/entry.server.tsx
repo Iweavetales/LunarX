@@ -76,6 +76,8 @@ export default async function handleRequest(
       console.log("stringify size", appDataStringArgument.length)
   }
 
+  const bootstrapScriptTagId = "b_" + Math.floor(Math.random() * 100000)
+
   const bootstrapScript = ` window.addEventListener('DOMContentLoaded', function() {(function (){ 
             require([${browserEntryModulePathArgument}], function (modules) { 
               modules[0].default( 
@@ -94,6 +96,7 @@ export default async function handleRequest(
                     ...documentSheet.pageResourceBuilder.dependingStyles.values()
                   )
                 )},
+                ${`document.getElementById('${bootstrapScriptTagId}').nonce`},
                 ${JSON.stringify(documentSheet.custom404ShardPath)},
                 ${JSON.stringify(documentSheet.customErrorShardPath)},
                 ${JSON.stringify(documentSheet.err)}
@@ -202,7 +205,7 @@ export default async function handleRequest(
 
       <Bootstrap
         script={bootstrapScript}
-        scriptId={"s_" + Math.floor(Math.random() * 100000)}
+        scriptId={bootstrapScriptTagId}
         nonce={documentSheet.nonce}
         defer
       />
@@ -252,7 +255,7 @@ export default async function handleRequest(
       secondScripts={secondScripts}
       secondLinks={secondStyles}
       bootstrapScript={bootstrapScript}
-      bootstrapScriptId={"s_" + Math.floor(Math.random() * 100000)}
+      bootstrapScriptId={bootstrapScriptTagId}
     >
       {documentContents}
     </DocumentWrapper>

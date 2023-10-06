@@ -53,7 +53,7 @@ export function DocumentWrapper(props: {
   )
 }
 
-export function DocumentResourcePreloads() {
+export function DocumentResourcePrefetch() {
   const ctx = useContext(DocumentInjectionContext)
   if (ctx) {
     return (
@@ -121,33 +121,38 @@ export function DocumentScripts() {
   return null
 }
 
-export const Body = (props: { children: React.ReactNode }) => {
+export const Body = (props: {
+  children: React.ReactNode
+  autoLoadAllLeftResources?: boolean
+}) => {
   const ctx = useContext(DocumentInjectionContext)
   return (
     <body>
       {props.children}
-      {ctx?.secondLinks.map((link, index) => {
-        if (link.element) {
-          return link.element
-        } else {
-          return <link href={link.href} rel={link.rel} key={link.href}></link>
-        }
-      })}
-      {ctx?.secondScripts.map((script, index) => {
-        if (script.element) {
-          return script.element
-        } else {
-          return (
-            <script
-              src={script.src}
-              async={script.async}
-              defer={script.defer}
-              nonce={ctx.nonce}
-              key={script.src}
-            ></script>
-          )
-        }
-      })}
+      {(props.autoLoadAllLeftResources ?? true) &&
+        ctx?.secondLinks.map((link, index) => {
+          if (link.element) {
+            return link.element
+          } else {
+            return <link href={link.href} rel={link.rel} key={link.href}></link>
+          }
+        })}
+      {(props.autoLoadAllLeftResources ?? true) &&
+        ctx?.secondScripts.map((script, index) => {
+          if (script.element) {
+            return script.element
+          } else {
+            return (
+              <script
+                src={script.src}
+                async={script.async}
+                defer={script.defer}
+                nonce={ctx.nonce}
+                key={script.src}
+              ></script>
+            )
+          }
+        })}
     </body>
   )
 }
@@ -170,11 +175,14 @@ export function DocumentLinks() {
 
   return null
 }
-export const Head = (props: { children: React.ReactNode }) => {
+export const Head = (props: {
+  children: React.ReactNode
+  activatePrefetch?: boolean
+}) => {
   return (
     <head>
       {props.children}
-      <DocumentResourcePreloads />
+      {(props.activatePrefetch ?? true) && <DocumentResourcePrefetch />}
       <DocumentScripts />
       <DocumentLinks />
     </head>
@@ -197,12 +205,7 @@ export function Bootstrap(props: {
   defer?: boolean
   async?: boolean
 }) {
-  let scriptContent = props.script
-  // # defined by esbuild
-  // eslint-disable-next-line no-undef
-  if (DEFINE_DELETE_BOOTSTRAP_BLOCK_AFTER_BOOT) {
-    scriptContent += `;document.getElementById("${props.scriptId}").remove();`
-  }
+  const scriptContent = props.script
 
   return (
     <script
@@ -212,6 +215,7 @@ export function Bootstrap(props: {
         __html: scriptContent,
       }}
       nonce={props.nonce}
+      data-lunar={"bootstrap"}
       id={props.scriptId}
     />
   )

@@ -1,19 +1,59 @@
 /**
  * browser-amd-module-loader.js
- *
- * 브라우저 상에서 샤드 스크립트를 로드하고 제공 하는 스크립트
+ * Asynchronous Define/Require pattern module loader
+ * Authored by Seunghoon Han 2023
  */
-// type RequireFunction = (deps: string[]) => any
-type ModuleFactory = (...deps: string[]) => any
-type ModuleContent = {
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+const DEBUG = false
+
+type ModuleUrlResolver = (moduleName: string) => string
+type ModuleNameToURLHint =
+  | {
+      [moduleName: string]: string | null
+    }
+  | ModuleUrlResolver
+
+type ModuleObjectFactory = (...deps: string[]) => any
+type ModuleDefinition = {
   name: string
   deps: string[]
-  moduleFactory: ModuleFactory
+  moduleFactory: ModuleObjectFactory
 }
+// exported real module by moduleDefinition
+type ModuleContent = any
 ;(function () {
-  const moduleMap: { [absoluteModulePath: string]: ModuleContent } = {}
-  const loadedModule: { [absoluteModulePath: string]: any } = {}
+  const moduleMap: { [absoluteModulePath: string]: ModuleDefinition } = {}
+  const loadedModule: { [absoluteModulePath: string]: ModuleContent } = {}
 
+  let subscriberIdCounter = 1
+  const subscribers: {
+    [id: number]: {
+      listener: (moduleName: string) => void
+      moduleName: string
+    }
+  } = {}
+
+  function subscribeModuleLoad(
+    modulePath: string,
+    cb: (module: any) => void
+  ): number {
+    const id = subscriberIdCounter++
+
+    subscribers[id] = { listener: cb, moduleName: modulePath }
+
+    return id
+  }
+  function cancelSubscribeModuleLoad(id: number) {
+    delete subscribers[id]
+  }
+
+  /**
+   * Path resolver
+   * @param base
+   * @param target
+   */
   function resolvePath(base: string, target: string) {
     let editing = base
 
@@ -83,140 +123,136 @@ type ModuleContent = {
     return editing
   }
 
-  function _define(moduleName: string, deps: string[], factory: ModuleFactory) {
-    // console.log("Define", moduleName, deps)
+  function _define(
+    moduleName: string,
+    deps: string[],
+    factory: ModuleObjectFactory
+  ) {
+    // DEBUG &&  console.log("Define", moduleName, deps)
     moduleMap[moduleName] = {
       name: moduleName,
       deps: deps,
       moduleFactory: factory,
     }
-  }
 
-  /**
-   * 배열의 요소 중에 undefined 가 있는지 검사 합니다
-   * @param arr
-   */
-  function HasArrayUndefinedElement(arr: any[]): boolean {
-    const len = arr.length
-    for (let i = 0; i < len; i++) {
-      if (arr[i] === undefined) {
-        return true
+    for (const subscriberId in subscribers) {
+      const subscriber = subscribers[subscriberId]
+      if (subscriber.moduleName === moduleName) {
+        subscriber.listener(moduleName)
+
+        delete subscribers[subscriberId]
       }
     }
-
-    return false
   }
 
-  type ModuleMeta = {
-    name: string
-    deps: string[]
-  }
-  type ModuleCallback = (module: ModuleContent) => void
   type ModuleNamesCallback = (
     moduleNames: string[],
     callback: () => any
   ) => void
 
-  function moduleCall(moduleMeta: ModuleMeta, _callback: ModuleCallback): void {
-    if (loadedModule[moduleMeta.name]) {
-      _callback(loadedModule[moduleMeta.name])
-      return
+  async function resolveModuleDependencyPaths(
+    moduleMeta: ModuleDefinition
+  ): Promise<any[]> {
+    return moduleMeta.deps.map((subModuleName) => {
+      if (subModuleName === "exports") {
+        return "exports"
+      } else if (subModuleName === "require") {
+        return "require"
+      } else {
+        return resolvePath(moduleMeta.name, subModuleName)
+      }
+    })
+  }
+  async function unpackModuleDefinition(
+    moduleDefinition: ModuleDefinition,
+    nonce: string | null,
+    moduleUrlHint: ModuleNameToURLHint
+  ): Promise<any> {
+    DEBUG &&
+      console.log(
+        "> unpack module definition",
+        moduleDefinition.name,
+        loadedModule
+      )
+    if (loadedModule[moduleDefinition.name]) {
+      DEBUG &&
+        console.log(
+          "> present loaded module already",
+          moduleDefinition.name,
+          loadedModule[moduleDefinition.name]
+        )
+      return loadedModule[moduleDefinition.name]
     }
 
-    const targetModuleContents = getTargetModuleContents(moduleMeta)
-    const loadedModules = new Array(targetModuleContents.length)
     const exportObject = {}
+    const resolvedModuleDependencyPaths = await resolveModuleDependencyPaths(
+      moduleDefinition
+    )
 
-    handleSubModules(
-      targetModuleContents,
-      loadedModules,
-      moduleMeta,
+    return await handleSubModules(
+      resolvedModuleDependencyPaths,
+      moduleDefinition,
       exportObject,
-      _callback
+      nonce,
+      moduleUrlHint
     )
   }
 
-  function getTargetModuleContents(moduleMeta: ModuleMeta): any[] {
-    return moduleMeta.deps.map((depModuleName) => {
-      if (["exports", "require"].includes(depModuleName)) {
-        return depModuleName
-      }
-      const absoluteModulePath = resolvePath(moduleMeta.name, depModuleName)
-      const referencingModuleContent = moduleMap[absoluteModulePath]
-
-      if (referencingModuleContent) {
-        return referencingModuleContent
-      }
-
-      throw new Error(`Module[${moduleMeta.name}] not found.`)
-    })
-  }
-
-  function handleSubModules(
-    targetModuleContents: any[],
-    loadedModules: any[],
-    moduleMeta: ModuleMeta,
+  async function handleSubModules(
+    moduleDependencyPaths: any[],
+    moduleMeta: ModuleDefinition,
     exportObject: any,
-    _callback: ModuleCallback
-  ): void {
-    let hasSubModuleCall = false
-
-    targetModuleContents.forEach((content, i) => {
-      if (content === "exports") {
-        loadedModules[i] = exportObject
-      } else if (content === "require") {
-        loadedModules[i] = createModuleNamesCallback(moduleMeta)
-      } else {
-        hasSubModuleCall = true
-        handleModuleContent(
-          content,
-          loadedModules,
-          i,
-          moduleMeta,
-          exportObject,
-          _callback
-        )
+    nonce: string | null,
+    moduleUrlHint: ModuleNameToURLHint
+  ): Promise<any> {
+    const loadedModulesBucket = await PromiseSerialMap(
+      moduleDependencyPaths,
+      (depPath, i) => {
+        return new Promise((resolve, reject) => {
+          if (depPath === "exports") {
+            resolve(exportObject)
+          } else if (depPath === "require") {
+            resolve(createModuleNamesCallback(moduleMeta))
+          } else {
+            _require(
+              [depPath],
+              (requiredModules) => {
+                resolve(requiredModules[0])
+              },
+              moduleMeta.name,
+              nonce,
+              moduleUrlHint
+            )
+          }
+        })
       }
-    })
+    )
 
-    if (!hasSubModuleCall) {
-      finalizeModule(moduleMeta, loadedModules, exportObject, _callback)
-    }
+    return finalizeModule(moduleMeta, loadedModulesBucket, exportObject)
   }
 
   function createModuleNamesCallback(
-    moduleMeta: ModuleMeta
+    moduleMeta: ModuleDefinition
   ): ModuleNamesCallback {
     return (moduleNames: string[], callback: () => any) =>
-      _require(moduleNames, callback, moduleMeta.name)
-  }
-
-  function handleModuleContent(
-    content: any,
-    loadedModules: any[],
-    index: number,
-    moduleMeta: ModuleMeta,
-    exportObject: any,
-    _callback: ModuleCallback
-  ): void {
-    moduleCall(content, (module) => {
-      loadedModules[index] = module
-
-      if (!HasArrayUndefinedElement(loadedModules)) {
-        finalizeModule(moduleMeta, loadedModules, exportObject, _callback)
-      }
-    })
+      _require(moduleNames, callback, moduleMeta.name, null, {})
   }
 
   function finalizeModule(
-    moduleMeta: ModuleMeta,
+    moduleMeta: ModuleDefinition,
     loadedModules: any[],
-    exportObject: any,
-    _callback: ModuleCallback
-  ): void {
+    exportObject: any
+  ): any {
     moduleMeta.moduleFactory(...loadedModules)
     loadedModule[moduleMeta.name] = exportObject
-    _callback(exportObject)
+    DEBUG &&
+      console.log(
+        "> module content has been cached",
+        moduleMeta.name,
+        loadedModule
+      )
+
+    return exportObject
   }
 
   /**
@@ -225,14 +261,18 @@ type ModuleContent = {
    * @param _callback
    * @param _from 모듈 호출 위치
    */
-  function _require(
+  async function _require(
     deps: string[],
-    _callback: (modules: any[]) => any,
-    _from: string | null = null
+    _callback: ((modules: any[]) => void) | null,
+    _from: string | null,
+    nonce: string | null,
+    moduleUrlHint: ModuleNameToURLHint
   ) {
-    const loadedModules = new Array(deps.length)
+    DEBUG && console.log("> required modules", deps, moduleMap)
 
-    const targetModuleContents = deps.map((moduleName) => {
+    const retrievedModuleDefinitionList: ModuleDefinition[] = []
+
+    for await (const moduleName of deps) {
       /**
        * _from 이 입력되면 모듈 내에서 모듈을 호출 했으므로
        * _from 기준으로 모듈의 절대경로를 보정 한다.
@@ -242,41 +282,88 @@ type ModuleContent = {
         const referencingModuleContent = moduleMap[absoluteModulePath]
 
         if (referencingModuleContent) {
-          return referencingModuleContent
+          retrievedModuleDefinitionList.push(referencingModuleContent)
+          continue
         }
       }
 
       if (moduleMap[moduleName]) {
-        return moduleMap[moduleName]
+        retrievedModuleDefinitionList.push(moduleMap[moduleName])
+        continue
       }
 
-      throw new Error(`${_from}: Module[${moduleName}] not found.`)
-    })
+      const moduleDefinitionFromRemote: ModuleDefinition = await new Promise(
+        (resolve, reject) => {
+          const moduleUrl =
+            typeof moduleUrlHint === "function"
+              ? moduleUrlHint(moduleName)
+              : moduleUrlHint[moduleName] || moduleName
 
-    targetModuleContents.forEach((content, copyIndex) => {
-      moduleCall(content, (module) => {
-        loadedModules[copyIndex] = module
+          const presentScriptTag = document.querySelector(
+            `script[src='${moduleUrl}']`
+          )
+          if (!presentScriptTag) {
+            const preloadedScript = document.createElement("script")
+            DEBUG && console.log(`> Load module ${moduleName}`)
+            preloadedScript.src = moduleUrl
+            preloadedScript.nonce = nonce ?? ""
 
-        if (HasArrayUndefinedElement(loadedModules) === false) {
-          _callback(loadedModules)
+            /**
+             * Will called listener when loaded module from remote has been defined.
+             */
+            const subscribingId = subscribeModuleLoad(moduleName, () => {
+              DEBUG && console.log("> defined module", moduleMap, loadedModule)
+              resolve(moduleMap[moduleName])
+            })
+            preloadedScript.onload = () => {
+              DEBUG &&
+                console.log("> onload module script", moduleMap, loadedModule)
+            }
+            preloadedScript.onerror = () => {
+              cancelSubscribeModuleLoad(subscribingId)
+              reject(`from:'${_from}' Module[${moduleName}] not found.`)
+            }
+            document.body.appendChild(preloadedScript)
+          }
         }
-      })
+      )
+
+      retrievedModuleDefinitionList.push(moduleDefinitionFromRemote)
+    }
+
+    DEBUG &&
+      console.log(
+        "> retrieved module factories",
+        deps,
+        retrievedModuleDefinitionList
+      )
+
+    PromiseSerialMap(retrievedModuleDefinitionList, (moduleDef) => {
+      return unpackModuleDefinition(moduleDef, nonce, moduleUrlHint)
+    }).then((requiredModuleContents) => {
+      _callback?.(requiredModuleContents)
     })
-    // for(let i =0; i < deps.length; i++ ){
-    //   let copyIndex = i
-    //   let moduleContent = moduleMap[deps[i]];
-    //
-    //   moduleCall(moduleContent, (module) => {
-    //     loadedModules[copyIndex] = module
-    //     console.log('module loaded', moduleContent.name, loadedModules)
-    //
-    //     if( IsArrayHasUndefinedElement(loadedModules) === false ){
-    //       _callback(loadedModules)
-    //     }
-    //   })
-    // }
   }
 
+  async function PromiseSerialMap<ItemType, ResultType>(
+    items: ItemType[],
+    processor: (item: ItemType, index: number) => Promise<ResultType>
+  ) {
+    const bucket: ResultType[] = new Array(items.length)
+    let index = 0
+    for await (const item of items) {
+      bucket[index] = await processor(item, index)
+
+      index++
+    }
+    return bucket
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   window.define = _define
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   window.require = _require
 })()

@@ -8,11 +8,11 @@ export default async function (
 ) {
   return (
     <html>
-      <Head>
+      <Head activatePrefetch={false}>
         <title>LunarJS</title>
       </Head>
 
-      <Body>
+      <Body autoLoadAllLeftResources={false}>
         <Main />
       </Body>
     </html>

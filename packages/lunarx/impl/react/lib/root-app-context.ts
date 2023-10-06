@@ -4,6 +4,7 @@ import {
   UniversalRouteInfoNode,
 } from "~/core/document-types"
 import { PublicErrorInfo } from "~/core/context"
+import { AsyncEmptyFunction, EmptyFunction, NullFunction } from "./constants"
 
 export type ComponentModule = any
 /**
@@ -11,9 +12,14 @@ export type ComponentModule = any
  * 실제 함수 형식의 컴포넌트를 반환 해야 한다
  */
 export type ShardLoader = (shardPath: string) => Promise<ComponentModule>
+export type PreloadResource = (
+  shardPath: string,
+  type: "script" | "style"
+) => void
 export type RootAppContextValue = {
   initError?: PublicErrorInfo | null
   loader: ShardLoader
+  preloader: PreloadResource
   routeShardPrepareTrigger: (shardPaths: string[]) => Promise<void>
   components: { [shardPath: string]: React.FunctionComponent }
   registerComponentByShardPath: (shardPath: string, shard: any) => void
@@ -28,6 +34,8 @@ export type RootAppContextValue = {
   ascendRouteNodeList: UniversalRouteInfoNode[]
   dataMatchMap: RouteServerFetchDataMap
 
+  initScriptShardPathDependencies: string[]
+  initStyleShardPathDependencies: string[]
   staticHandler?: { dataRoutes: any; context: any }
   //
   // // client side browsing 에 긴밀하게 사용되는 속성들
@@ -41,22 +49,20 @@ export type RootAppContextValue = {
  */
 export const RootAppContext = createContext<RootAppContextValue>({
   initError: null,
-  loader: async (shardPath: string) => {
-    return true
-  },
-  routeShardPrepareTrigger: async (shardPaths: string[]) => {
-    return
-  },
+  loader: AsyncEmptyFunction,
+  preloader: EmptyFunction,
+  routeShardPrepareTrigger: AsyncEmptyFunction,
   components: {},
-  registerComponentByShardPath: () => {
-    return
-  },
-  errorComponent: () => null,
-  notFoundComponent: () => null,
+  registerComponentByShardPath: EmptyFunction,
+  errorComponent: NullFunction,
+  notFoundComponent: NullFunction,
   enterLocation: { pathname: "", search: "?", hash: "#" },
   ascendRouteNodeList: [],
   dataMatchMap: {},
   staticHandler: undefined, // Only exists on Server-side
+
+  initScriptShardPathDependencies: [],
+  initStyleShardPathDependencies: [],
 })
 
 export function useRouteShardPreparing() {

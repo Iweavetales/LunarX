@@ -4,6 +4,7 @@ import {
   UniversalRouteInfoNode,
 } from "~/core/document-types"
 import {
+  PreloadResource,
   RootAppContext,
   RootAppContextValue,
   ShardLoader,
@@ -14,6 +15,7 @@ export default function LunarAppContainer(props: {
   initError?: PublicErrorInfo | null
   ascendRouteNodeList: UniversalRouteInfoNode[]
   loader: ShardLoader
+  preload: PreloadResource
   preloadedComponents: { [shardPath: string]: React.FunctionComponent }
   routeShardPrepareTrigger: (shardPaths: string[]) => Promise<void>
   dataMatchMap: RouteServerFetchDataMap
@@ -26,6 +28,8 @@ export default function LunarAppContainer(props: {
     hash: string
   }
   staticHandler?: RootAppContextValue["staticHandler"]
+  initScriptShardPathDependencies: string[]
+  initStyleShardPathDependencies: string[]
 }) {
   const [loadedComponents, setLoadedComponents] = useState({
     ...props.preloadedComponents,
@@ -36,6 +40,7 @@ export default function LunarAppContainer(props: {
       value={{
         initError: props.initError,
         loader: props.loader,
+        preloader: props.preload,
         routeShardPrepareTrigger: props.routeShardPrepareTrigger,
         components: loadedComponents,
         errorComponent: props.errorComponent,
@@ -43,6 +48,8 @@ export default function LunarAppContainer(props: {
         ascendRouteNodeList: props.ascendRouteNodeList,
         dataMatchMap: props.dataMatchMap,
         enterLocation: props.enterLocation,
+        initScriptShardPathDependencies: props.initScriptShardPathDependencies,
+        initStyleShardPathDependencies: props.initStyleShardPathDependencies,
         registerComponentByShardPath: (shardPath, shard) => {
           setLoadedComponents((state) => {
             return {
