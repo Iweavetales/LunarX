@@ -14,7 +14,6 @@ import { ProductionMode } from "../../../node-runtime/lib/constants"
 
 export function AppRoutingProvider(props: {
   children: React.ReactNode
-  // onFetchedRoute: (newRoutes: UniversalRouteInfoNode[], dataMap: { [pattern: string]: any }) => void;
   enterRouteNodeList: UniversalRouteInfoNode[]
   enterLocation: Location
   enterRouteData: { [pattern: string]: any }
@@ -320,65 +319,3 @@ export function AppRoutingProvider(props: {
     </AppRoutingContext.Provider>
   )
 }
-
-// class Router2 extends React.Component<any, any> {
-//   constructor(props) {
-//     super(props)
-//   }
-// }
-
-// function graftRouteNodesToRouteTree(
-//   ascendRouteNodeList: UniversalRouteInfoNode[],
-//   tree: RouteTreeNode[],
-// ): [RouteTreeNode[], boolean] {
-//   //
-//   let clonedTree: RouteTreeNode[] = JSON.parse(JSON.stringify(tree));
-//   let changed = false;
-//   let ascendNodeCount = ascendRouteNodeList.length;
-//
-//   let upperChildrenListRef: RouteTreeNode[] = clonedTree;
-//   let upperNode: RouteTreeNode | null = null;
-//
-//   /**
-//    * 입력된 ascendRouteNodeList 의 라우트 노드를 차례대로 돌아가며 tree 에 존재하는 동일한 라우트 노드외에 tree 에 존재하지 않는 라우트 노드를 tree 에 추가 한다.
-//    */
-//   for (let i = 0; i < ascendNodeCount; i++) {
-//     let currentNode = ascendRouteNodeList[i];
-//
-//     /**
-//      * 이전 루프에 선택된 상위 노드의 자식 또는 tree 의 최상위 노드 중에서 현재 노드와 같은 노드를 찾는다.
-//      */
-//     let foundNode: RouteTreeNode | undefined = undefined;
-//     if (upperNode !== null) {
-//       // 이전 루프에 선택된 상위 노드의 자식중 현재 노드와 같은 노드가 있는지 찾는다.
-//       // 단, 이전 루프에서 선택된 상위 노드와 현재 노드의 상위노드가 같아야 한다.
-//       // 현재 노드의 상위 노드와 루프에서 선택된 상위노드가 다른 노드라면 에러를 발생 한다.
-//       if (upperNode.matchPattern === currentNode.upperRouteMatchPattern) {
-//         foundNode = upperNode.children.find(node => node.matchPattern === currentNode.matchPattern);
-//
-//         console.log('found same node', upperNode, foundNode);
-//       } else {
-//         throw new Error(
-//           `not matched[${currentNode.upperRouteMatchPattern}] to upper route node[${upperNode.matchPattern}]`,
-//         );
-//       }
-//     } else {
-//       foundNode = clonedTree.find(node => node.matchPattern === currentNode.matchPattern);
-//     }
-//
-//     if (foundNode) {
-//       // 상위 노드를 찾았다면
-//       upperNode = foundNode;
-//       upperChildrenListRef = foundNode.children;
-//     } else {
-//       // 노드의 가지를 추가할 상위 노드를 찾지 못하면 남은 노드들의 트리를 만들어 지금까지 찾은 tree 에 추가 한다.
-//       let newTreeBranchNode = { ...currentNode, children: [] };
-//       upperChildrenListRef.push(newTreeBranchNode);
-//       upperChildrenListRef = newTreeBranchNode.children;
-//
-//       changed = true;
-//     }
-//   }
-//
-//   return [clonedTree, changed];
-// }

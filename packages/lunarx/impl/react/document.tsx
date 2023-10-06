@@ -189,15 +189,6 @@ export const Head = (props: {
   )
 }
 
-//
-// export function App() {
-//   const ctx = useContext(DocumentInjectionContext);
-//   if (ctx) {
-//     return ctx.app;
-//   }
-//   return null;
-// }
-
 export function Bootstrap(props: {
   script: string
   scriptId: string

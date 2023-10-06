@@ -1,7 +1,7 @@
 /**
  * browser-amd-module-loader.js
  * Asynchronous Define/Require pattern module loader
- * Authored by Seunghoon Han 2023
+ * Authored by Iweavetales@github 2023
  */
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -24,8 +24,11 @@ type ModuleDefinition = {
 // exported real module by moduleDefinition
 type ModuleContent = any
 ;(function () {
-  const moduleMap: { [absoluteModulePath: string]: ModuleDefinition } = {}
-  const loadedModule: { [absoluteModulePath: string]: ModuleContent } = {}
+  const loadedModuleDefinitions: {
+    [absoluteModulePath: string]: ModuleDefinition
+  } = {}
+  const loadedModuleContents: { [absoluteModulePath: string]: ModuleContent } =
+    {}
 
   let subscriberIdCounter = 1
   const subscribers: {
@@ -39,7 +42,13 @@ type ModuleContent = any
     modulePath: string,
     cb: (module: any) => void
   ): number {
+    DEBUG && console.log("> subscribe module definition loaded", modulePath)
     const id = subscriberIdCounter++
+
+    if (loadedModuleDefinitions[modulePath]) {
+      cb(loadedModuleDefinitions[modulePath])
+      return id
+    }
 
     subscribers[id] = { listener: cb, moduleName: modulePath }
 
@@ -129,7 +138,7 @@ type ModuleContent = any
     factory: ModuleObjectFactory
   ) {
     // DEBUG &&  console.log("Define", moduleName, deps)
-    moduleMap[moduleName] = {
+    loadedModuleDefinitions[moduleName] = {
       name: moduleName,
       deps: deps,
       moduleFactory: factory,
@@ -138,6 +147,7 @@ type ModuleContent = any
     for (const subscriberId in subscribers) {
       const subscriber = subscribers[subscriberId]
       if (subscriber.moduleName === moduleName) {
+        DEBUG && console.log("> notify module def loaded", moduleName)
         subscriber.listener(moduleName)
 
         delete subscribers[subscriberId]
@@ -172,16 +182,16 @@ type ModuleContent = any
       console.log(
         "> unpack module definition",
         moduleDefinition.name,
-        loadedModule
+        loadedModuleContents
       )
-    if (loadedModule[moduleDefinition.name]) {
+    if (loadedModuleContents[moduleDefinition.name]) {
       DEBUG &&
         console.log(
-          "> present loaded module already",
+          "> Module content is already existent",
           moduleDefinition.name,
-          loadedModule[moduleDefinition.name]
+          loadedModuleContents[moduleDefinition.name]
         )
-      return loadedModule[moduleDefinition.name]
+      return loadedModuleContents[moduleDefinition.name]
     }
 
     const exportObject = {}
@@ -244,12 +254,12 @@ type ModuleContent = any
     exportObject: any
   ): any {
     moduleMeta.moduleFactory(...loadedModules)
-    loadedModule[moduleMeta.name] = exportObject
+    loadedModuleContents[moduleMeta.name] = exportObject
     DEBUG &&
       console.log(
         "> module content has been cached",
         moduleMeta.name,
-        loadedModule
+        loadedModuleContents
       )
 
     return exportObject
@@ -268,7 +278,7 @@ type ModuleContent = any
     nonce: string | null,
     moduleUrlHint: ModuleNameToURLHint
   ) {
-    DEBUG && console.log("> required modules", deps, moduleMap)
+    DEBUG && console.log("> required modules", deps, loadedModuleDefinitions)
 
     const retrievedModuleDefinitionList: ModuleDefinition[] = []
 
@@ -279,7 +289,8 @@ type ModuleContent = any
        */
       if (_from !== null) {
         const absoluteModulePath = resolvePath(_from, moduleName)
-        const referencingModuleContent = moduleMap[absoluteModulePath]
+        const referencingModuleContent =
+          loadedModuleDefinitions[absoluteModulePath]
 
         if (referencingModuleContent) {
           retrievedModuleDefinitionList.push(referencingModuleContent)
@@ -287,8 +298,8 @@ type ModuleContent = any
         }
       }
 
-      if (moduleMap[moduleName]) {
-        retrievedModuleDefinitionList.push(moduleMap[moduleName])
+      if (loadedModuleDefinitions[moduleName]) {
+        retrievedModuleDefinitionList.push(loadedModuleDefinitions[moduleName])
         continue
       }
 
@@ -299,10 +310,10 @@ type ModuleContent = any
               ? moduleUrlHint(moduleName)
               : moduleUrlHint[moduleName] || moduleName
 
-          const presentScriptTag = document.querySelector(
+          const attachedScriptTag = document.querySelector(
             `script[src='${moduleUrl}']`
           )
-          if (!presentScriptTag) {
+          if (!attachedScriptTag) {
             const preloadedScript = document.createElement("script")
             DEBUG && console.log(`> Load module ${moduleName}`)
             preloadedScript.src = moduleUrl
@@ -312,12 +323,22 @@ type ModuleContent = any
              * Will called listener when loaded module from remote has been defined.
              */
             const subscribingId = subscribeModuleLoad(moduleName, () => {
-              DEBUG && console.log("> defined module", moduleMap, loadedModule)
-              resolve(moduleMap[moduleName])
+              DEBUG &&
+                console.log(
+                  "> module definition loaded",
+                  loadedModuleDefinitions,
+                  loadedModuleContents
+                )
+              resolve(loadedModuleDefinitions[moduleName])
             })
             preloadedScript.onload = () => {
               DEBUG &&
-                console.log("> onload module script", moduleMap, loadedModule)
+                console.log(
+                  "> onload module script",
+                  moduleName,
+                  loadedModuleDefinitions,
+                  loadedModuleContents
+                )
             }
             preloadedScript.onerror = () => {
               cancelSubscribeModuleLoad(subscribingId)
@@ -341,6 +362,8 @@ type ModuleContent = any
     PromiseSerialMap(retrievedModuleDefinitionList, (moduleDef) => {
       return unpackModuleDefinition(moduleDef, nonce, moduleUrlHint)
     }).then((requiredModuleContents) => {
+      DEBUG &&
+        console.log("> callback require result", deps, requiredModuleContents)
       _callback?.(requiredModuleContents)
     })
   }

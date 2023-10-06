@@ -7,7 +7,6 @@ import LunarAppContainer from "../lib/root-app-container"
 import { RootElementID } from "~/core/constants"
 import { SwiftRenderer } from "../app"
 import { ServerFetchesProvider } from "../lib/server-fetches-provider"
-import { TAppData } from "../lib/app-data"
 import DefaultNotFoundPage from "./_404.default"
 import DefaultErrorComponent from "./_error.default"
 import { PublicErrorInfo } from "~/core/context"
@@ -97,38 +96,34 @@ export default function (
      * @param shardPaths
      */
     async function prepareRouteShards(shardPaths: string[]) {
-      const loadedShards: {
+      /**
+       * Filtering already loaded module
+       */
+      const filteredModuleNames = shardPaths.filter((shardPath) => {
+        if (routeComponents[shardPath]) {
+          return false
+        }
+        return true
+      })
+
+      const loadedModules: {
         module?: { default: any }
         shardPath?: string
-        skip?: boolean
-      }[] = await Promise.all(
-        shardPaths.map(async (shardPath) => {
-          /**
-           * 준비된 컴포넌트가 이미 있으면 skip 을 true 로
-           */
-          if (routeComponents[shardPath]) {
-            return {
-              skip: true,
-            }
-          }
-          const importedModule = await PromiseRequire(require, shardPath, nonce)
+      }[] = await new Promise((resolve) => {
+        require(filteredModuleNames, (modules) => {
+          resolve(modules)
+        }, null, nonce, (moduleName) => shardPathToResourceUrlPath(moduleName))
+      })
 
-          return {
-            module: importedModule,
-            shardPath: shardPath,
-          }
-        })
-      )
-
-      for (let i = 0; i < loadedShards.length; i++) {
-        const loadedShardInfo = loadedShards[i]
+      for (let i = 0; i < loadedModules.length; i++) {
+        const loadedShardInfo = loadedModules[i]
+        const moduleName = filteredModuleNames[i]
         if (
           loadedShardInfo &&
           loadedShardInfo.shardPath &&
           loadedShardInfo.module
         ) {
-          routeComponents[loadedShardInfo.shardPath] =
-            loadedShardInfo.module.default
+          routeComponents[moduleName] = loadedShardInfo.module.default
         }
       }
     }
