@@ -64,11 +64,7 @@ export default function (
     process.env.NODE_ENV !== "production" &&
       console.timeEnd("server data decompress time")
   } else {
-    process.env.NODE_ENV !== "production" &&
-      console.time("server data parsing time")
-    appDataFromServer = JSON.parse(atob(appDataStringFromServer))
-    process.env.NODE_ENV !== "production" &&
-      console.timeEnd("server data parsing time")
+    appDataFromServer = appDataStringFromServer
   }
 
   async function Startup() {

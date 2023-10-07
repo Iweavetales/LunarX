@@ -67,13 +67,9 @@ export default async function handleRequest(
         )}%)`
       )
   } else {
+    appDataStringArgument = stringifiedAppData
     process.env.NODE_ENV !== "production" &&
-      console.time("server data stringify time")
-    appDataStringArgument = '"' + btoa(stringifiedAppData) + '"'
-    process.env.NODE_ENV !== "production" &&
-      console.timeEnd("server data stringify time")
-    process.env.NODE_ENV !== "production" &&
-      console.log("stringify size", appDataStringArgument.length)
+      console.log("data stringify size", appDataStringArgument.length)
   }
 
   const bootstrapScriptTagId = "b_" + Math.floor(Math.random() * 100000)

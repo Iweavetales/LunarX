@@ -20,8 +20,8 @@ export function Link(props: {
     <a
       onClick={(e) => {
         e.preventDefault()
+        e.stopPropagation()
 
-        // location.href = props.href;
         router.push(props.href, props.options)
       }}
       href={props.href}
