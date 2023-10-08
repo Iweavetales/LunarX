@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useId } from "react"
+import React, { MouseEvent, useContext, useEffect, useId } from "react"
 import { AppRoutingContext, NavigateOptions } from "./lib/router-context"
 import { useLocation, useNavigate } from "react-router"
 import {
@@ -9,10 +9,11 @@ import {
 } from "~/core/location"
 
 export function Link(props: {
-  href: string
+  href?: string
   children?: React.ReactNode
   className?: string
   options?: NavigateOptions
+  onClick?: (e: MouseEvent) => boolean
 }) {
   const router = useRouter()
 
@@ -21,8 +22,12 @@ export function Link(props: {
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
+        props.onClick?.(e)
+        if (props.href === undefined && props.options === undefined) {
+          return
+        }
 
-        router.push(props.href, props.options)
+        router.push(props.href ?? "", props.options)
       }}
       href={props.href}
       className={props.className}
