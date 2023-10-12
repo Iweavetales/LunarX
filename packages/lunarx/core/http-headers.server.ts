@@ -23,6 +23,30 @@ export class MutableHTTPHeaders {
     return headerObj
   }
 
+  asTuples(): [string, string][] {
+    const headerTuples: [string, string][] = []
+    const entries = this.headers.entries()
+    for (let it = entries.next(); it.value; it = entries.next()) {
+      if (Array.isArray(it.value[1])) {
+        it.value[1].forEach((v) => {
+          headerTuples.push([it.value[0], v])
+        })
+      } else {
+        headerTuples.push([it.value[0], it.value[1]])
+      }
+    }
+    return headerTuples
+  }
+
+  asRecord(): Record<string, string> {
+    const headerRecord: Record<string, string> = {}
+    const entries = this.headers.entries()
+    for (let it = entries.next(); it.value; it = entries.next()) {
+      headerRecord[it.value[0]] = it.value[1]
+    }
+    return headerRecord
+  }
+
   set(k: string, v: string | string[]): void {
     this.headers.set(k, v)
   }

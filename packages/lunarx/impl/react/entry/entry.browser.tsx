@@ -24,22 +24,6 @@ type RequireFunction = (
   moduleUrlHint: (name: string) => string
 ) => void
 
-function PromiseRequire(
-  require: RequireFunction,
-  modulePath: string,
-  nonce: string | null
-): Promise<any> {
-  return new Promise((resolve) => {
-    require([modulePath], ([module]) => {
-      resolve(module)
-    }, null, nonce, (moduleName) => shardPathToResourceUrlPath(moduleName))
-  })
-}
-
-function shardPathToResourceUrlPath(shardPath: string): string {
-  return `/_/s/${shardPath}`
-}
-
 export default function (
   require: RequireFunction,
   appDataStringFromServer: string,
@@ -49,10 +33,27 @@ export default function (
   initScriptShardPathDependencies: string[],
   initStyleShardPathDependencies: string[],
   nonce: string | null,
+  builtVersion: string,
   custom404RouteShardPath?: string,
   customErrorRouteShardPath?: string,
   initError?: PublicErrorInfo | null
 ) {
+  function shardPathToResourceUrlPath(shardPath: string): string {
+    return `/_/s/${shardPath}?v=${builtVersion}`
+  }
+
+  function PromiseRequire(
+    require: RequireFunction,
+    modulePath: string,
+    nonce: string | null
+  ): Promise<any> {
+    return new Promise((resolve) => {
+      require([modulePath], ([module]) => {
+        resolve(module)
+      }, null, nonce, (moduleName) => shardPathToResourceUrlPath(moduleName))
+    })
+  }
+
   let appDataFromServer = {}
   // eslint-disable-next-line no-undef
   if (COMPRESSING_SSR_DATA) {

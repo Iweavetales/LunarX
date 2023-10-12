@@ -67,4 +67,5 @@ export type DocumentSheet = {
   requireFunction: (shardPath: ShardPath) => any
 
   nonce: string // script 에 사용되는 nonce 값
+  v: string // built version
 }

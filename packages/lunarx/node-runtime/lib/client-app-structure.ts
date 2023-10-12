@@ -114,7 +114,7 @@ export class AppStructureContext {
 
   shardPathToPublicUrlPath(shardPath: string, version = true): string {
     if (version) {
-      return "/_/s/" + shardPath + "?v=" + version
+      return "/_/s/" + shardPath + "?v=" + this.#manifest.builtVersion
     }
     return "/_/s/" + shardPath
   }

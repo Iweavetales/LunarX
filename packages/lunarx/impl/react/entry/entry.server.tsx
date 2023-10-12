@@ -93,6 +93,7 @@ export default async function handleRequest(
                   )
                 )},
                 ${`document.getElementById('${bootstrapScriptTagId}').nonce`},
+                ${JSON.stringify(documentSheet.v)},
                 ${JSON.stringify(documentSheet.custom404ShardPath)},
                 ${JSON.stringify(documentSheet.customErrorShardPath)},
                 ${JSON.stringify(documentSheet.err)}

@@ -102,6 +102,7 @@ export async function executeServerEntry(
         return appStructureContext.getModuleByShardPath(shardPath)
       },
       nonce: nonce,
+      v: appStructureContext.manifest.builtVersion,
     },
     res
   )
