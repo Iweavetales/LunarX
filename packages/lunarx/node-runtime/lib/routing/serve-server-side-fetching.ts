@@ -34,7 +34,8 @@ export const serveServerSideFetching = async (
     params,
     appRouteInstanceContext.universalRouteInfoNodeList,
     requestHeaders,
-    responseHeaders
+    responseHeaders,
+    ""
   )
 
   const passOrThrownError = await initServer(

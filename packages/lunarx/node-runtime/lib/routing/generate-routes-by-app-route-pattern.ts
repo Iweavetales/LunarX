@@ -8,6 +8,7 @@ import { HTTPVersion, Instance as RouterInstance } from "find-my-way"
 import { AppRouteInstanceContext } from "./app-route-instance-context"
 import { serveServerSideRendering } from "./serve-server-side-rendering"
 import { serveServerSideFetching } from "./serve-server-side-fetching"
+import { preloadRouteInfo } from "./preload-route-info"
 
 export const GenerateRoutesByAppRoutePattern = (
   rootRouter: RouterInstance<HTTPVersion.V1>,
@@ -58,9 +59,19 @@ export const GenerateRoutesByAppRoutePattern = (
    * route 체크 및 SSR 데이터 로드 API
    */
   rootRouter.on(
-    "GET", // @Todo: change to post
+    "POST", // @Todo: change to post
     "/_/r" + routePattern,
     serveServerSideFetching,
+    appRouteInstanceContext
+  )
+
+  /**
+   * Preload shards
+   */
+  rootRouter.on(
+    "POST", // @Todo: change to post
+    "/_/pl" + routePattern,
+    preloadRouteInfo,
     appRouteInstanceContext
   )
 }

@@ -13,6 +13,7 @@ export function TranspileScript(
     // https://npmdoc.github.io/node-npmdoc-babel-core/build/apidoc.html#apidoc.element.babel-core.File.prototype.getModuleName
     moduleId: filename, // amd 모듈로 전환 할 때 모듈명을 부여하기 위해 moduleId 를 지정
     filename: filename,
+
     presets: [
       [
         "@babel/preset-env",

@@ -19,6 +19,11 @@ export function Link(props: {
 
   return (
     <a
+      onMouseOver={() => {
+        if (props.href) {
+          router.preloadModules(props.href)
+        }
+      }}
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -49,6 +54,7 @@ export const useSoftReload = () => {
 export type pushMethod = (href: string, options?: NavigateOptions) => void
 export { NavigateOptions }
 export const useRouter = (): {
+  preloadModules: (href: string) => Promise<void>
   push: pushMethod
   getQueryMap: () => QueryMap
 } => {
@@ -57,6 +63,9 @@ export const useRouter = (): {
   const location = useLocation()
 
   return {
+    preloadModules: (href: string) => {
+      return routerContext.preloadRouteShards(href)
+    },
     push: (href: string, options) => {
       const query = options?.query ?? {}
       const newUrl = UrlStringToURLComponents(href)

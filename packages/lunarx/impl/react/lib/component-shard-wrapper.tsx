@@ -3,23 +3,23 @@ import { RootAppContext } from "./root-app-context"
 import { Params, useParams } from "react-router"
 
 export const ComponentShardWrapper = (props: { shardPath: string }) => {
-  const appRouteContext = useContext(RootAppContext)
+  const rootAppContextValue = useContext(RootAppContext)
   const params = useParams()
   const [error, setError] = useState<unknown | null>(null)
-  const preparedComponent = appRouteContext.components[props.shardPath]
-
+  const preparedComponent = rootAppContextValue.components[props.shardPath]
+  // console.log("rootAppContextValue.components", rootAppContextValue.components)
   useEffect(() => {
     if (!preparedComponent) {
       ;(async () => {
         try {
-          const module = await appRouteContext.loader(props.shardPath)
+          const module = await rootAppContextValue.loader(props.shardPath)
 
-          appRouteContext.registerComponentByShardPath(
+          rootAppContextValue.registerComponentByShardPath(
             props.shardPath,
             module.default
           )
         } catch (e) {
-          console.log("eee", e)
+          // console.log("eee", e)
           setError(e)
         }
       })()

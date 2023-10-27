@@ -28,6 +28,7 @@ export type RouteTreeNode = UniversalRouteInfoNode & {
 }
 type SwiftRouterProvides = {
   prepareNavigate: PrepareForNavigate
+  preloadRouteShards: (href: string) => Promise<void>
   browsing: boolean
   currentLocation: {
     auto: boolean
@@ -44,7 +45,7 @@ type SwiftRouterProvides = {
 
 export const AppRoutingContext = createContext<SwiftRouterProvides>({
   prepareNavigate: EmptyFunction,
-
+  preloadRouteShards: AsyncEmptyFunction,
   currentLocation: { auto: false, hash: "", pathname: "", search: "" },
   browsing: false,
   routeTree: [],

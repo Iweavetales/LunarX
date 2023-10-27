@@ -29,6 +29,10 @@ export type LunarConfig = {
   etc: {
     deleteBootstrapScriptAfterBoot: boolean
   }
+
+  // debug: {
+  //   debugLoader: boolean
+  // }
 }
 
 export const baseConfig: LunarConfig = {

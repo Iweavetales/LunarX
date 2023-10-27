@@ -12,6 +12,25 @@ import { graftRouteNodesToRouteTree } from "./graft-route-nodes-to-route-tree"
 import { ShardPath } from "~/core/manifest"
 import { ProductionMode } from "../../../node-runtime/lib/constants"
 
+function isOutboundHref(href: string) {
+  /**
+   * preprocessing routing destination
+   */
+  if (href.startsWith("/")) {
+    // nothing to do in here
+    return false
+  } else if (href.startsWith("#")) {
+    // will change hash
+    location.href = href
+    return false
+  } else if (href.startsWith("?")) {
+    // same destination path routing
+    return false
+  } else {
+    return true
+  }
+}
+
 export function AppRoutingProvider(props: {
   children: React.ReactNode
   enterRouteNodeList: UniversalRouteInfoNode[]
@@ -89,7 +108,7 @@ export function AppRoutingProvider(props: {
       // 새로고침 이후의 히스토리 백이라서 이전 라우트 정보가 없을 경우엔 라우터 정보를 받아 온다.
       // eslint-disable-next-line no-constant-condition
       if (true /* 임시, 매번 페이지 데이터를 새로 받아 온다 */) {
-        const res = await fetch("/_/r" + pathUrl)
+        const res = await fetch("/_/r" + pathUrl, { method: "POST" })
         const ret: {
           r: UniversalRouteInfoNode[]
           data: {
@@ -147,6 +166,41 @@ export function AppRoutingProvider(props: {
     }
   })
 
+  const preloadRouteShards = async (href: string) => {
+    if (isOutboundHref(href)) {
+      return
+    }
+    const res = await fetch("/_/pl" + href, { method: "POST" })
+    if (res.status !== 200) {
+      throw new Error(await res.text())
+    }
+
+    const ret: {
+      r: UniversalRouteInfoNode[]
+      a: ShardPath[] // script shard paths
+      d: ShardPath[] // style shard paths
+    } = await res.json()
+
+    ret.a.forEach((scriptShard) => {
+      rootCtx.preloader(scriptShard, "script")
+    })
+
+    ret.d.forEach((scriptShard) => {
+      rootCtx.preloader(scriptShard, "style")
+    })
+
+    if (Array.isArray(ret.r)) {
+      ret.r.map((routeInfo) => {
+        rootCtx.loader(routeInfo.shardPath).then((module) => {
+          rootCtx.registerComponentByShardPath(
+            routeInfo.shardPath,
+            module.default
+          )
+        })
+      })
+    }
+  }
+
   const prepareNavigate: PrepareForNavigate = async (
     href: string,
     navigateFunction: (
@@ -198,7 +252,7 @@ export function AppRoutingProvider(props: {
     setBrowsing(true)
 
     try {
-      const res = await fetch("/_/r" + href)
+      const res = await fetch("/_/r" + href, { method: "POST" })
       if (res.status !== 200) {
         throw new Error(await res.text())
       }
@@ -285,7 +339,9 @@ export function AppRoutingProvider(props: {
    * 현재 페이지 상태를 어느정도 유지 하면서 서버측 데이터를 다시 로딩하는 목적으로 사용 할 수 있다.
    */
   const softReload = async () => {
-    const res = await fetch("/_/r" + location.pathname + location.search)
+    const res = await fetch("/_/r" + location.pathname + location.search, {
+      method: "POST",
+    })
     const ret: {
       r: UniversalRouteInfoNode[]
       data: {
@@ -300,6 +356,7 @@ export function AppRoutingProvider(props: {
     <AppRoutingContext.Provider
       value={{
         prepareNavigate: prepareNavigate,
+        preloadRouteShards: preloadRouteShards,
         browsing: browsing,
         routeTree: routeTree,
         routeDataMap: currentRouteDataMap,

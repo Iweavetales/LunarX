@@ -48,7 +48,9 @@ export default function (
     nonce: string | null
   ): Promise<any> {
     return new Promise((resolve) => {
+      // console.log("PromiseRequire", modulePath)
       require([modulePath], ([module]) => {
+        // console.log("PromiseRequire done", modulePath, module)
         resolve(module)
       }, null, nonce, (moduleName) => shardPathToResourceUrlPath(moduleName))
     })
